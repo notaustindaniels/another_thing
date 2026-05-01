@@ -968,3 +968,78 @@ Next session should:
    - Module: parallax_engine/casting/bible.py
    - No LLM calls needed — pure Python file I/O with atomic writes.
 3. P4_5.M03 validation_commands: python tools/validate_licensing.py (same as M02)
+
+---
+
+## Session 13 (2026-05-01)
+
+Worked: P4_5.M03 — casting/bible.py — read/append-only casting API with hash verification
+Status: passed
+Evidence: evidence/P4_5.M03/
+Commit: 23efab7
+
+Implementation notes:
+
+1. ORIENTATION: init.sh fails with pip proxy error (network blocked) — persistent issue from
+   prior sessions. All 747 prior tests still pass; clean state confirmed.
+
+2. SPEC READING: §11.7 (The Casting / Continuity System) and §11.14 step 4 read fully.
+   Key design decisions:
+   - SHA-256 hashes stored in casting.sha256.json SIDECAR file (not inside casting.yaml),
+     because CastingEntry in director/schema.py has extra="forbid". Adding unknown fields
+     to casting.yaml would break schema validation.
+   - casting.yaml format: {"casting": [...]} with entries sorted by id for determinism.
+   - Atomic writes: all writes use write-to-tmp (same dir) + os.replace() — POSIX atomic.
+   - append_canonical_svg is append-only: calling with same path = idempotent no-op;
+     calling with different path = RuntimeError with "already set" message.
+   - hash_verify_canonical(id, path=None): if path=None, reads canonical_svg from entry.
+
+3. MODULES CREATED:
+   A. parallax_engine/casting/__init__.py: exports CastingBible, load_casting_bible
+   B. parallax_engine/casting/bible.py (384 lines):
+      - _sha256_file(), _sha256_bytes(): hashlib.sha256 helpers
+      - _atomic_write_text(), _atomic_write_bytes(): write-to-tmp + os.replace
+      - CastingBible class:
+        * _load_raw() / _save_raw(): YAML I/O with deterministic sort
+        * _load_hashes() / _save_hashes(): JSON sidecar I/O
+        * read_casting_entry(id): returns CastingEntry | None
+        * all_entries(): returns list[CastingEntry]
+        * entry_ids(): returns sorted list[str]
+        * write_entries(list[CastingEntry]): batch director write
+        * append_canonical_svg(id, path): atomic + append-only
+        * hash_verify_canonical(id, path=None): SHA-256 check
+        * exists(), path, hash_path, __repr__
+      - load_casting_bible(workspace_dir): factory function
+
+4. TESTS: 41 new tests in tests/test_casting_bible.py
+   TestReadCastingEntry (6): None for unknown, known returns entry
+   TestWriteEntries (6): creates file, valid YAML, round-trip, parent dirs, sorted by id
+   TestAppendCanonicalSvg (10): sets path, hash sidecar, idempotent, raises on diff path,
+     raises unknown, raises missing SVG, no .tmp leftover, valid YAML, others untouched,
+     multiple entries
+   TestHashVerification (7): true unchanged, false unknown, false no hash, false missing,
+     drift detection, no-path uses stored, false no canonical_svg
+   TestLifecycle (3): full §11.7.1 steps 1-6, multiple cast members, ordering
+   TestEdgeCases (9): empty bible, entry_ids sorted, exists API, repr, factory,
+     hash sidecar name, flat list YAML format, SHA-256 is 64 hex chars
+
+5. Total tests: 747 → 788 (41 new, all passing)
+
+Next session should:
+1. CHECK: 788 tests pass; validate_licensing passes.
+2. Proceed to P4_5.M04: "scene/designer.py — scene-designer as translator consuming
+   storyboard + casting"
+   - This is now unblocked (P4_5.M03 passes).
+   - Read §11.6 (Scene Designer) and §11.14 step 5 in full.
+   - Key: scene-designer is now a TRANSLATOR (not a one-shot) — consumes storyboard.yaml,
+     scene index, prior fragments, and casting.yaml; produces scene.yaml fragment + asset
+     manifest for ONE scene only.
+   - Read §11.6.2 (input contract), §11.6.3 (output contract), §11.6.6 (prompt).
+   - Module: parallax_engine/scene/designer.py
+   - Use DirectorStub pattern and CastingBible in tests (no real LLM calls needed).
+3. P4_5.M04 acceptance_criteria:
+   * SceneDesigner.run() produces scene fragment YAML + asset manifest for one scene
+   * Manifest entry kind: produce_canonical when canonical_svg is null; canonical when set;
+     local for assets not in casting
+   * Tests cover stub mode and structural validation of output
+   * validate_licensing.py exits 0
