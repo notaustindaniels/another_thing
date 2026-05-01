@@ -424,6 +424,176 @@ def _build_stack_buffer(
 
 
 # ---------------------------------------------------------------------------
+# Fisheye precomputed pixel-map cache (§2.7, §9.8)
+# ---------------------------------------------------------------------------
+
+#: Cache: (H, W, k1, k2) → (map_x, map_y) both float32 (H, W).
+_FISHEYE_MAP_CACHE: dict[tuple[int, int, float, float], tuple[np.ndarray, np.ndarray]] = {}
+
+
+def _compute_fisheye_map(
+    H: int, W: int, k1: float, k2: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Compute the backward-warp pixel map for the fisheye effect (§2.7).
+
+    ``r_undist = r * (1 + k1·r² + k2·r⁴)``
+
+    Returns ``(map_x, map_y)`` as float32 arrays of shape ``(H, W)``
+    suitable for ``cv2.remap``.  The result is cached by ``(H, W, k1, k2)``
+    so identical frames incur no recompute cost.
+    """
+    key = (H, W, k1, k2)
+    if key in _FISHEYE_MAP_CACHE:
+        return _FISHEYE_MAP_CACHE[key]
+
+    cx, cy = (W - 1) / 2.0, (H - 1) / 2.0
+    # Normalise by the half-diagonal so r = 1.0 at the corner
+    r_max = np.sqrt(cx ** 2 + cy ** 2)
+
+    ys = np.arange(H, dtype=np.float32)
+    xs = np.arange(W, dtype=np.float32)
+    xg, yg = np.meshgrid(xs, ys)   # (H, W)
+
+    dx = (xg - cx) / r_max
+    dy = (yg - cy) / r_max
+    r2 = dx ** 2 + dy ** 2
+    r4 = r2 ** 2
+    scale = 1.0 + k1 * r2 + k2 * r4
+
+    map_x = (dx * scale * r_max + cx).astype(np.float32)
+    map_y = (dy * scale * r_max + cy).astype(np.float32)
+
+    _FISHEYE_MAP_CACHE[key] = (map_x, map_y)
+    return map_x, map_y
+
+
+# ---------------------------------------------------------------------------
+# .cube LUT parsing and application (§2.7)
+# ---------------------------------------------------------------------------
+
+def _parse_cube_lut(path: Path) -> np.ndarray:
+    """
+    Parse a 3D LUT in .cube format (§2.7).
+
+    Returns an ``(N, N, N, 3)`` float32 array ``lut`` where
+    ``lut[b_idx, g_idx, r_idx]`` is the output RGB for the corresponding
+    input.  The .cube file iteration order is R-fastest, B-slowest, so the
+    array axes after reshape are (B, G, R).
+
+    Raises
+    ------
+    ValueError
+        If the file is malformed or ``LUT_3D_SIZE`` is missing.
+    """
+    lut_size: int | None = None
+    data_lines: list[np.ndarray] = []
+
+    with path.open("r", encoding="utf-8", errors="replace") as fh:
+        for raw_line in fh:
+            line = raw_line.strip()
+            # Skip empty lines and comments
+            if not line or line.startswith("#"):
+                continue
+            if line.upper().startswith("LUT_3D_SIZE"):
+                parts = line.split()
+                if len(parts) >= 2:
+                    lut_size = int(parts[1])
+                continue
+            if line.upper().startswith("DOMAIN_"):
+                continue
+            if line.upper().startswith("TITLE"):
+                continue
+            # Try to parse as a data line (3 floats)
+            parts = line.split()
+            if len(parts) == 3:
+                try:
+                    data_lines.append(
+                        np.array([float(parts[0]), float(parts[1]), float(parts[2])],
+                                 dtype=np.float32)
+                    )
+                except ValueError:
+                    pass  # non-data line; skip
+
+    if lut_size is None:
+        raise ValueError(f"LUT_3D_SIZE not found in {path}")
+
+    expected = lut_size ** 3
+    if len(data_lines) != expected:
+        raise ValueError(
+            f"Expected {expected} data lines in {path}, got {len(data_lines)}"
+        )
+
+    # Stack → (N³, 3); reshape in file order: R-fastest → axis=(B, G, R)
+    data = np.stack(data_lines, axis=0)          # (N³, 3)
+    lut = data.reshape(lut_size, lut_size, lut_size, 3)  # (B, G, R, 3)
+    return lut
+
+
+def _apply_cube_lut(frame: np.ndarray, lut: np.ndarray) -> np.ndarray:
+    """
+    Apply a preloaded 3D LUT to a float32 RGBA frame (§2.7).
+
+    Parameters
+    ----------
+    frame:
+        ``(H, W, 4)`` float32 premultiplied RGBA in ``[0, 1]``.
+    lut:
+        ``(N, N, N, 3)`` float32 LUT array with axis order ``(B, G, R, 3)``
+        as returned by :func:`_parse_cube_lut`.
+
+    Returns
+    -------
+    ``(H, W, 4)`` float32 array with LUT applied to RGB; alpha unchanged.
+    """
+    N = lut.shape[0]
+    Nm1 = float(N - 1)
+
+    # RGB channels only; at global-post stage alpha=1 everywhere
+    rgb = frame[:, :, :3]  # (H, W, 3)
+
+    # Float indices into the LUT
+    idx_f = rgb * Nm1  # (H, W, 3)
+
+    # Floor indices clipped to [0, N-2] so ceil = floor+1 is always valid
+    i0 = np.clip(idx_f.astype(np.int32), 0, N - 2)  # (H, W, 3)
+    i1 = i0 + 1                                       # (H, W, 3)
+
+    # Fractional parts for interpolation
+    frac = (idx_f - i0.astype(np.float32)).astype(np.float32)  # (H, W, 3)
+
+    # Per-axis indices: .cube axis order is (B, G, R)
+    r0, g0, b0 = i0[:, :, 0], i0[:, :, 1], i0[:, :, 2]
+    r1, g1, b1 = i1[:, :, 0], i1[:, :, 1], i1[:, :, 2]
+    fr = frac[:, :, 0:1]  # (H, W, 1)
+    fg = frac[:, :, 1:2]
+    fb = frac[:, :, 2:3]
+
+    # 8 corners of the interpolation cube — indexing as lut[B, G, R]
+    c000 = lut[b0, g0, r0]   # (H, W, 3)
+    c100 = lut[b0, g0, r1]   # R+1
+    c010 = lut[b0, g1, r0]   # G+1
+    c110 = lut[b0, g1, r1]   # G+1, R+1
+    c001 = lut[b1, g0, r0]   # B+1
+    c101 = lut[b1, g0, r1]   # B+1, R+1
+    c011 = lut[b1, g1, r0]   # B+1, G+1
+    c111 = lut[b1, g1, r1]   # B+1, G+1, R+1
+
+    # Trilinear interpolation (R, then G, then B)
+    c00 = c000 * (1.0 - fr) + c100 * fr
+    c01 = c001 * (1.0 - fr) + c101 * fr
+    c10 = c010 * (1.0 - fr) + c110 * fr
+    c11 = c011 * (1.0 - fr) + c111 * fr
+    c0  = c00  * (1.0 - fg) + c10  * fg
+    c1  = c01  * (1.0 - fg) + c11  * fg
+    c   = c0   * (1.0 - fb) + c1   * fb  # (H, W, 3)
+
+    result = frame.copy()
+    result[:, :, :3] = np.clip(c, 0.0, 1.0)
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Global post-processing (§2.7)
 # ---------------------------------------------------------------------------
 
@@ -540,6 +710,8 @@ def _apply_fisheye(
     frame: np.ndarray,
     k1: float,
     k2: float = 0.0,
+    map_x: np.ndarray | None = None,
+    map_y: np.ndarray | None = None,
 ) -> np.ndarray:
     """
     Apply barrel / fisheye lens distortion (§2.7).
@@ -547,33 +719,20 @@ def _apply_fisheye(
     Backward-warp: ``r_undist = r * (1 + k1·r² + k2·r⁴)``
     Resampled with ``cv2.remap(..., INTER_LANCZOS4)``.
 
-    The pixel map is computed fresh each call.  Callers that render many
-    frames with the same (k1, k2, H, W) should precompute and cache the map.
+    The pixel map is computed once via :func:`_compute_fisheye_map` and
+    cached by ``(H, W, k1, k2)``.  Callers may supply ``map_x``/``map_y``
+    to bypass the cache lookup for performance in the render loop.
     """
     H, W = frame.shape[:2]
-    cx, cy = (W - 1) / 2.0, (H - 1) / 2.0
-    # Normalise by the half-diagonal so r = 1.0 at the corner
-    r_max = np.sqrt(cx ** 2 + cy ** 2)
-
-    ys = np.arange(H, dtype=np.float32)
-    xs = np.arange(W, dtype=np.float32)
-    xg, yg = np.meshgrid(xs, ys)   # (H, W)
-
-    dx = (xg - cx) / r_max
-    dy = (yg - cy) / r_max
-    r2 = dx ** 2 + dy ** 2
-    r4 = r2 ** 2
-    scale = 1.0 + k1 * r2 + k2 * r4
-
-    src_x = (dx * scale * r_max + cx).astype(np.float32)
-    src_y = (dy * scale * r_max + cy).astype(np.float32)
+    if map_x is None or map_y is None:
+        map_x, map_y = _compute_fisheye_map(H, W, k1, k2)
 
     # cv2.remap requires each channel separately for float32 RGBA
     channels = []
     for c in range(4):
         ch = cv2.remap(
             frame[:, :, c],
-            src_x, src_y,
+            map_x, map_y,
             interpolation=cv2.INTER_LANCZOS4,
             borderMode=cv2.BORDER_CONSTANT,
             borderValue=0.0,
@@ -589,18 +748,19 @@ def _apply_color_grade(
     """
     Apply a .cube 3D LUT (§2.7).
 
-    Stub for v1: logs a warning and returns frame unchanged if the LUT
-    file is missing or cannot be parsed.
+    Parses the .cube file, then applies trilinear interpolation across the
+    3D table.  Returns the frame unchanged (with a warning) if the file is
+    missing or malformed.
     """
     if not lut_path.exists():
         warnings.warn(f"Color grade LUT not found: {lut_path}; skipping", stacklevel=2)
         return frame
-    # Full .cube LUT parsing is deferred to a later milestone.
-    warnings.warn(
-        f"Color grade LUT parsing not yet implemented; skipping {lut_path.name}",
-        stacklevel=2,
-    )
-    return frame
+    try:
+        lut = _parse_cube_lut(lut_path)
+    except Exception as exc:
+        warnings.warn(f"Could not parse LUT {lut_path.name}: {exc}; skipping", stacklevel=2)
+        return frame
+    return _apply_cube_lut(frame, lut)
 
 
 def _apply_global_post(
@@ -610,6 +770,8 @@ def _apply_global_post(
     frame_idx: int,
     workspace: Path,
     grain_children: list,
+    fisheye_map: tuple[np.ndarray, np.ndarray] | None = None,
+    cached_lut: np.ndarray | None = None,
 ) -> np.ndarray:
     """
     Apply global post-processing to one frame (§2.7).
@@ -630,6 +792,13 @@ def _apply_global_post(
         Root for resolving asset paths.
     grain_children:
         Pre-spawned SeedSequence children for grain, one per frame.
+    fisheye_map:
+        Optional pre-built ``(map_x, map_y)`` from :func:`_compute_fisheye_map`.
+        When supplied the fisheye step skips the map-computation cost.
+    cached_lut:
+        Optional pre-loaded ``(N, N, N, 3)`` LUT array from
+        :func:`_parse_cube_lut`.  When supplied the color-grade step skips
+        the file-parse overhead.
     """
     post = scene.post
     if post is None or post.global_ is None:
@@ -660,19 +829,26 @@ def _apply_global_post(
         blend = str(ll.blend) if ll.blend is not None else "screen"
         frame = _apply_light_leaks(frame, sprite_path, opacity, blend)
 
-    # 4. Fisheye lens distortion
+    # 4. Fisheye lens distortion — uses precomputed map when available
     if gpost.fisheye is not None:
         fi = gpost.fisheye
         k1 = float(fi.k1) if fi.k1 is not None else 0.0
         k2 = float(fi.k2) if fi.k2 is not None else 0.0
         if abs(k1) > 1e-9 or abs(k2) > 1e-9:
-            frame = _apply_fisheye(frame, k1, k2)
+            if fisheye_map is not None:
+                mx, my = fisheye_map
+                frame = _apply_fisheye(frame, k1, k2, map_x=mx, map_y=my)
+            else:
+                frame = _apply_fisheye(frame, k1, k2)
 
-    # 5. Color grade
+    # 5. Color grade — uses preloaded LUT when available
     if gpost.color_grade is not None:
-        lut = gpost.color_grade.lut
-        if lut:
-            frame = _apply_color_grade(frame, workspace / str(lut))
+        lut_spec = gpost.color_grade.lut
+        if lut_spec:
+            if cached_lut is not None:
+                frame = _apply_cube_lut(frame, cached_lut)
+            else:
+                frame = _apply_color_grade(frame, workspace / str(lut_spec))
 
     return frame
 
@@ -736,7 +912,37 @@ def render_scene(
     grain_children = grain_ss.spawn(max(n_frames, 1))
 
     # --- Step 0d: Precompute fisheye map if needed (avoid per-frame recompute) ---
-    # (fisheye is computed inside _apply_fisheye per-frame in v1; future optimisation)
+    fisheye_map_precomputed: tuple[np.ndarray, np.ndarray] | None = None
+    if (
+        scene.post is not None
+        and scene.post.global_ is not None
+        and scene.post.global_.fisheye is not None
+    ):
+        fi = scene.post.global_.fisheye
+        k1 = float(fi.k1) if fi.k1 is not None else 0.0
+        k2 = float(fi.k2) if fi.k2 is not None else 0.0
+        if abs(k1) > 1e-9 or abs(k2) > 1e-9:
+            fisheye_map_precomputed = _compute_fisheye_map(H, W, k1, k2)
+
+    # --- Step 0e: Preload color-grade LUT if needed ---
+    cached_lut_preloaded: np.ndarray | None = None
+    if (
+        scene.post is not None
+        and scene.post.global_ is not None
+        and scene.post.global_.color_grade is not None
+    ):
+        lut_spec = scene.post.global_.color_grade.lut
+        if lut_spec:
+            lut_path = workspace / str(lut_spec)
+            if lut_path.exists():
+                try:
+                    cached_lut_preloaded = _parse_cube_lut(lut_path)
+                except Exception as exc:
+                    warnings.warn(
+                        f"Could not pre-load LUT {lut_path.name}: {exc}; "
+                        "will re-attempt per-frame",
+                        stacklevel=2,
+                    )
 
     # Background colour as float32
     bg_rgb = _hex_to_rgb01(scene.meta.bg_color)
@@ -798,7 +1004,9 @@ def render_scene(
 
             # --- Step 5: Global post ---
             frame_buf_out = _apply_global_post(
-                frame_buf_out, scene, seed, frame_idx, workspace, grain_children
+                frame_buf_out, scene, seed, frame_idx, workspace, grain_children,
+                fisheye_map=fisheye_map_precomputed,
+                cached_lut=cached_lut_preloaded,
             )
 
             # --- Step 6: Write to encoder ---

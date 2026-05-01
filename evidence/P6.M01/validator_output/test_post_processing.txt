@@ -1,0 +1,43 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /Users/austin/parallax-skill/.conda-env/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/austin/parallax-skill
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.13.0
+collecting ... collected 33 items
+
+tests/test_post_processing.py::TestParseCubeLut::test_parses_identity_lut PASSED [  3%]
+tests/test_post_processing.py::TestParseCubeLut::test_identity_lut_values PASSED [  6%]
+tests/test_post_processing.py::TestParseCubeLut::test_comments_and_blank_lines_ignored PASSED [  9%]
+tests/test_post_processing.py::TestParseCubeLut::test_missing_lut_size_raises_valueerror PASSED [ 12%]
+tests/test_post_processing.py::TestParseCubeLut::test_wrong_entry_count_raises_valueerror PASSED [ 15%]
+tests/test_post_processing.py::TestParseCubeLut::test_size_2_round_trip PASSED [ 18%]
+tests/test_post_processing.py::TestApplyCubeLut::test_identity_lut_leaves_frame_unchanged PASSED [ 21%]
+tests/test_post_processing.py::TestApplyCubeLut::test_alpha_channel_unchanged PASSED [ 24%]
+tests/test_post_processing.py::TestApplyCubeLut::test_constant_shift_lut PASSED [ 27%]
+tests/test_post_processing.py::TestApplyCubeLut::test_result_clamped_to_0_1 PASSED [ 30%]
+tests/test_post_processing.py::TestApplyCubeLut::test_apply_color_grade_missing_file_returns_frame PASSED [ 33%]
+tests/test_post_processing.py::TestFisheyeMap::test_compute_fisheye_map_shape PASSED [ 36%]
+tests/test_post_processing.py::TestFisheyeMap::test_fisheye_map_cached PASSED [ 39%]
+tests/test_post_processing.py::TestFisheyeMap::test_fisheye_different_params_different_maps PASSED [ 42%]
+tests/test_post_processing.py::TestFisheyeMap::test_zero_distortion_is_identity PASSED [ 45%]
+tests/test_post_processing.py::TestFisheyeMap::test_two_frames_same_params_byte_identical PASSED [ 48%]
+tests/test_post_processing.py::TestFisheyeMap::test_fisheye_uses_lanczos4 PASSED [ 51%]
+tests/test_post_processing.py::TestGrain::test_same_seed_same_frame_identical_grain PASSED [ 54%]
+tests/test_post_processing.py::TestGrain::test_different_frame_index_different_grain PASSED [ 57%]
+tests/test_post_processing.py::TestGrain::test_grain_only_affects_rgb_not_alpha PASSED [ 60%]
+tests/test_post_processing.py::TestGrain::test_grain_output_clamped_0_1 PASSED [ 63%]
+tests/test_post_processing.py::TestGrain::test_zero_sigma_grain_no_change PASSED [ 66%]
+tests/test_post_processing.py::TestLightLeaks::test_opacity_zero_leaves_frame_unchanged PASSED [ 69%]
+tests/test_post_processing.py::TestLightLeaks::test_opacity_one_full_screen_blend PASSED [ 72%]
+tests/test_post_processing.py::TestLightLeaks::test_screen_blend_formula PASSED [ 75%]
+tests/test_post_processing.py::TestLightLeaks::test_missing_sprite_returns_frame_unchanged PASSED [ 78%]
+tests/test_post_processing.py::TestLightLeaks::test_alpha_preserved_after_light_leaks PASSED [ 81%]
+tests/test_post_processing.py::TestVignette::test_center_pixel_unchanged PASSED [ 84%]
+tests/test_post_processing.py::TestVignette::test_corner_darkened PASSED [ 87%]
+tests/test_post_processing.py::TestVignette::test_zero_strength_no_change PASSED [ 90%]
+tests/test_post_processing.py::TestVignette::test_alpha_unchanged PASSED [ 93%]
+tests/test_post_processing.py::TestVignette::test_output_clamped PASSED  [ 96%]
+tests/test_post_processing.py::TestPinnedOrder::test_pinned_order_vignette_first_color_grade_last PASSED [100%]
+
+============================== 33 passed in 0.37s ==============================

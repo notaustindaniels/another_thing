@@ -768,7 +768,7 @@
       ],
       "passes": true,
       "evidence": "evidence/P4_5.M07/",
-      "notes": "44 new integration tests (27 CI schema-validation + 17 end-to-end). All three canonical storyboards run through manager dry_run pipeline and produce real non-empty MP4s via render_scene(). skill/SKILL.md created with verbatim §4.2 template extended with --resume, --budget, --director-mode docs per §11.14 step 12. skill/scripts/run.sh created verbatim from §4.3. Full test suite: 1028 passed, 0 failed."
+      "notes": "44 new integration tests (27 CI schema-validation + 17 end-to-end). All three canonical storyboards run through manager dry_run pipeline and produce real non-empty MP4s via render_scene(). skill/SKILL.md created with verbatim \u00a74.2 template extended with --resume, --budget, --director-mode docs per \u00a711.14 step 12. skill/scripts/run.sh created verbatim from \u00a74.3. Full test suite: 1028 passed, 0 failed."
     },
     {
       "id": "P5.M01",
@@ -802,7 +802,7 @@
       ],
       "passes": true,
       "evidence": "evidence/P5.M01/",
-      "notes": "Trimmed SKILL.md to exactly the §4.2 verbatim template (prior session had added Director-Era Flags section). run.sh already correct and executable. All 4 acceptance criteria met; validate_licensing 6/6 PASS."
+      "notes": "Trimmed SKILL.md to exactly the \u00a74.2 verbatim template (prior session had added Director-Era Flags section). run.sh already correct and executable. All 4 acceptance criteria met; validate_licensing 6/6 PASS."
     },
     {
       "id": "P5.M02",
@@ -858,7 +858,7 @@
       ],
       "passes": true,
       "evidence": "evidence/P5.M03/",
-      "notes": "Updated cli.py with global --workspace/--brief/--budget/--resume/--dry-run flags and cmd_run() default behavior (§4.3 run.sh form). 32-test test_skill_packaging.py verifies SKILL.md §4.2 template, run.sh §4.3 verbatim, CLI default path, and workspace/out.mp4 production in dry-run mode. Manual Skill trigger criteria documented. validate_licensing 6/6 PASS. 1060 tests, 0 failures."
+      "notes": "Updated cli.py with global --workspace/--brief/--budget/--resume/--dry-run flags and cmd_run() default behavior (\u00a74.3 run.sh form). 32-test test_skill_packaging.py verifies SKILL.md \u00a74.2 template, run.sh \u00a74.3 verbatim, CLI default path, and workspace/out.mp4 production in dry-run mode. Manual Skill trigger criteria documented. validate_licensing 6/6 PASS. 1060 tests, 0 failures."
     },
     {
       "id": "P6.M01",
@@ -888,9 +888,9 @@
         "P5.M02",
         "P5.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P6.M01/",
+      "notes": "Implemented _parse_cube_lut (R-fastest B-slowest .cube parser) and _apply_cube_lut (vectorized trilinear interpolation, no Python loops). Added _compute_fisheye_map with module-level _FISHEYE_MAP_CACHE keyed on (H,W,k1,k2); _apply_fisheye accepts precomputed map_x/map_y args. render_scene Steps 0d+0e precompute fisheye map and LUT before frame loop. Grain seeding verified per 9.3 (SeedSequence.spawn chain). All 6 acceptance criteria tested in tests/test_post_processing.py (33 tests). Total: 1093 passing, 0 failed."
     },
     {
       "id": "P6.M02",

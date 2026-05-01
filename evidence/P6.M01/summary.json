@@ -1,0 +1,28 @@
+{
+  "milestone_id": "P6.M01",
+  "title": "Post-processing polish: LUT color grading, light leaks, fisheye, vignette, grain tuned",
+  "timestamp": "2026-05-01T13:00:00",
+  "git_commit": "d56ea6f3a8037bd46a55fa7f6b9b55d202b30c2d",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "tests_added": "tests/test_post_processing.py (33 tests)",
+  "total_tests": "1093 passed, 0 failed",
+  "implementation_summary": {
+    "cube_lut_parsing": "_parse_cube_lut(path) -> (N,N,N,3) float32; R-fastest B-slowest per .cube spec",
+    "cube_lut_application": "_apply_cube_lut(frame, lut) -> trilinear interpolation, vectorized NumPy, alpha unchanged",
+    "fisheye_precomputed_map": "_compute_fisheye_map(H,W,k1,k2) -> (map_x,map_y); cached in _FISHEYE_MAP_CACHE dict",
+    "fisheye_apply": "_apply_fisheye() accepts optional map_x/map_y args; uses cache via _compute_fisheye_map",
+    "render_scene_precompute": "Step 0d and 0e precompute fisheye map + LUT before frame loop; both passed to _apply_global_post",
+    "grain_seeding": "SeedSequence.spawn(GRAIN_channel).spawn(n_frames); child[frame_idx] per §9.3",
+    "pinned_order": "vignette -> grain -> light_leaks -> fisheye -> color_grade enforced in _apply_global_post"
+  },
+  "acceptance_criteria_verified": {
+    "color_grading_cube_lut": "PASS - _parse_cube_lut + _apply_cube_lut; 6 parser tests + 5 application tests",
+    "light_leaks_screen_blend": "PASS - formula verified: out=1-(1-dst)*(1-src*opacity); opacity=0 no-op; opacity=1 full blend",
+    "fisheye_precomputed_map": "PASS - _FISHEYE_MAP_CACHE; same params return same object; byte-identical across calls",
+    "grain_seeded_per_9_3": "PASS - same seed+frame_idx -> identical grain; different frame_idx -> different grain",
+    "pinned_order": "PASS - mock test verifies call sequence vignette->grain->light_leaks->fisheye->color_grade",
+    "validate_licensing": "PASS - 6/6 checks passed"
+  }
+}
