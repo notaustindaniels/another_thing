@@ -1,0 +1,40 @@
+{
+  "milestone_id": "P4_5.M07",
+  "title": "Integration tests: three canonical storyboards end-to-end; tests/storyboards/ CI",
+  "timestamp": "2026-05-01T10:40:00Z",
+  "git_commit": "7f2f1afb002efb7f06c0bc6e395e16e4d952862b",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "tests_added": {
+    "tests/integration/test_storyboard_ci.py": 27,
+    "tests/integration/test_e2e_storyboards.py": 17
+  },
+  "files_created": [
+    "skill/SKILL.md",
+    "skill/scripts/run.sh",
+    "tests/integration/__init__.py",
+    "tests/integration/test_storyboard_ci.py",
+    "tests/integration/test_e2e_storyboards.py"
+  ],
+  "acceptance_criteria_satisfied": {
+    "three_canonical_storyboards_produce_valid_nonempty_mp4s": true,
+    "tests_storyboards_schema_validation_passes_in_ci": true,
+    "tests_integration_runs_end_to_end_per_storyboard": true,
+    "skill_md_documents_resume_budget_director_mode_flags": true,
+    "validate_licensing_exits_0": true
+  },
+  "test_counts": {
+    "before": 984,
+    "after": 1028,
+    "new_integration_tests": 44
+  },
+  "implementation_notes": [
+    "test_storyboard_ci.py: 27 tests — schema validation, round-trip, merger CI, error rejection",
+    "test_e2e_storyboards.py: 17 tests — manager dry_run pipeline + real renderer producing non-empty MP4s for each of 3 canonical storyboards",
+    "skill/SKILL.md: verbatim §4.2 template extended with --resume, --budget, --director-mode docs (§11.14 step 12)",
+    "skill/scripts/run.sh: verbatim §4.3 shim",
+    "Portal scene uses anchor=world mask modelled on tests/scenes/portal.yaml",
+    "Drone scenes use noise:{z_amp:0,...} to satisfy required DroneCamera.noise field with zero amplitude"
+  ]
+}

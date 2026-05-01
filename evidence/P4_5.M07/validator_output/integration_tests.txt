@@ -1,0 +1,36 @@
+............................................                             [100%]
+=============================== warnings summary ===============================
+tests/integration/test_e2e_storyboards.py::TestExampleAE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m0/ws_a_render/assets/a_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/integration/test_e2e_storyboards.py::TestExampleAE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m0/ws_a_render/assets/a_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/integration/test_e2e_storyboards.py::TestExampleBE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m1/ws_b_render/assets/b_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/integration/test_e2e_storyboards.py::TestExampleBE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m1/ws_b_render/assets/b_bird.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/integration/test_e2e_storyboards.py::TestExampleCE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m2/ws_c_render/assets/c_wall.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/integration/test_e2e_storyboards.py::TestExampleCE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m2/ws_c_render/assets/c_floor.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/integration/test_e2e_storyboards.py::TestExampleCE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m2/ws_c_render/assets/c_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/integration/test_e2e_storyboards.py::TestExampleCE2E::test_produces_valid_nonempty_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/pytest-of-austin/pytest-271/test_produces_valid_nonempty_m2/ws_c_render/assets/c_grass.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+44 passed, 8 warnings in 1.09s

@@ -766,9 +766,9 @@
       "blocked_by": [
         "P4_5.M06"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4_5.M07/",
+      "notes": "44 new integration tests (27 CI schema-validation + 17 end-to-end). All three canonical storyboards run through manager dry_run pipeline and produce real non-empty MP4s via render_scene(). skill/SKILL.md created with verbatim §4.2 template extended with --resume, --budget, --director-mode docs per §11.14 step 12. skill/scripts/run.sh created verbatim from §4.3. Full test suite: 1028 passed, 0 failed."
     },
     {
       "id": "P5.M01",
