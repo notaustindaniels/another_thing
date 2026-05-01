@@ -1,8 +1,9 @@
 import sys
-mods = ["skimage", "cv2", "PIL", "numpy"]
+mods = ["anthropic", "skimage", "cv2", "PIL", "numpy", "scipy"]
 for m in mods:
     try:
-        __import__(m)
-        print(f"OK: {m}")
+        mod = __import__(m)
+        ver = getattr(mod, "__version__", "?")
+        print(f"OK: {m}=={ver}")
     except ImportError as e:
         print(f"MISSING: {m} -- {e}")

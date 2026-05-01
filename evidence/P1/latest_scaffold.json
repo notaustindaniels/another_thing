@@ -1,7 +1,7 @@
 {
   "validator": "validate_scaffold",
-  "timestamp": "20260430T223757",
-  "ok": false,
+  "timestamp": "20260501T074127",
+  "ok": true,
   "checks_run": [
     "required_files",
     "required_dirs",
@@ -12,11 +12,5 @@
     "phase_milestones",
     "no_forbidden_files"
   ],
-  "failures": [
-    {
-      "category": "no_git",
-      "what": "project is not a git repository",
-      "fix": "git init && git add . && git commit -m 'initial scaffold'"
-    }
-  ]
+  "failures": []
 }

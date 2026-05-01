@@ -8,7 +8,7 @@
       "passed": true,
       "detail": "validator constants are internally consistent",
       "items": [],
-      "elapsed_ms": 0.0014998950064182281
+      "elapsed_ms": 0.0017909333109855652
     },
     {
       "name": "declared_dependencies",
@@ -17,35 +17,35 @@
       "items": [
         "unrecognized:noise"
       ],
-      "elapsed_ms": 2.787292003631592
+      "elapsed_ms": 2.168041653931141
     },
     {
       "name": "installed_distributions",
       "passed": true,
       "detail": "no forbidden distributions installed",
       "items": [],
-      "elapsed_ms": 15.444500371813774
+      "elapsed_ms": 17.11641624569893
     },
     {
       "name": "source_imports",
       "passed": true,
       "detail": "no forbidden imports",
       "items": [],
-      "elapsed_ms": 0.4948750138282776
+      "elapsed_ms": 96.27579199150205
     },
     {
       "name": "text_artifacts",
       "passed": true,
       "detail": "no forbidden strings in scanned text files",
       "items": [],
-      "elapsed_ms": 0.8147917687892914
+      "elapsed_ms": 6.387040950357914
     },
     {
       "name": "system_ffmpeg",
       "passed": true,
       "detail": "ffmpeg at /Users/austin/parallax-skill/.conda-env/bin/ffmpeg; libopenh264=True, libx264=False, libx265=False",
       "items": [],
-      "elapsed_ms": 128.48362512886524
+      "elapsed_ms": 116.2608340382576
     }
   ]
 }
