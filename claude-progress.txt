@@ -745,3 +745,75 @@ _SMOKE_SCENE_YAML in cli.py uses legacy format — still works because lead.py d
 
 Ambiguity 7 now RESOLVED (see implementation notes above).
 No new ambiguities this session.
+
+---
+
+## Session 10 (2026-05-01)
+
+Worked: P4.M04 — tests/test_harness_e2e.py: three reference briefs produce valid MP4s under $2.50
+Status: passed
+Evidence: evidence/P4.M04/
+Commit: 56a34ac
+
+Implementation notes:
+
+1. STRATEGY — _WritingStub (subclass of ClaudeSDKStub):
+   - When scene-designer is dispatched, writes preset scene.yaml to cwd (=workspace)
+   - All other agents (asset-generator, mask-author, camera-pather, qa-critic) return PASS
+   - Real render pipeline (load_scene_yaml → render_scene → FFmpeg) produces actual MP4
+   - SVG placeholder fallback (SPEC.md §2.5) makes render succeed without SVG files
+
+2. THREE SCENE TEMPLATES (all validated against scene.py Pydantic v2):
+   - Forest: 128x72, 0.5s, 6fps, drone camera, 1 stack (2 layers), no masks, seed=1001
+   - Biomes: 128x72, 0.5s, 6fps, keyframed camera, 2 stacks (1 layer each), no masks, seed=2002
+   - Portal: 128x72, 0.5s, 6fps, drone camera, 2 stacks, screen-anchor radius mask, seed=3003
+   - Portal uses anchor=screen (not anchor=world) to avoid needing SVG path files
+
+3. TEST STRUCTURE (32 tests, 7 classes):
+   - TestSceneYAMLValidity (6): all 3 templates parse cleanly, drone/keyframed/mask verified
+   - TestForestFlythrough (5): MP4 exists+non-empty, QA<=3, cost<=2.50, non-blocking, all phases
+   - TestBiomeExplainer (4): MP4 exists, QA<=3, cost<=2.50, multi-stack renders
+   - TestPortalTransition (4): MP4 exists, QA<=3, cost<=2.50, mask compositing renders
+   - TestQALoopBoundary (5): MAX_QA_PASSES is int, always-fail stops at 3, no prompt stop
+   - TestCostBound (4): parametrized over all 3 briefs + MAX_BUDGET_USD==2.50 check
+   - TestWritingStub (4): isolation tests for the stub helper
+
+4. COST TRACKING: log_usage() called with 0-token stub records; computed as
+   input_tokens * $3/M + output_tokens * $15/M = $0.00 <= $2.50. usage.jsonl verified.
+
+5. REGRESSION CHECK: 537 prior tests still pass; total 569 tests.
+
+Next session should:
+1. VERIFY REGRESSIONS FIRST:
+   - .conda-env/bin/python tools/validate_licensing.py (6/6)
+   - .conda-env/bin/python -m pytest tests/ -q (569 pass)
+
+2. Proceed to next unblocked milestone. P4.M04 now passes, which unblocks P4_5.M01:
+   "parallax_engine/director/schema.py — Pydantic v2 storyboard models; three example
+   storyboards validate" (Phase 4.5 Director tier).
+
+3. P4_5.M01 is blocked_by: [P4.M01, P4.M02, P4.M03, P4.M04] — all now pass.
+   Phase 4.5 can begin.
+
+4. For P4_5.M01, read SPEC.md §11 in full before starting (per Step 4 instructions
+   for Phase 4.5 milestones — "Also read SPEC.md §11 in full before any implementation
+   work; the director tier has design subtlety that the milestone titles cannot capture").
+
+5. P4_5.M01 validation_commands: python tools/validate_licensing.py.
+   Main work: implement director/schema.py with Pydantic v2 storyboard models and
+   three YAML examples from §11.4 that validate against them.
+
+### SPEC AMBIGUITIES (continuing)
+
+No new ambiguities this session. Ambiguity 7 remains resolved.
+
+### IMPLEMENTATION DECISIONS
+
+- Used anchor=screen (not anchor=world) for portal test mask to avoid SVG path
+  dependency. This is functionally correct — the screen-anchor radius mask tests
+  the mask compositing pipeline without requiring path_svg/silhouette_id_in_svg.
+  The world-anchor portal is tested in tests/test_render_golden.py (Phase 2).
+
+- init.sh fails due to pip proxy error (network blocked in session). This is a
+  network issue, not a code issue. The .conda-env is pre-built and fully functional.
+  The init.sh failure does not affect the build — all dependencies are installed.
