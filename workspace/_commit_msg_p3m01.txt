@@ -1,0 +1,8 @@
+feat(P3.M01): auth.py + observability.py + state.py — harness infrastructure
+
+- auth.py: configure_credentials() per §3.5 — cloud-provider/api-key/oauth paths
+- observability.py: pre/post tool hooks write append-only JSONL to logs/; ObservabilityHooks deduplicates usage by message_id
+- state.py: write_checkpoint/read_checkpoint with atomic tmp-rename, is_phase_done, completed_phases per §3.8
+- 62 new tests (363 total), stdlib only, validate_licensing 6/6 PASS
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

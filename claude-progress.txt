@@ -211,3 +211,61 @@ pixel-exact output: SSIM=1.0, MAE=0.0, MaxAE=0.
 Resolution: Output PNG frames to workspace/synthetic_test/frames/. The validator reads them
 correctly. The MP4 file is deleted (or not created) so the validator uses the PNG path.
 This is the correct approach for a synthetic correctness test.
+
+---
+
+## Session 3 (2026-05-01 00:30)
+
+Worked: P3.M01 — auth.py + observability.py + state.py (harness infrastructure)
+Status: passed
+Evidence: evidence/P3.M01/
+Commit: ca04bd1
+
+### Environment notes
+
+init.sh still fails (pip blocked by proxy) but .conda-env is fully functional.
+All validators and 363 tests pass using .conda-env/bin/python.
+The `python` alias in validation_commands resolves to .conda-env/bin/python via the PATH
+set by the runner harness.
+
+### Implementation notes
+
+P3.M01 — Three infrastructure modules, stdlib only (no new deps):
+
+auth.py (§3.5):
+- configure_credentials() checks _CLOUD_PROVIDER_VARS first, then ANTHROPIC_API_KEY, then
+  CLAUDE_CODE_OAUTH_TOKEN (mapping it to ANTHROPIC_API_KEY). sys.exit() if none found.
+- Helper functions: is_cloud_provider(), effective_api_key()
+- 13 tests covering all paths including sys.exit case
+
+observability.py (§3.7):
+- pre_tool_hook() / post_tool_hook() write append-only JSONL to logs/tool_calls.jsonl
+- log_usage() writes to logs/usage.jsonl, deduplication is the caller's responsibility
+- ObservabilityHooks class: stateful wrapper tracking turn counts + seen message_ids
+  (deduplicates usage by message_id per §3.7 "deduped by message_id")
+- Atomic JSONL writes via O_APPEND fd (POSIX-atomic for lines < PIPE_BUF)
+- Non-serialisable tool results are repr()'d rather than raising
+- 22 tests
+
+state.py (§3.8):
+- write_checkpoint(workspace, phase, extra=None) — atomic write via tmp-rename
+- read_checkpoint(workspace) — returns fresh dict if no file exists
+- is_phase_done(workspace, phase) — convenience boolean
+- completed_phases(workspace) — sorted by timestamp
+- reset_checkpoint(workspace) — for testing / fresh runs
+- Phase name constants: PHASE_MANIFEST, PHASE_ASSETS_DONE, PHASE_MASKS_DONE,
+  PHASE_CAMERA_DONE, PHASE_RENDER_DONE, PHASE_QA_PASS_1/2/3
+- 27 tests
+
+### Next session should
+
+1. Verify all prior validators still pass (validate_licensing, validate_portal_equivalence)
+2. Proceed to P3.M02: parallax_engine/tools/render.py + tools/qa.py (MCP tool wrappers)
+   - render_scene(scene_yaml_path, workspace) → status dict wrapping Phase 1 renderer
+   - diff_frames(dir_a, dir_b) → per-frame max absolute difference
+   - ssim_score(dir_a, dir_b) → mean SSIM across frame pairs
+   - All tools importable; validate_licensing.py exits 0
+   - No new deps needed (uses existing render.py + encode.py + skimage/PIL already in env)
+3. Then P3.M03: harness.py (lead orchestrator ClaudeSDKClient wrapper)
+   - Requires anthropic package — check: .conda-env/bin/python -c "import anthropic"
+   - If not available, this will be the next env-setup challenge
