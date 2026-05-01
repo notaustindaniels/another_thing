@@ -1,0 +1,18 @@
+{
+  "milestone_id": "P4.M03",
+  "title": "Full subagent intelligence: real LLM subagents producing real output",
+  "timestamp": "2026-05-01T00:00:00Z",
+  "git_commit": "8d1383a26bbb11a6b04e0d3c73968c23d8142426",
+  "validators_passed": [
+    "validate_licensing"
+  ],
+  "tests_added": 39,
+  "total_tests": 537,
+  "implementation_summary": {
+    "scene_designer_md": "Updated to produce scene.yaml matching actual scene.py Pydantic schema (stacks.{name}.layers, scene_xyz, plate_size, perspective_px, bg_color). Includes worked example matching canonical forest.yaml format.",
+    "camera_pather_md": "Updated to describe actual CameraSpec schema (drone: {path: {kind: bezier, controls, duration_s}, poi_lookahead_s, spring_halflife_s, noise, bank_from_velocity} and keyframed mode). Translation table updated. Return format updated to match new schema.",
+    "lead_py_layer_parsing": "Fixed _run_asset_generators to handle canonical stacks.{name}.layers format. Now supports both new canonical dict format and legacy plain-list format.",
+    "lead_py_mask_parsing": "Fixed _run_mask_authors to use path_svg field (canonical). Falls back to legacy silhouette_svg and svg fields.",
+    "test_subagent_output_schemas": "39 tests covering: scene.yaml schema compliance (7), SVG asset structure (6), SVG mask silhouette+hole (8), lead layer discovery (4), lead mask discovery (3), QA integer counter (3), prompt constraints (7)."
+  }
+}

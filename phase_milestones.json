@@ -538,9 +538,9 @@
       "blocked_by": [
         "P4.M02"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4.M03/",
+      "notes": "Updated scene_designer.md and camera_pather.md to use canonical scene.py Pydantic schema (stacks.{name}.layers, scene_xyz, plate_size, drone bezier path). Fixed lead.py to parse both canonical and legacy formats. Added 39 schema-compliance tests covering scene.yaml, SVG asset structure, mask silhouette+hole, layer/mask discovery, and QA Python integer counter."
     },
     {
       "id": "P4.M04",

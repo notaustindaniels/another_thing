@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/austin/parallax-skill
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.13.0
+collected 39 items
+
+tests/test_subagent_output_schemas.py .................................. [ 87%]
+.....                                                                    [100%]
+
+============================== 39 passed in 0.15s ==============================

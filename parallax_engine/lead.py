@@ -465,14 +465,23 @@ class ParallaxLead:
             return True
 
         # Discover layers from scene.yaml (best-effort; fallback to empty list)
+        # Supports the canonical schema: stacks.{name}.layers = [{id, src, ...}]
         layer_ids: list[str] = []
         try:
             import yaml as _yaml  # type: ignore[import]
             raw = scene_yaml.read_text(encoding="utf-8")
             doc = _yaml.safe_load(raw)
             stacks = doc.get("stacks", {}) or {}
-            for stack_layers in stacks.values():
-                for layer in (stack_layers or []):
+            for stack_data in stacks.values():
+                if isinstance(stack_data, dict):
+                    # canonical schema: {layers: [{id, src, scene_xyz, ...}]}
+                    layers = stack_data.get("layers", []) or []
+                elif isinstance(stack_data, list):
+                    # legacy naive schema: [{id, z, parallax, asset, ...}]
+                    layers = stack_data
+                else:
+                    layers = []
+                for layer in layers:
                     if isinstance(layer, dict) and "id" in layer:
                         layer_ids.append(layer["id"])
         except Exception:
@@ -504,6 +513,8 @@ class ParallaxLead:
             return True
 
         # Discover masks from scene.yaml (best-effort)
+        # Supports canonical schema field: path_svg
+        # Also falls back to legacy fields: silhouette_svg, svg
         mask_files: list[str] = []
         try:
             import yaml as _yaml  # type: ignore[import]
@@ -511,7 +522,11 @@ class ParallaxLead:
             doc = _yaml.safe_load(raw)
             for mask in doc.get("masks", []) or []:
                 if isinstance(mask, dict):
-                    svg = mask.get("silhouette_svg") or mask.get("svg")
+                    svg = (
+                        mask.get("path_svg")
+                        or mask.get("silhouette_svg")
+                        or mask.get("svg")
+                    )
                     if svg:
                         mask_files.append(svg)
         except Exception:
