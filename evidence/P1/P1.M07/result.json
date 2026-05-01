@@ -1,0 +1,12 @@
+{
+  "milestone": "P1.M07",
+  "session": 3,
+  "timestamp": "2026-04-30T00:00:00",
+  "validation_results": {
+    "tests_test_render_smoke_pytest": "PASS — 29/29 tests passed",
+    "validate_scaffold": "PASS — 8/8 checks passed",
+    "validate_licensing": "PASS — 6/6 checks passed",
+    "full_suite": "PASS — 279/279 total tests (108s)"
+  },
+  "notes": "cli.py: render subcommand with argparse, workspace defaults to scene file directory. __main__.py: python -m parallax_engine entry point. tests/scenes/forest.yaml: §6.1 structure, 192x108, 1.0s, 10fps, drone camera. tests/scenes/portal.yaml: §6.3 structure with world-anchored perspective mask. tests/scenes/assets/*.svg: 12 placeholder SVGs (solid color fills). portal_tree.svg has id='silhouette' and id='hole' in one viewBox (§2.4). Smoke renders produce valid MP4s; two consecutive forest renders byte-identical (determinism). Phase 1 gate: all 7 milestones pass."
+}

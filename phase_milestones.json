@@ -214,9 +214,9 @@
       "blocked_by": [
         "P1.M06"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P1/P1.M07/",
+      "notes": "Session 3. cli.py: render subcommand (argparse), workspace defaults to scene file directory, delegates to render_scene(). __main__.py: python -m parallax_engine entry point. tests/scenes/forest.yaml (§6.1 structure, 192x108, 1s, 10fps, drone) + tests/scenes/portal.yaml (§6.3 with world/perspective mask). 12 placeholder SVGs in tests/scenes/assets/ including portal_tree.svg with id=silhouette and id=hole in one viewBox (§2.4). test_render_smoke.py: 29 tests covering scene parsing, asset existence, smoke renders (MP4 non-empty), determinism, CLI arg parsing, validator exit codes. 279/279 tests pass, validate_scaffold 8/8 pass, validate_licensing 6/6 pass. Phase 1 COMPLETE."
     },
     {
       "id": "P2.M01",

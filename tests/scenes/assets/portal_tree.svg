@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 3840 2160" width="3840" height="2160">
+  <!-- placeholder portal tree — same SVG defines silhouette and hole (§2.4) -->
+  <!-- silhouette: the tree shape painted by the layer pipeline -->
+  <path id="silhouette"
+        d="M 1700 2160 L 1700 1200 Q 1920 900 2140 1200 L 2140 2160 Z
+           M 1700 1200 Q 1500 600 1920 400 Q 2340 600 2140 1200 Z"
+        fill="#1a3810"/>
+  <!-- hole: the portal opening inside the tree -->
+  <path id="hole"
+        d="M 1800 1800 Q 1920 1400 2040 1800 Q 2040 2100 1920 2100 Q 1800 2100 1800 1800 Z"
+        fill="none" stroke="none"/>
+</svg>

@@ -1,0 +1,41 @@
+# parallax-scene v1 — Forest drone flythrough smoke test (§6.1)
+# Resolution and duration reduced for CI speed; structure matches §6.1 exactly.
+version: 1
+meta:
+  duration_s: 1.0
+  fps: 10
+  resolution: [192, 108]
+  perspective_px: 1200
+  origin: [96, 54]
+  bg_color: "#0a0a14"
+  seed: 4242
+
+stacks:
+  forest:
+    layers:
+      - { id: sky,        src: assets/sky_dawn.svg,   scene_xyz: [0,0,-12000], plate_size: [3840,2160] }
+      - { id: mountains,  src: assets/mountains.svg,  scene_xyz: [0,0,-9000],  plate_size: [3840,2160], post: { dof_blur_px: 5, depth_fade: 0.4 } }
+      - { id: trees_far,  src: assets/trees_far.svg,  scene_xyz: [0,0,-6500],  plate_size: [3840,2160], post: { dof_blur_px: 3, depth_fade: 0.25 } }
+      - { id: trees_mid,  src: assets/trees_mid.svg,  scene_xyz: [0,0,-4500],  plate_size: [3840,2160] }
+      - { id: trees_near, src: assets/trees_near.svg, scene_xyz: [0,0,-2500],  plate_size: [3840,2160] }
+      - { id: foreground, src: assets/leaves_fg.svg,  scene_xyz: [0,0,-500],   plate_size: [3840,2160] }
+
+camera:
+  mode: drone
+  drone:
+    path:
+      kind: bezier
+      controls: [[0,0,0], [180,30,-3000], [-150,-25,-7000], [0,0,-11500]]
+      duration_s: 1.0
+    poi_lookahead_s: 0.55
+    spring_halflife_s: 0.18
+    noise: { z_amp: 22, xy_amp: 6, hz: 0.7 }
+    bank_from_velocity: 0.40
+
+masks: []
+
+post:
+  global:
+    vignette: { strength: 0.5, radius: 0.85 }
+    grain:    { sigma: 4 }
+    fisheye:  { k1: 0.20, k2: 0.04 }
