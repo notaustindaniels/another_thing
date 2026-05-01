@@ -1,0 +1,55 @@
+## Session 20 (2026-05-01)
+
+Worked: P6.M01 — Post-processing polish: LUT color grading, light leaks, fisheye, vignette, grain tuned
+Status: passed
+Evidence: evidence/P6.M01/
+Commit: 1dc09184674ded7c1d8c07719a7d2c7839cdd0a0
+
+### Implementation notes
+
+- **_parse_cube_lut(path)**: Parses .cube LUT files per the standard spec
+  (R-fastest, B-slowest iteration order). Returns (N, N, N, 3) float32 array
+  with axis order (B, G, R). Skips # comments, TITLE, DOMAIN_MIN/MAX lines.
+  Raises ValueError if LUT_3D_SIZE is absent or entry count mismatches.
+
+- **_apply_cube_lut(frame, lut)**: Vectorized trilinear interpolation — zero
+  Python loops. Computes float indices, floor/ceil per axis, gathers 8
+  cube corners from the lut array, interpolates R then G then B. Alpha
+  channel is always preserved unchanged.
+
+- **_apply_color_grade**: Replaced the stub with real logic: parse_cube_lut +
+  apply_cube_lut. Warnings on missing file or parse failure (graceful).
+
+- **_compute_fisheye_map(H, W, k1, k2)**: Computes backward-warp pixel
+  map once, stores in module-level _FISHEYE_MAP_CACHE dict keyed by
+  (H, W, k1, k2). Returns same numpy arrays on repeated calls (identity
+  check passes). _apply_fisheye() accepts optional map_x/map_y to skip
+  cache lookup in the hot path.
+
+- **render_scene Step 0d/0e**: Precomputes fisheye map and LUT before the
+  frame loop. Both passed as kwargs to _apply_global_post() for each frame,
+  eliminating per-frame recompute cost.
+
+- **tests/test_post_processing.py**: 33 new tests covering all 6 acceptance
+  criteria. Total suite: 1093 passed, 0 failed.
+
+### Validation
+
+- python tools/validate_licensing.py: 6/6 PASS
+- tests/test_post_processing.py: 33/33 PASS
+- Full suite: 1093 passed, 0 failed
+
+### init.sh note
+
+init.sh still fails during pip step due to proxy/network restrictions.
+The conda env is fully functional; this is non-fatal.
+
+Next session should:
+1. CHECK: 1093 tests pass; validate_licensing 6/6; parallax_engine imports; JSON valid.
+2. Work on P6.M02 — License audit document + EULA template.
+   From phase_milestones.json description:
+   "Write LICENSES.md listing all runtime dependencies with license types and
+   copyright holders. Write EULA.md template for commercial customers."
+   Acceptance criteria will be in phase_milestones.json — check them carefully.
+   This is likely a documentation milestone (no new code).
+3. After P6.M02: P6.M03 (golden hash regression), P6.M04 (demo reel), P6.M05 (README + pip).
