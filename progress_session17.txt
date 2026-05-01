@@ -1,0 +1,54 @@
+## Session 17 (2026-05-01)
+
+Worked: P4_5.M07 — Integration tests: three canonical storyboards end-to-end; tests/storyboards/ CI
+Status: passed
+Evidence: evidence/P4_5.M07/
+Commit: 3346618dddfc7dc4479f0cf130cafb88393949bd
+
+Implementation notes:
+- Created tests/integration/__init__.py (empty marker)
+- Created tests/integration/test_storyboard_ci.py (27 tests):
+  - TestSchemaValidation: all 3 examples load, project meta checks,
+    arc structure checks, transition pairing checks (A/B/C), JSON schema
+    exportable, round-trip YAML→Storyboard→JSON→Storyboard
+  - TestMergerCI: merge succeeds for all 3 examples, merge log JSON parseable,
+    start_times monotonic, scene.yaml written, rejects missing fragment,
+    rejects extra fragment, schema rejects bad transition pairing, merger
+    rejects wrong transition type in fragment
+- Created tests/integration/test_e2e_storyboards.py (17 tests):
+  - TestExampleAE2E (forest): schema, manager dry_run, workspace artefacts,
+    log is JSON-lines, produces real non-empty MP4 via render_scene()
+  - TestExampleBE2E (biome tour): schema, manager dry_run, 4 scene fragments,
+    merge log written (scene_count=4), produces real non-empty MP4
+  - TestExampleCE2E (portal): schema, manager dry_run, 2 scene fragments,
+    produces real non-empty MP4 (portal mask with anchor=world), casting preserved,
+    --resume doesn't overwrite storyboard.yaml
+- Created skill/SKILL.md: verbatim §4.2 template + --resume/--budget/--director-mode
+  flag documentation per §11.14 step 12
+- Created skill/scripts/run.sh: verbatim §4.3 shim
+
+KEY FIXES DURING IMPLEMENTATION:
+1. DroneCamera.noise is required (not optional) — minimal scenes needed
+   noise: {z_amp: 0, xy_amp: 0, hz: 0.5} (zero amplitude = no wobble)
+2. camera.mode is "keyframed" (not "keyframe") and keyframes use t/x/y/z fields
+   (not xyz list or look_at)
+3. MaskSpec schema uses id/anchor/src_stack/dest_stack/growth/path_svg/etc.
+   (not silhouette_svg/behind_stack); modelled portal test on portal.yaml
+4. Pydantic schema catches bad transition pairings before merger does
+   (model_validator on Storyboard raises ValidationError on paired_scene mismatch)
+
+Full test suite: 1028 passed (up from 984), 0 failed
+Licensing: 6/6 PASS
+
+Next session should:
+1. CHECK: 1028 tests pass; validate_licensing passes; parallax_engine imports.
+2. Proceed to P5.M01 — skill/SKILL.md + skill/scripts/run.sh (verbatim §4.2/§4.3).
+   NOTE: skill/SKILL.md and skill/scripts/run.sh already EXIST from this session!
+   P5.M01 needs to verify they match §4.2/§4.3 exactly and that SKILL.md does NOT
+   contain multi-agent prompts or renderer code. The current SKILL.md satisfies this
+   but may need minor adjustments to match the §4.2 template more exactly.
+   Check acceptance criteria carefully: "matches §4.2 template exactly (name,
+   description, usage, notes, examples)" — the current SKILL.md has the extended
+   director-era flags section which is ADDITIONAL content, not replacing any §4.2 content.
+3. P5.M01 blocked_by includes P4_5.M01 through P4_5.M07 — all now pass.
+4. After P5.M01: P5.M02 (README.md), P5.M03 (Skill trigger test), then Phase 6.

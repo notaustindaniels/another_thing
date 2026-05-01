@@ -1,0 +1,15 @@
+feat(P4_5.M07): integration tests + SKILL.md — validation passing
+
+- 44 new integration tests: 27 CI schema-validation tests
+  (tests/integration/test_storyboard_ci.py) + 17 end-to-end tests
+  (tests/integration/test_e2e_storyboards.py) covering all three
+  canonical storyboards (forest, biome tour, portal)
+- Each e2e test runs manager dry_run pipeline AND produces a real non-empty
+  MP4 via render_scene() on a minimal scene (128x72, 0.5s, 6fps)
+- skill/SKILL.md: verbatim section 4.2 template extended with
+  --resume/--budget/--director-mode docs per section 11.14 step 12
+- skill/scripts/run.sh: verbatim section 4.3 shim
+- Full test suite: 1028 passed (up from 984), 0 failed
+- Validators: validate_licensing.py 6/6 PASS
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
