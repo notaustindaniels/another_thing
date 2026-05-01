@@ -652,9 +652,9 @@
       "blocked_by": [
         "P4_5.M02"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4_5.M03/",
+      "notes": "CastingBible class in parallax_engine/casting/bible.py. Atomic writes via os.replace(). SHA-256 hashes stored in casting.sha256.json sidecar to keep casting.yaml schema-compatible with extra=forbid. append_canonical_svg is append-only (RuntimeError on different-path overwrite). 41 tests cover full §11.7.1 lifecycle (steps 1-6), edge cases, drift detection."
     },
     {
       "id": "P4_5.M04",

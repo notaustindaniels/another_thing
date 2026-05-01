@@ -1,0 +1,32 @@
+{
+  "milestone_id": "P4_5.M03",
+  "title": "casting/bible.py — read/append-only casting API with hash verification",
+  "timestamp": "2026-05-01T00:00:00Z",
+  "git_commit": "pre-commit",
+  "validators_passed": [
+    "validate_licensing"
+  ],
+  "tests_added": 41,
+  "tests_total_before": 747,
+  "tests_total_after": 788,
+  "modules_created": [
+    "parallax_engine/casting/__init__.py",
+    "parallax_engine/casting/bible.py"
+  ],
+  "tests_created": [
+    "tests/test_casting_bible.py"
+  ],
+  "acceptance_criteria": {
+    "append_canonical_svg_is_atomic": true,
+    "hash_verify_canonical_compares_sha256": true,
+    "read_casting_entry_returns_none_for_unknown": true,
+    "tests_cover_full_lifecycle_steps_1_to_6": true,
+    "validate_licensing_exits_0": true
+  },
+  "implementation_notes": {
+    "atomicity": "write to <file>.tmp then os.replace() — POSIX atomic",
+    "hash_storage": "casting.sha256.json sidecar (keeps casting.yaml schema-compatible with extra=forbid)",
+    "determinism": "entries sorted by id; JSON hashes sorted by key",
+    "append_only_guard": "RuntimeError if canonical_svg already set to different path; no-op if same path"
+  }
+}

@@ -1,0 +1,51 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /Users/austin/parallax-skill/.conda-env/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/austin/parallax-skill
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.13.0
+collecting ... collected 41 items
+
+tests/test_casting_bible.py::TestReadCastingEntry::test_unknown_id_returns_none PASSED [  2%]
+tests/test_casting_bible.py::TestReadCastingEntry::test_unknown_id_on_empty_file PASSED [  4%]
+tests/test_casting_bible.py::TestReadCastingEntry::test_unknown_id_when_file_absent PASSED [  7%]
+tests/test_casting_bible.py::TestReadCastingEntry::test_known_id_returns_entry PASSED [  9%]
+tests/test_casting_bible.py::TestReadCastingEntry::test_known_id_among_multiple PASSED [ 12%]
+tests/test_casting_bible.py::TestReadCastingEntry::test_read_returns_none_after_checking_all_entries PASSED [ 14%]
+tests/test_casting_bible.py::TestWriteEntries::test_write_creates_file PASSED [ 17%]
+tests/test_casting_bible.py::TestWriteEntries::test_written_file_is_valid_yaml PASSED [ 19%]
+tests/test_casting_bible.py::TestWriteEntries::test_round_trip PASSED    [ 21%]
+tests/test_casting_bible.py::TestWriteEntries::test_write_creates_parent_dirs PASSED [ 24%]
+tests/test_casting_bible.py::TestWriteEntries::test_entries_sorted_by_id_in_file PASSED [ 26%]
+tests/test_casting_bible.py::TestWriteEntries::test_overwrite_replaces_all_entries PASSED [ 29%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_sets_canonical_svg PASSED [ 31%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_creates_hash_sidecar PASSED [ 34%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_idempotent_same_path PASSED [ 36%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_raises_on_different_path PASSED [ 39%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_raises_for_unknown_id PASSED [ 41%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_raises_if_svg_missing PASSED [ 43%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_atomic_write_leaves_no_tmp_file PASSED [ 46%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_write_is_valid_yaml_after_append PASSED [ 48%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_other_entries_untouched_after_append PASSED [ 51%]
+tests/test_casting_bible.py::TestAppendCanonicalSvg::test_multiple_entries_can_be_set PASSED [ 53%]
+tests/test_casting_bible.py::TestHashVerification::test_verify_returns_true_for_unchanged_file PASSED [ 56%]
+tests/test_casting_bible.py::TestHashVerification::test_verify_returns_false_for_unknown_id PASSED [ 58%]
+tests/test_casting_bible.py::TestHashVerification::test_verify_returns_false_if_no_hash_stored PASSED [ 60%]
+tests/test_casting_bible.py::TestHashVerification::test_verify_returns_false_for_missing_file PASSED [ 63%]
+tests/test_casting_bible.py::TestHashVerification::test_verify_detects_drift PASSED [ 65%]
+tests/test_casting_bible.py::TestHashVerification::test_verify_without_explicit_path_uses_stored_path PASSED [ 68%]
+tests/test_casting_bible.py::TestHashVerification::test_verify_returns_false_when_no_canonical_svg_set PASSED [ 70%]
+tests/test_casting_bible.py::TestLifecycle::test_full_lifecycle PASSED   [ 73%]
+tests/test_casting_bible.py::TestLifecycle::test_lifecycle_multiple_cast_members PASSED [ 75%]
+tests/test_casting_bible.py::TestLifecycle::test_lifecycle_first_appearance_ordering PASSED [ 78%]
+tests/test_casting_bible.py::TestEdgeCases::test_empty_bible_all_entries_returns_empty PASSED [ 80%]
+tests/test_casting_bible.py::TestEdgeCases::test_entry_ids_sorted PASSED [ 82%]
+tests/test_casting_bible.py::TestEdgeCases::test_exists_false_before_write PASSED [ 85%]
+tests/test_casting_bible.py::TestEdgeCases::test_exists_true_after_write PASSED [ 87%]
+tests/test_casting_bible.py::TestEdgeCases::test_repr_contains_path PASSED [ 90%]
+tests/test_casting_bible.py::TestEdgeCases::test_load_casting_bible_factory PASSED [ 92%]
+tests/test_casting_bible.py::TestEdgeCases::test_hash_sidecar_name_derived_from_yaml_stem PASSED [ 95%]
+tests/test_casting_bible.py::TestEdgeCases::test_flat_list_yaml_format_accepted PASSED [ 97%]
+tests/test_casting_bible.py::TestEdgeCases::test_sha256_is_64_char_hex PASSED [100%]
+
+============================== 41 passed in 0.19s ==============================
