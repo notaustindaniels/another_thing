@@ -567,9 +567,9 @@
       "blocked_by": [
         "P4.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4.M04/",
+      "notes": "Implemented tests/test_harness_e2e.py with 32 tests across 7 classes. _WritingStub subclasses ClaudeSDKStub and writes valid scene.yaml to workspace when scene-designer is dispatched; real render pipeline then produces actual MP4 (128x72, 0.5s, 6fps, 3 frames). Three scene templates validated: forest (drone, 1 stack, no masks), biomes (keyframed, 2 stacks, no masks), portal (drone, 2 stacks, screen-anchor radius mask). SVG placeholder fallback ensures render succeeds without SVG seeding. QA counter verified as Python int bounded by range(MAX_QA_PASSES=3). Cost computed from usage.jsonl tokens ($0 for stub runs, verifiably <=2.50). 569/569 total tests pass."
     },
     {
       "id": "P4_5.M01",

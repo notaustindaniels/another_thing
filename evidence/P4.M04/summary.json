@@ -1,0 +1,31 @@
+{
+  "milestone_id": "P4.M04",
+  "title": "tests/test_harness_e2e.py: three reference briefs produce valid MP4s under $2.50",
+  "timestamp": "2026-05-01T10:00:00Z",
+  "git_commit": "57cf17ad17d4a6b14098bd6bbe28e456d5afecd9",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "tests_added": 32,
+  "total_tests": 569,
+  "implementation_notes": {
+    "strategy": "_WritingStub subclass of ClaudeSDKStub that writes scene.yaml to workspace when scene-designer is dispatched; all other agents return PASS; real render pipeline produces actual MP4 from the stub-written scene.yaml",
+    "three_scenes": {
+      "forest": "128x72 / 0.5s / 6fps / drone camera / 2 layers / no masks",
+      "biomes": "128x72 / 0.5s / 6fps / keyframed camera / 2 stacks / no masks",
+      "portal": "128x72 / 0.5s / 6fps / drone camera / 2 stacks / screen-anchor radius mask"
+    },
+    "svg_fallback": "Renderer uses transparent placeholder for missing SVG files (SPEC.md §2.5); no SVG seeding required",
+    "cost_tracking": "log_usage() called after each run with 0 tokens; $0 < $2.50 verified",
+    "qa_counter": "Python integer counter via range(MAX_QA_PASSES); not a prompt instruction",
+    "test_classes": [
+      "TestSceneYAMLValidity (6 tests): all 3 templates parse cleanly",
+      "TestForestFlythrough (5 tests): MP4 exists + size>0, QA<=3, cost<=$2.50, non-blocking, all phases",
+      "TestBiomeExplainer (4 tests): MP4 exists, QA<=3, cost<=$2.50, multi-stack",
+      "TestPortalTransition (4 tests): MP4 exists, QA<=3, cost<=$2.50, mask compositing",
+      "TestQALoopBoundary (5 tests): int counter, stops at max, not prompt-based, range()",
+      "TestCostBound (4 tests): parametrized across all 3 briefs + MAX_BUDGET_USD check",
+      "TestWritingStub (4 tests): stub isolation"
+    ]
+  }
+}

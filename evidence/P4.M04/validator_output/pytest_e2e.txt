@@ -1,0 +1,108 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/austin/parallax-skill
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.13.0
+collected 32 items
+
+tests/test_harness_e2e.py ................................               [100%]
+
+=============================== warnings summary ===============================
+tests/test_harness_e2e.py::TestForestFlythrough::test_produces_valid_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_l3z5ys0w/assets/e2e_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_produces_valid_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_l3z5ys0w/assets/e2e_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_qa_passes_bounded
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_g2iqlh0a/assets/e2e_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_qa_passes_bounded
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_g2iqlh0a/assets/e2e_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_cost_under_budget
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_lnol7l7k/assets/e2e_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_cost_under_budget
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_lnol7l7k/assets/e2e_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_no_human_intervention
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_fncqdd3o/assets/e2e_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_no_human_intervention
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_fncqdd3o/assets/e2e_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_all_phases_completed
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_3um5coy1/assets/e2e_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestForestFlythrough::test_all_phases_completed
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_3um5coy1/assets/e2e_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestBiomeExplainer::test_produces_valid_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_igvs08km/assets/e2e_m_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestBiomeExplainer::test_qa_passes_bounded
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_712g1jo5/assets/e2e_m_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestBiomeExplainer::test_cost_under_budget
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_gmnpplmr/assets/e2e_m_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestBiomeExplainer::test_multi_stack_renders
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_6n2t1l88/assets/e2e_m_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestPortalTransition::test_produces_valid_mp4
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_wb0y65yy/assets/e2e_f_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestPortalTransition::test_qa_passes_bounded
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_7lv9pdvv/assets/e2e_f_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestPortalTransition::test_cost_under_budget
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_zg0dsd9i/assets/e2e_f_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestPortalTransition::test_mask_compositing_renders
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_9iz7a626/assets/e2e_f_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestQALoopBoundary::test_qa_counter_stops_at_max_when_always_fail
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_zhh63gt5/assets/e2e_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestQALoopBoundary::test_qa_counter_stops_at_max_when_always_fail
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_zhh63gt5/assets/e2e_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestCostBound::test_cost_under_250[forest-version: 1\nmeta:\n  duration_s: 0.5\n  fps: 6\n  resolution: [128, 72]\n  perspective_px: 800\n  origin: [64, 36]\n  bg_color: "#0a1520"\n  seed: 1001\nstacks:\n  forest:\n    layers:\n      - { id: e2e_sky,   src: assets/e2e_sky.svg,   scene_xyz: [0,0,-8000], plate_size: [1920,1080] }\n      - { id: e2e_trees, src: assets/e2e_trees.svg, scene_xyz: [0,0,-3000], plate_size: [1920,1080] }\ncamera:\n  mode: drone\n  drone:\n    path:\n      kind: bezier\n      controls: [[0,0,0],[0,0,-4000],[0,0,-8000]]\n      duration_s: 0.5\n    poi_lookahead_s: 0.5\n    spring_halflife_s: 0.20\n    noise: {z_amp: 10, xy_amp: 3, hz: 0.5}\n    bank_from_velocity: 0.30\nmasks: []\npost:\n  global:\n    vignette: {strength: 0.3}\n-Create a forest drone flythrough at golden hour]
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_73h4mq_i/assets/e2e_sky.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestCostBound::test_cost_under_250[forest-version: 1\nmeta:\n  duration_s: 0.5\n  fps: 6\n  resolution: [128, 72]\n  perspective_px: 800\n  origin: [64, 36]\n  bg_color: "#0a1520"\n  seed: 1001\nstacks:\n  forest:\n    layers:\n      - { id: e2e_sky,   src: assets/e2e_sky.svg,   scene_xyz: [0,0,-8000], plate_size: [1920,1080] }\n      - { id: e2e_trees, src: assets/e2e_trees.svg, scene_xyz: [0,0,-3000], plate_size: [1920,1080] }\ncamera:\n  mode: drone\n  drone:\n    path:\n      kind: bezier\n      controls: [[0,0,0],[0,0,-4000],[0,0,-8000]]\n      duration_s: 0.5\n    poi_lookahead_s: 0.5\n    spring_halflife_s: 0.20\n    noise: {z_amp: 10, xy_amp: 3, hz: 0.5}\n    bank_from_velocity: 0.30\nmasks: []\npost:\n  global:\n    vignette: {strength: 0.3}\n-Create a forest drone flythrough at golden hour]
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_73h4mq_i/assets/e2e_trees.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestCostBound::test_cost_under_250[biomes-version: 1\nmeta:\n  duration_s: 0.5\n  fps: 6\n  resolution: [128, 72]\n  perspective_px: 800\n  origin: [64, 36]\n  bg_color: "#1a1a2e"\n  seed: 2002\nstacks:\n  mountains:\n    layers:\n      - { id: e2e_m_bg, src: assets/e2e_m_bg.svg, scene_xyz: [0,0,-6000], plate_size: [1920,1080] }\n  desert:\n    layers:\n      - { id: e2e_d_bg, src: assets/e2e_d_bg.svg, scene_xyz: [0,0,-6000], plate_size: [1920,1080] }\ncamera:\n  mode: keyframed\n  keyframed:\n    - { t: 0,   x: 0,   y: 0, z: 0,     yaw: 0,    pitch: 0, roll: 0, ease: easeInOutCubic }\n    - { t: 0.5, x: 100, y: 0, z: -1000, yaw: 0.02, pitch: 0, roll: 0, ease: linear }\nmasks: []\npost:\n  global:\n    grain: {sigma: 2}\n-Create a 4-biome explainer with wipe transitions]
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_3aqsmvlt/assets/e2e_m_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+tests/test_harness_e2e.py::TestCostBound::test_cost_under_250[portal-version: 1\nmeta:\n  duration_s: 0.5\n  fps: 6\n  resolution: [128, 72]\n  perspective_px: 800\n  origin: [64, 36]\n  bg_color: "#0a0a14"\n  seed: 3003\nstacks:\n  forest:\n    layers:\n      - { id: e2e_f_bg, src: assets/e2e_f_bg.svg, scene_xyz: [0,0,-8000], plate_size: [1920,1080] }\n  city:\n    layers:\n      - { id: e2e_c_bg, src: assets/e2e_c_bg.svg, scene_xyz: [0,0,-8000], plate_size: [1920,1080] }\ncamera:\n  mode: drone\n  drone:\n    path:\n      kind: bezier\n      controls: [[0,0,0],[0,0,-4000],[0,0,-8000]]\n      duration_s: 0.5\n    poi_lookahead_s: 0.5\n    spring_halflife_s: 0.20\n    noise: {z_amp: 10, xy_amp: 3, hz: 0.5}\n    bank_from_velocity: 0.30\nmasks:\n  - id: portal_reveal\n    anchor: screen\n    src_stack: forest\n    dest_stack: city\n    matte: alpha\n    growth: {kind: radius, t0: 0.1, t1: 0.4, r0: 0, r1: 200, feather_px: 10}\npost:\n  global:\n    vignette: {strength: 0.4}\n-Create a portal flythrough from forest to futuristic city]
+  /Users/austin/parallax-skill/parallax_engine/render.py:270: UserWarning: SVG not found: /private/tmp/claude-501/parallax_e2e_kmxcbg4j/assets/e2e_f_bg.svg; using placeholder
+    raster = _rasterize_svg_file(svg_path, max_w, max_h)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 32 passed, 24 warnings in 1.11s ========================
