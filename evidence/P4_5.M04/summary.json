@@ -1,0 +1,30 @@
+{
+  "milestone_id": "P4_5.M04",
+  "title": "scene/designer.py — scene-designer as translator consuming storyboard + casting",
+  "timestamp": "2026-05-01T09:00:00Z",
+  "git_commit": "pending",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "tests_added": 37,
+  "total_tests_after": 825,
+  "acceptance_criteria_status": {
+    "run_produces_yaml_and_manifest": "PASS — SceneDesigner.run() returns SceneDesignerOutput with fragment + manifest",
+    "produce_canonical_uses_casting_description": "PASS — _resolve_manifest_entry() always overwrites canonical_description from CastingBible",
+    "fragment_no_project_metadata": "PASS — SceneFragment rejects fps/resolution/seed/meta/bg_color/version via @model_validator",
+    "example_b_red_bird_manifest_entry": "PASS — TestExampleBAcceptanceCriterion::test_example_b_scene1_has_red_bird_manifest_entry",
+    "validate_licensing_exits_0": "PASS — 6/6 checks passed"
+  },
+  "modules_created": [
+    "parallax_engine/scene/__init__.py",
+    "parallax_engine/scene/_renderer.py",
+    "parallax_engine/scene/designer.py"
+  ],
+  "key_design_decisions": [
+    "scene.py converted to parallax_engine/scene/ package to accommodate new designer module; _renderer.py preserves old scene.py content for backward compatibility",
+    "SceneFragment uses extra=allow but explicitly rejects project-level keys via @model_validator(mode=before)",
+    "produce_canonical canonical_description is ALWAYS sourced from CastingBible in _resolve_manifest_entry(), never from LLM output — structural prevention of description drift",
+    "SceneDesignerStub uses dict[int, str] keyed on scene_index for explicit per-scene responses",
+    "System prompt is verbatim from §11.6.6; prompt caching applied to stable system blocks"
+  ]
+}

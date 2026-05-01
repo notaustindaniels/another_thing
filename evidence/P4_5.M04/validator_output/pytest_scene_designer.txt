@@ -1,0 +1,47 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /Users/austin/parallax-skill/.conda-env/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/austin/parallax-skill
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.13.0
+collecting ... collected 37 items
+
+tests/test_scene_designer.py::TestSceneFragment::test_minimal_valid PASSED [  2%]
+tests/test_scene_designer.py::TestSceneFragment::test_extra_fields_allowed PASSED [  5%]
+tests/test_scene_designer.py::TestSceneFragment::test_scene_index_must_be_positive PASSED [  8%]
+tests/test_scene_designer.py::TestSceneFragment::test_duration_must_be_positive PASSED [ 10%]
+tests/test_scene_designer.py::TestSceneFragment::test_rejects_fps PASSED [ 13%]
+tests/test_scene_designer.py::TestSceneFragment::test_rejects_resolution PASSED [ 16%]
+tests/test_scene_designer.py::TestSceneFragment::test_rejects_seed PASSED [ 18%]
+tests/test_scene_designer.py::TestSceneFragment::test_rejects_meta PASSED [ 21%]
+tests/test_scene_designer.py::TestSceneFragment::test_rejects_bg_color PASSED [ 24%]
+tests/test_scene_designer.py::TestSceneFragment::test_allows_qa_self_check PASSED [ 27%]
+tests/test_scene_designer.py::TestSceneFragment::test_allows_scene_designer_protest PASSED [ 29%]
+tests/test_scene_designer.py::TestManifestEntry::test_local_minimal PASSED [ 32%]
+tests/test_scene_designer.py::TestManifestEntry::test_canonical_no_description_needed PASSED [ 35%]
+tests/test_scene_designer.py::TestManifestEntry::test_produce_canonical_requires_description PASSED [ 37%]
+tests/test_scene_designer.py::TestManifestEntry::test_produce_canonical_with_description PASSED [ 40%]
+tests/test_scene_designer.py::TestManifestEntry::test_extra_fields_forbidden PASSED [ 43%]
+tests/test_scene_designer.py::TestBlockExtraction::test_extract_yaml_block_basic PASSED [ 45%]
+tests/test_scene_designer.py::TestBlockExtraction::test_extract_yaml_block_missing PASSED [ 48%]
+tests/test_scene_designer.py::TestBlockExtraction::test_extract_json_block_basic PASSED [ 51%]
+tests/test_scene_designer.py::TestBlockExtraction::test_extract_json_block_missing PASSED [ 54%]
+tests/test_scene_designer.py::TestBlockExtraction::test_extract_yaml_block_multiline PASSED [ 56%]
+tests/test_scene_designer.py::TestParseFragment::test_valid_minimal PASSED [ 59%]
+tests/test_scene_designer.py::TestParseFragment::test_invalid_project_key PASSED [ 62%]
+tests/test_scene_designer.py::TestParseFragment::test_non_mapping_fails PASSED [ 64%]
+tests/test_scene_designer.py::TestParseManifest::test_local_entry PASSED [ 67%]
+tests/test_scene_designer.py::TestParseManifest::test_produce_canonical_uses_casting_description PASSED [ 70%]
+tests/test_scene_designer.py::TestParseManifest::test_produce_canonical_path_set PASSED [ 72%]
+tests/test_scene_designer.py::TestParseManifest::test_non_list_json_fails PASSED [ 75%]
+tests/test_scene_designer.py::TestSceneDesignerRun::test_basic_run_returns_output PASSED [ 78%]
+tests/test_scene_designer.py::TestSceneDesignerRun::test_scene_index_mismatch_raises PASSED [ 81%]
+tests/test_scene_designer.py::TestSceneDesignerRun::test_duration_mismatch_raises PASSED [ 83%]
+tests/test_scene_designer.py::TestSceneDesignerRun::test_no_response_for_scene_raises PASSED [ 86%]
+tests/test_scene_designer.py::TestSceneDesignerRun::test_fragment_no_project_metadata PASSED [ 89%]
+tests/test_scene_designer.py::TestSceneDesignerRun::test_prior_fragments_accepted PASSED [ 91%]
+tests/test_scene_designer.py::TestExampleBAcceptanceCriterion::test_example_b_scene1_has_red_bird_manifest_entry PASSED [ 94%]
+tests/test_scene_designer.py::TestExampleBAcceptanceCriterion::test_example_b_scene2_red_bird_canonical PASSED [ 97%]
+tests/test_scene_designer.py::TestExampleBAcceptanceCriterion::test_example_b_fragment_has_no_project_metadata PASSED [100%]
+
+============================== 37 passed in 0.28s ==============================

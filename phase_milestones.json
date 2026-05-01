@@ -679,9 +679,9 @@
       "blocked_by": [
         "P4_5.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4_5.M04/",
+      "notes": "SceneDesigner in parallax_engine/scene/designer.py. SceneFragment Pydantic model (extra=allow, rejects fps/resolution/seed/meta/bg_color). ManifestEntry (kind: canonical|produce_canonical|local; canonical_description required for produce_canonical). Key invariant: produce_canonical canonical_description always sourced from CastingBible, never from LLM. SceneDesignerStub for tests. Merged old parallax_engine/scene.py into parallax_engine/scene/_renderer.py + package __init__.py to fix namespace conflict. 37 new tests cover all acceptance criteria including example B scene-1 red_bird manifest entry."
     },
     {
       "id": "P4_5.M05",
