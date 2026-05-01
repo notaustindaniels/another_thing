@@ -918,9 +918,9 @@
       "blocked_by": [
         "P6.M01"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P6.M02/",
+      "notes": "Session 21. Created LICENSES.md (full audit of 50+ packages, licenses, copyright holders, commercial resale status). Created EULA.md template with required attributions: 'OpenH264 Video Codec provided by Cisco Systems, Inc.' and FFmpeg LGPLv2.1+ attribution. All deps permissive (MIT/BSD/Apache/HPND/LGPL-dynamic). Zero GPL/AGPL dependencies. validate_licensing.py 6/6 PASS."
     },
     {
       "id": "P6.M03",

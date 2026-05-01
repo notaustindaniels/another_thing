@@ -1,0 +1,24 @@
+{
+  "milestone_id": "P6.M02",
+  "title": "License audit document + EULA template",
+  "timestamp": "2026-05-01T13:10:00Z",
+  "git_commit": "7cdca4c04982d1cba3e64271807c9ac67f34f29c",
+  "validators_passed": ["validate_licensing"],
+  "files_created": ["LICENSES.md", "EULA.md"],
+  "acceptance_criteria": {
+    "covers_all_dependencies": true,
+    "eula_cisco_attribution": "OpenH264 Video Codec provided by Cisco Systems, Inc.",
+    "eula_ffmpeg_lgpl_attribution": true,
+    "validate_licensing_exits_0": true,
+    "human_readable_markdown": "LICENSES.md"
+  },
+  "dependency_count": {
+    "runtime_direct": 6,
+    "runtime_transitive": 40,
+    "dev_only": 6,
+    "build_only": 3,
+    "system": 2
+  },
+  "gpl_tainted_deps": 0,
+  "agpl_tainted_deps": 0
+}
