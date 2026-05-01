@@ -87,9 +87,9 @@
       "blocked_by": [
         "P1.M01"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P1/P1.M03/",
+      "notes": "Session 2. Pydantic v2 models for full §2.2 scene.yaml schema. 71/71 pytest tests pass. Round-trip on all three §6 examples. SceneVersionError rejects version != 1. find_layer() qualified-name lookup. dump_scene_yaml uses model_dump_json -> json.loads to avoid !!python/tuple tags."
     },
     {
       "id": "P1.M04",
