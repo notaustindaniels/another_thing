@@ -31,19 +31,74 @@ SPEC anchors: §2.8, §5.2, §7
 
 from __future__ import annotations
 
+import os
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
 
 
 # ---------------------------------------------------------------------------
+# FFmpeg binary resolution (§5, §7)
+# ---------------------------------------------------------------------------
+#
+# parallax-engine ships with the LGPL FFmpeg build (libopenh264 only) under
+# <sys.prefix>/bin. Bare "ffmpeg" lookups via subprocess depend on
+# os.environ["PATH"], which does NOT include <sys.prefix>/bin when Python is
+# invoked as ".conda-env/bin/python" (no shell activation). That can cause
+# subprocess to either (a) fail with FileNotFoundError or (b) — worse —
+# silently pick up a GPL-tainted system ffmpeg. Both contaminate the resale
+# story and are caught by tools/validate_licensing.py.
+#
+# All FFmpeg invocations in parallax_engine/* MUST go through _ffmpeg_binary()
+# so the env-local LGPL build is always selected.
+
+def _ensure_env_bin_on_path() -> None:
+    """Prepend ``<sys.prefix>/bin`` to ``os.environ['PATH']`` (idempotent)."""
+    env_bin = str(Path(sys.prefix) / "bin")
+    parts = os.environ.get("PATH", "").split(os.pathsep)
+    if not parts or parts[0] != env_bin:
+        parts = [p for p in parts if p != env_bin]
+        os.environ["PATH"] = os.pathsep.join([env_bin] + parts)
+
+
+def _ffmpeg_binary() -> str:
+    """
+    Return the absolute path to the FFmpeg binary parallax-engine should
+    invoke. Always prefers the env-local LGPL build at ``<sys.prefix>/bin``.
+
+    Raises
+    ------
+    FileNotFoundError
+        If no ffmpeg is on PATH after prepending ``<sys.prefix>/bin``.
+    """
+    _ensure_env_bin_on_path()
+    binary = shutil.which("ffmpeg")
+    if binary is None:
+        raise FileNotFoundError(
+            f"ffmpeg not found on PATH (after prepending "
+            f"{Path(sys.prefix) / 'bin'}). Install the LGPL build of FFmpeg "
+            "into the Python environment."
+        )
+    return binary
+
+
+# Run the PATH fix once at import time so subprocesses launched later in the
+# same process (e.g. the validator invoked by test_validate_licensing_passes)
+# inherit a PATH that resolves to the env-local LGPL FFmpeg.
+_ensure_env_bin_on_path()
+
+
+# ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-#: FFmpeg arguments that are non-negotiable (§2.8, §7).
+#: FFmpeg arguments that are non-negotiable (§2.8, §7). The leading binary is
+#: resolved via _ffmpeg_binary() at call time, not stored here.
 _ENCODER_ARGS_TEMPLATE = [
-    "ffmpeg", "-y",
+    "-y",
     "-f", "rawvideo",
     "-pix_fmt", "rgba",
     # -s and -r inserted at call time
@@ -88,7 +143,7 @@ def open_encoder(
     """
     gop = fps * 2   # keyframe interval
     cmd = [
-        "ffmpeg", "-y",
+        _ffmpeg_binary(), "-y",
         "-f", "rawvideo",
         "-pix_fmt", "rgba",
         "-s", f"{width}x{height}",

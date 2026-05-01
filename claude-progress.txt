@@ -1357,3 +1357,92 @@ Next session should:
   but not explicitly stated in the ManifestEntry schema. Chose to handle "variant" as an additional
   kind in the generator without modifying the SceneDesigner schema (which is the Tier 2 output).
   The manager dispatches variant generation separately from the scene designer's manifest output.
+
+## OUT-OF-BAND INTERVENTION (FFmpeg PATH fix) — 2026-05-01
+**This was NOT a milestone session.** The autonomous harness was paused; the user
+invoked Claude directly to fix one specific bug: parallax-engine code was
+resolving `ffmpeg` (and `rsvg-convert`) via bare-name subprocess lookup, which
+depends on `os.environ["PATH"]`. Under `.conda-env/bin/python` the env's `bin`
+directory is NOT on PATH unless the shell has activated it — so subprocess
+either failed with `FileNotFoundError` or, on machines that have a system
+FFmpeg, would silently pick up a GPL-tainted binary. No phase_milestones.json
+edit; no `passes` flip; the integrity check that runs after milestone sessions
+does not apply.
+
+### The previous "environmental" framing was wrong
+Earlier sessions (see line ~1166 above) framed `system_ffmpeg` validator
+failures and the 26+ FFmpeg test failures as **environmental** ("local Homebrew
+FFmpeg ships without libopenh264", "FFmpeg builds without libopenh264"). That
+was incorrect. The env-local FFmpeg at `.conda-env/bin/ffmpeg` is a clean LGPL
+build with libopenh264 (verified: libx264 is absent). The real cause was a
+PATH-resolution bug in our code: subprocess invocations used bare `"ffmpeg"`
+and `"rsvg-convert"` strings, which resolve via PATH — and PATH did not include
+`.conda-env/bin`. Validators and tests were either failing with
+`FileNotFoundError` or (where a system binary existed) picking it up instead
+of the env-local one.
+
+### Audit of FFmpeg invocation sites
+- `parallax_engine/encode.py:91` — `open_encoder()` builds cmd with bare
+  `"ffmpeg"`, then `subprocess.Popen` at line 105. Used by Encoder context
+  manager → render pipeline → tests/test_encode.py, tests/test_render.py,
+  tests/test_render_smoke.py, tests/test_render_golden.py,
+  tests/test_harness_e2e.py.
+- `parallax_engine/synthetic_renderer.py:311` — `_encode_frames_to_mp4()`
+  builds cmd with bare `"ffmpeg"`, then `subprocess.Popen` at line 330. Used
+  by `tools/validate_portal_equivalence.py` (and, indirectly, smoke tests).
+- `parallax_engine/encode.py:46` — `_ENCODER_ARGS_TEMPLATE` constant. Dead
+  code (not actually invoked anywhere) but contained `"ffmpeg"` as the leading
+  element; updated to drop the binary entry, since the binary is now resolved
+  at call time.
+- `tools/validate_licensing.py:457` — uses `shutil.which("ffmpeg")` directly.
+  NOT modified (out of bounds for this session) but benefits from the same
+  PATH fix via the sitecustomize hook below.
+- `parallax_engine/render.py:132-143` — uses bare `"rsvg-convert"`. Not
+  explicitly rerouted (out of FFmpeg scope) but benefits from the same PATH
+  fix and as a result `tests/test_render.py::TestRasterizeSvg::test_different_svgs_differ`
+  also passes — its previous "skia-python API drift" framing was wrong too.
+
+### The fix (the canonical pattern)
+1. `parallax_engine/encode.py` — added `_ensure_env_bin_on_path()` (prepends
+   `<sys.prefix>/bin` to `os.environ["PATH"]`, idempotent) and `_ffmpeg_binary()`
+   (calls the helper, returns `shutil.which("ffmpeg")`). The helper is invoked
+   once at module-import time so subprocesses launched later in the same
+   process inherit the fixed PATH (e.g., the validator invoked from
+   `tests/test_render_smoke.py::TestValidators::test_validate_licensing_passes`).
+2. `parallax_engine/encode.py:91` — bare `"ffmpeg"` replaced with
+   `_ffmpeg_binary()`.
+3. `parallax_engine/synthetic_renderer.py:312` — bare `"ffmpeg"` replaced with
+   `_ffmpeg_binary()` (lazy-imported inside `_encode_frames_to_mp4()` to keep
+   import order clean).
+4. `sitecustomize.py` (NEW, project root) — Python `site` module auto-imports
+   it at interpreter startup whenever the project root is on `sys.path` (which
+   is always true under the editable install thanks to
+   `_editable_impl_parallax_engine.pth`). It runs the same PATH-fix logic so
+   that processes that NEVER import parallax-engine (e.g., a user typing
+   `.conda-env/bin/python tools/validate_licensing.py` directly in the shell)
+   still resolve to the env-local LGPL FFmpeg. This is what closes the
+   standalone-validator gap; without it, the validator's own
+   `shutil.which("ffmpeg")` would still return whatever the shell's PATH
+   happens to surface.
+
+### Validation
+- `.conda-env/bin/python tools/validate_licensing.py` — **6/6 PASS**, including
+  `system_ffmpeg` reporting `ffmpeg at /Users/austin/parallax-skill/.conda-env/bin/ffmpeg;
+  libopenh264=True, libx264=False, libx265=False`.
+- `.conda-env/bin/python -m pytest tests/ -q` — **984 passed, 0 failed** in 255s.
+  Up from 956 passed / 28 failed before the fix. (Earlier framing of "27 failures"
+  was approximate; the actual count was 28 — the 26 FFmpeg + the
+  `test_validate_licensing_passes` + the rsvg-convert / skia test.)
+- Every previously-failing test (FFmpeg encoder, render pipeline, smoke,
+  golden-hash, e2e portal/forest/biome, validator) now passes.
+
+### Future autonomous sessions should expect
+- `validate_licensing.py` returns 6/6, including `system_ffmpeg`.
+- All FFmpeg-related tests pass; the previous "FFmpeg without libopenh264" /
+  "skia-python API drift" / "rsvg-convert not installed" framings were ALL
+  symptoms of the same single root cause (bare-name subprocess lookups under
+  a non-activated env). Don't add new bare-name FFmpeg invocations — route
+  them through `parallax_engine.encode._ffmpeg_binary()`.
+- If a similar bare-name external-tool subprocess pattern is added later
+  (e.g., a new tool fetched from the env), prefer `shutil.which` after
+  `_ensure_env_bin_on_path()` over a hardcoded path or bare name.

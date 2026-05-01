@@ -308,8 +308,9 @@ def _encode_frames_to_mp4(
     Uses the same FFmpeg flags as parallax_engine/encode.py to stay
     consistent with the production pipeline.
     """
+    from parallax_engine.encode import _ffmpeg_binary
     cmd = [
-        "ffmpeg", "-y",
+        _ffmpeg_binary(), "-y",
         "-f", "rawvideo",
         "-vcodec", "rawvideo",
         "-s", f"{W}x{H}",

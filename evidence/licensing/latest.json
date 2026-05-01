@@ -8,44 +8,42 @@
       "passed": true,
       "detail": "validator constants are internally consistent",
       "items": [],
-      "elapsed_ms": 0.0017909333109855652
+      "elapsed_ms": 0.0015832483768463135
     },
     {
       "name": "declared_dependencies",
       "passed": true,
-      "detail": "unrecognized (not in allowlist; review and add to ALLOWED_DISTS if legitimate): ['noise']",
-      "items": [
-        "unrecognized:noise"
-      ],
-      "elapsed_ms": 2.168041653931141
+      "detail": "all declared deps allowed",
+      "items": [],
+      "elapsed_ms": 2.7248747646808624
     },
     {
       "name": "installed_distributions",
       "passed": true,
       "detail": "no forbidden distributions installed",
       "items": [],
-      "elapsed_ms": 17.11641624569893
+      "elapsed_ms": 26.243666652590036
     },
     {
       "name": "source_imports",
       "passed": true,
       "detail": "no forbidden imports",
       "items": [],
-      "elapsed_ms": 96.27579199150205
+      "elapsed_ms": 197.11249973624945
     },
     {
       "name": "text_artifacts",
       "passed": true,
       "detail": "no forbidden strings in scanned text files",
       "items": [],
-      "elapsed_ms": 6.387040950357914
+      "elapsed_ms": 9.425625205039978
     },
     {
       "name": "system_ffmpeg",
       "passed": true,
       "detail": "ffmpeg at /Users/austin/parallax-skill/.conda-env/bin/ffmpeg; libopenh264=True, libx264=False, libx265=False",
       "items": [],
-      "elapsed_ms": 116.2608340382576
+      "elapsed_ms": 127.96074990183115
     }
   ]
 }
