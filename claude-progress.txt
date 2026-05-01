@@ -1116,3 +1116,171 @@ Next session should:
 - §11.6.6 says system prompt should include "renderer's scene.yaml schema (§2.2) as
   canonical reference". Used compact _FRAGMENT_SCHEMA_HINT rather than full Pydantic
   JSON schema (too verbose). Cheapest-to-change interpretation.
+
+## Session 15 (2026-05-01) — pyproject.toml + install path cleanup
+
+### What this session did
+1. Audited every `import`/`from` in parallax_engine/, runner/, tools/, tests/, and the
+   top-level scripts. Cross-referenced against pyproject.toml.
+
+   Third-party packages actually imported: numpy, cv2 (opencv-python-headless),
+   PIL (Pillow), pydantic, yaml (PyYAML), claude_code_sdk, pytest (dev), and
+   skia (conditional, in a try/except inside parallax_engine/render.py with an
+   rsvg-convert CLI fallback per §5.3).
+
+   Declared in pyproject.toml but NOT imported anywhere: scipy, pydantic-yaml,
+   noise. The PyPI `noise` package is unused — `parallax_engine/camera.py`
+   defines a vendored `SeededNoise` class as the SPEC.md §5.1-approved
+   replacement ("noise or vendored simplex").
+
+2. Updated pyproject.toml:
+   - Removed: scipy, pydantic-yaml, noise (no imports).
+   - Moved skia-python from [project.dependencies] to a new
+     [project.optional-dependencies].render extra. The renderer's try/except
+     fallback to rsvg-convert means installs that already have rsvg-convert can
+     skip skia-python's native build. Default install no longer pulls a heavy
+     native dep.
+   - Added per-package comments naming the import name and the source files
+     that use it, so future readers can verify the dep ↔ import mapping.
+
+3. Reinstalled with new deps in normal pip mode:
+   `.conda-env/bin/pip install -e .` succeeded.
+   This proves pip works in normal shells. The proxy block ("pip install is
+   BLOCKED by a proxy (403 Forbidden)") in earlier sessions was sandbox-
+   specific — outside the sandbox, the standard install path works.
+
+4. Removed the editable-install workaround:
+   `.conda-env/lib/python3.11/site-packages/parallax_engine.pth` was a manual
+   sys.path injection used during the proxy-blocked era. Deleted it.
+   Verified `.conda-env/bin/python -c "import parallax_engine; print(parallax_engine.__file__)"`
+   now resolves to `/Users/austin/parallax-skill/parallax_engine/__init__.py`,
+   proving hatchling's PEP 660 editable install handles path injection on its
+   own. The install path is now standard.
+
+5. init.sh was already standard (`pip install -e ".[dev]"`). No changes needed
+   beyond the toml. Future sessions wanting to add a dependency can run
+   `.conda-env/bin/pip install <pkg>` directly — pip works.
+
+### Validation results
+
+- `.conda-env/bin/python tools/validate_licensing.py`:
+  5 of 6 checks PASS. The one FAIL is `system_ffmpeg` because the local Homebrew
+  FFmpeg ships with libx264/libx265 and no libopenh264. **This is pre-existing
+  and environmental — not caused by the toml change.** Verified by running the
+  validator with the original pyproject.toml: same FAIL with the same message.
+  Fixing it requires installing an LGPL FFmpeg build with libopenh264 (out of
+  scope for a deps-only edit).
+
+- `.conda-env/bin/python -m pytest tests/ -q`:
+  798 passed, 27 failed. **All 27 failures are pre-existing**, confirmed by
+  re-running the failing tests with the original pyproject.toml (same failures,
+  same errors). Two root causes, both environmental:
+  1. FFmpeg builds without libopenh264 → all encode/render/smoke/golden tests
+     that try to encode an MP4 fail with `Unknown encoder 'libopenh264'`. Same
+     issue as the validator's system_ffmpeg check.
+  2. test_render.py::TestRasterizeSvg::test_different_svgs_differ →
+     skia-python 144.0.post2 (the version installed in .conda-env) renamed
+     `skia.SVGDOM.MakeFromData`, so the try/except inside
+     `_rasterize_svg_bytes` falls through to rsvg-convert; rsvg-convert is not
+     installed; both SVGs end up as identical placeholders; test fails. This
+     was already failing before the toml change. Fixing it requires either
+     installing rsvg-convert (`brew install librsvg`) or updating render.py to
+     match the new skia API — out of scope for a deps-only edit.
+
+- The user's original pre-edit count of 655 tests is outdated; the suite has
+  grown to 825 over Sessions 9–14 as new milestones added tests.
+
+### Net effect
+- pyproject.toml accurately declares every package the codebase actually
+  imports; nothing extra.
+- Default install (`pip install -e .`) is leaner — no scipy/noise/pydantic-yaml,
+  no native skia-python build. Users who want skia run `pip install -e ".[render]"`.
+- Editable install works through standard PEP 660; the .pth workaround is gone.
+- No code outside pyproject.toml and (would-have-been) init.sh was touched.
+- No test or validator regressions; failures shown above are environmental and
+  pre-existed this session.
+
+### Next session
+P4_5.M05 (scene/merger.py) is still the next milestone. Nothing about that work
+changed. Future sessions can use `.conda-env/bin/pip install <pkg>` to add deps
+in normal pip mode — no offline-copy workaround needed anymore.
+
+---
+
+## Session 15 (2026-05-01)
+
+Worked: P4_5.M05 — scene/merger.py — deterministic Python merger (no LLM) producing final scene.yaml
+Status: passed
+Evidence: evidence/P4_5.M05/
+Commit: aa09ebd1b34a653ab1e9a7920e0381f395f5c05b
+
+Implementation notes:
+
+1. ORIENTATION: init.sh fails with pip proxy error (network blocked) — persistent issue,
+   non-fatal. All 825 prior tests pass; parallax_engine imports cleanly; licensing clean.
+
+2. MODULE CREATED: parallax_engine/scene/merger.py (330 lines)
+   - merge(fragment_dir, storyboard, output_dir=None) → (merged_dict, log_dict)
+   - Loads scene_N.yaml files from fragment_dir, sorts by scene_index
+   - _validate_coverage(): checks fragment set == storyboard scene index set exactly
+   - _validate_transition_pairing(): TWO levels:
+     (a) storyboard-level — reads Pydantic TransitionSpec objects; validates biome_wipe
+         and portal_reveal pairs are symmetric and paired_scene references cross-point
+     (b) fragment-level — reads raw dict transition blocks; validates same invariants
+         for any transitions present in the actual fragment files
+   - _compute_start_times(): cumulative sum of duration_s values
+   - _build_project_block(): promotes palette from storyboard.visual_vocabulary
+   - Writes scene.yaml (version:1, project block, scenes list with start_t) + log.json
+   - MergeError raised with bullet-list of ALL violations found (not just first)
+   - Pure Python — no anthropic import, no LLM calls (§11.13 anti-pattern 12)
+
+3. OUTPUT FORMAT: merged scene.yaml has version:1, project block (title, fps,
+   aspect_ratio, palette, shape_language), and scenes list where each entry is
+   the raw fragment dict with start_t injected. This is an EXTENDED format beyond
+   the renderer's current single-scene format; the renderer update (P4_5.M06/M07)
+   will consume it.
+
+4. TESTS: 53 new tests in tests/test_scene_merger.py (878 total, all passing)
+   TestCollectFragments (5): glob+sort, no files, missing scene_index, missing duration_s, non-mapping
+   TestValidateCoverage (3): exact match, missing fragment, extra fragment
+   TestValidateTransitionPairing (6): biome_wipe correct, portal_reveal correct, biome_wipe
+     wrong paired_scene, portal_reveal type mismatch, portal_reveal wrong receiver paired_scene,
+     no-transition-blocks passes
+   TestComputeStartTimes (4): single, two, four, fractional
+   TestBuildProjectBlock (5): palette, fps, title, shape_language, forbidden absent
+   TestMergeFunction (13): returns tuple, version, project, scenes, start_t, no-write,
+     writes yaml, writes log, yaml round-trips, log version, log count, log start_t,
+     transition_validation field, palette in project
+   TestMergeErrors (5): no frags, missing, extra, wrong type, wrong paired_scene
+   TestExampleBMerge (5): 4-scene biome_tour merges cleanly; indices, start_times,
+     total duration, title in log
+   TestExampleCMerge (4): 2-scene portal_reveal merges cleanly; start_times,
+     fragment content preserved, portal_reveal with paired blocks
+   TestMergeIsPurePython (2): no anthropic import, docstring declares no LLM
+
+5. ALSO UPDATED: parallax_engine/scene/__init__.py — re-exports MergeError and merge
+
+Next session should:
+1. CHECK: 878 tests pass; validate_licensing passes.
+2. Proceed to P4_5.M06: "Update asset/generator.py, qa/critic.py, manager.py —
+   director-era topology"
+   - This is now unblocked (P4_5.M05 passes).
+   - Read §11.7.1-2 (asset-generator casting-aware), §11.8.2 (QA critic levels),
+     §11.9.1-2 (project manager sequence + minimal prompt) in full before implementation.
+   - Three separate updates to existing modules; check each module's current state first.
+   - asset/generator.py: add kind dispatch (canonical=no-op, produce_canonical=casting-only,
+     local=current behavior, variant=transform canonical)
+   - qa/critic.py: add --level=(asset|scene|storyboard) with classification taxonomies
+   - manager.py: implement §11.9.1 sequence, --resume via storyboard diff, Python retry caps
+3. P4_5.M06 is the largest remaining milestone in Phase 4.5 — three modules.
+   Plan to read the spec sections carefully before writing any code.
+   If it's too large, implement asset/generator.py first (smallest, clearest contract),
+   validate, then continue to qa/critic.py and manager.py.
+
+## SPEC AMBIGUITIES (Session 15)
+- §11.6.5 says merger produces "single scene.yaml the renderer consumes" but the renderer's
+  current format (parallax_engine/scene/_renderer.py) is a single-scene format with no
+  scenes list. The merged format extends it with a scenes list + project block. This is
+  the most defensible interpretation since §11.14 step 7 updates the renderer for
+  multi-scene in P4_5.M06. The merger's output format is consistent with the eventual
+  updated renderer contract.
