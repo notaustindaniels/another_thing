@@ -527,3 +527,100 @@ For Phase 4, when scene-designer writes real scene.yaml:
 Resolution chosen for P3: use plain-list format in _SMOKE_SCENE_YAML. Satisfies P3.M05.
 Human action needed: decide before Phase 4 whether to fix lead.py parsing or constrain
 scene-designer output format.
+
+---
+
+## Session 7 (2026-05-01 06:00)
+
+Worked: P4.M01 — All six agent prompt files with full production prompts
+Status: passed
+Evidence: evidence/P4.M01/
+Commit: 720b95c
+
+### Environment notes
+
+init.sh still fails with pip proxy error (same as all prior sessions). Not blocking.
+All validators and 471 tests pass via .conda-env/bin/python. Environment is stable.
+
+### Implementation notes
+
+P4.M01 — Six prompt files + subagents.py loads from files:
+
+Created parallax_engine/prompts/ directory with six markdown files:
+
+1. lead.md (§3.4 orchestrator):
+   - Full effort-scaling rules: one scene-designer → parallel asset-generators →
+     parallel mask-authors → one camera-pather → render → QA loop (bounded in Python)
+   - Workspace contract documentation
+   - Budget/safety guidance (max_turns=80, max_budget_usd=2.50)
+   - Return contract: "done: workspace/out.mp4" or "salvage: ..."
+
+2. scene_designer.md (§3.3):
+   - Input: brief.md; Output: scene.yaml (manifest only, no assets)
+   - Full scene.yaml schema reference embedded in prompt
+   - Platform-to-resolution mapping table (TikTok/Reels → 1080×1920, etc.)
+   - Layer count rules by density (sparse=3-4, medium=5-7, dense=8-12)
+   - Return: "scene written: N layers, M masks, duration Ts"
+
+3. asset_generator.md (§3.3):
+   - Input: scene.yaml + layer_id; Output: assets/<id>.svg + .meta.json
+   - Asset kinds: local / produce_canonical / variant / canonical
+   - Integration points for gen_image and autosegment MCP tools
+   - Return: "ok: assets/<layer_id>.svg"
+
+4. mask_author.md (§9.4):
+   - Input: existing SVG; Output: same SVG + id="silhouette" + id="hole"
+   - Explains silhouette/hole semantics with portal examples (doorway, tree)
+   - Fallback: create geometric hole if none exists
+   - Return: "ok: silhouette + hole paths added to assets/<filename>.svg"
+
+5. camera_pather.md (§2.3):
+   - Input: scene.yaml + brief.md; Output: scene.yaml with camera: block
+   - Full camera mode schema for drone/parallax/portal modes
+   - Translation table: brief intent → camera mode → key parameters
+   - Return: "camera path written: ..."
+
+6. qa_critic.md (§3.3, §11.8):
+   - Input: frames/ + scene.yaml + brief.md; Output: qa/pass_NN_report.md
+   - Structured report schema (markdown table of checks)
+   - Tool usage examples (Glob, diff_frames, ssim_score)
+   - Verdict rules (PASS/FAIL criteria)
+   - Return: "PASS" or "FAIL: <checks>, see qa/pass_NN_report.md"
+
+subagents.py changes:
+   - Added load_prompt(name) function using pathlib.Path(__file__).parent / "prompts"
+   - Added LEAD_PROMPT module-level constant
+   - Replaced all five inline stub system_prompt strings with load_prompt() calls
+   - Removed unused `field` import from dataclasses
+
+All 471 existing tests pass. Subagents tests (27) all green. test_qa_prompt_does_not_say_stop passes (qa_critic.md has no "stop after" language). validate_licensing 6/6.
+
+### Next session should
+
+1. VERIFY REGRESSIONS FIRST:
+   - .conda-env/bin/python tools/validate_licensing.py (6/6)
+   - .conda-env/bin/python tools/validate_portal_equivalence.py (6/6)
+   - .conda-env/bin/python -m pytest tests/ -q (471 pass)
+
+2. Proceed to P4.M02: Image generation tool + auto-segmentation tool integration
+   - mcp__parallax_render__gen_image tool
+   - mcp__parallax_masks__autosegment tool (rembg or similar)
+   - These are MCP tool wrappers in parallax_engine/tools/
+   - Check: is rembg available in conda-env? find /Users/austin -name "rembg" -type d
+   - If not, implement as stub MCP tools that log a warning and return a placeholder SVG
+   - Validator: validate_licensing.py exits 0
+
+3. Phase 4 still needs P4.M03 (real LLM subagents) and P4.M04 (e2e tests).
+   P4.M02 is the next unblocked milestone.
+
+4. NOTE on scene.yaml format ambiguity (Ambiguity 7):
+   The scene_designer.md prompt now specifies the plain-list stack format
+   (stacks: {name: [layer1, layer2]}) which is what lead.py expects.
+   This is consistent with the P3 decision. Production scene.yaml format
+   in forest.yaml uses {name: {layers: [...]}} but lead.py parses plain lists.
+   Human should decide if lead.py or the prompt is the authoritative format.
+
+### SPEC AMBIGUITIES (continued)
+
+No new ambiguities this session. Existing Ambiguity 7 (scene.yaml format) was
+addressed by having scene_designer.md specify the plain-list format.
