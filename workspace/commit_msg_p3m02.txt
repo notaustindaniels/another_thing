@@ -1,0 +1,11 @@
+feat(P3.M02): tools/render.py + tools/qa.py — MCP tool wrappers, validation passing
+
+- render_scene wraps Phase 1 renderer, catches all exceptions, returns JSON-serialisable status dict (ok, out_mp4, message, n_frames, size_bytes)
+- diff_frames computes per-frame max/mean absolute pixel diff (numpy int16, cv2 resize for mismatched sizes)
+- ssim_score uses 11x11 Gaussian-windowed SSIM matching validate_portal_equivalence.py formula (cv2+numpy, no skimage)
+- 24 new tests in tests/test_tools.py; 387/387 total; validate_licensing 6/6
+
+Validators passed: validate_licensing
+Evidence: evidence/P3.M02/
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

@@ -1,0 +1,11 @@
+feat(P3.M03): subagents.py — AgentDefinitions for all five subagents, validation passing
+
+- AgentDefinition frozen dataclass with §9.6 enforcement (raises ValueError if 'Agent' in allowed_tools)
+- Five definitions: SCENE_DESIGNER/CAMERA_PATHER/QA_CRITIC (sonnet), ASSET_GENERATOR/MASK_AUTHOR (haiku)
+- Tool lists match §3.3 table exactly; stub prompts include §3.3-compliant return-value patterns
+- 27 new tests in tests/test_subagents.py; 414/414 total; validate_licensing 6/6
+
+Validators passed: validate_licensing
+Evidence: evidence/P3.M03/
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

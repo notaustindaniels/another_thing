@@ -1,0 +1,20 @@
+{
+  "milestone_id": "P3.M03",
+  "title": "parallax_engine/subagents.py — AgentDefinitions for all five subagents (stub prompts)",
+  "timestamp": "2026-05-01T01:00:00Z",
+  "git_commit": "564eae9",
+  "validators_passed": ["validate_licensing"],
+  "tests_passed": 27,
+  "files_created": [
+    "parallax_engine/subagents.py",
+    "tests/test_subagents.py"
+  ],
+  "implementation_notes": [
+    "AgentDefinition is a frozen dataclass with name, model, description, allowed_tools (tuple), system_prompt",
+    "__post_init__ enforces no 'Agent' tool in allowed_tools (raises ValueError if present, per §9.6)",
+    "Five definitions: SCENE_DESIGNER (sonnet), ASSET_GENERATOR (haiku), MASK_AUTHOR (haiku), CAMERA_PATHER (sonnet), QA_CRITIC (sonnet)",
+    "Tool lists match §3.3 table exactly; stub prompts include canned status strings matching §3.3 return contract",
+    "ALL_SUBAGENTS tuple + SUBAGENT_BY_NAME dict provide ordered iteration and fast name lookup",
+    "Uses stdlib dataclasses only — no new dependencies, licensing clean"
+  ]
+}

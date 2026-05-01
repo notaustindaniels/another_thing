@@ -390,9 +390,9 @@
       "blocked_by": [
         "P3.M02"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P3.M03/",
+      "notes": "AgentDefinition frozen dataclass with §9.6 enforcement; 5 subagents with §3.3-compliant tool lists and stub prompts. 27/27 tests. validate_licensing 6/6."
     },
     {
       "id": "P3.M04",
