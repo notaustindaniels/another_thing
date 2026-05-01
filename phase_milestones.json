@@ -945,9 +945,9 @@
       "blocked_by": [
         "P6.M02"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P6.M03/",
+      "notes": "Three canonical scene YAMLs (canonical_a/b/c.yaml) render drone-FPV forest (32s), keyframed biome pan (0.7s), and portal transition (19s) at 192x108 10fps 2s = 20 frames each. Golden SHA-256s stored in evidence/golden/*.sha256. tests/test_regression.py: 19 tests all pass (13 integrity + 3 byte-identical + 3 determinism double-render)."
     },
     {
       "id": "P6.M04",

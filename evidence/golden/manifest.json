@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-05-01T17:32:08Z",
+  "scenes": [
+    {
+      "id": "example_a",
+      "sha256": "7f4f189064f880a739974486d195503e403f2517c720d08352d6b91b6403d1b3",
+      "skipped": false,
+      "elapsed_s": 32.395597958005965,
+      "size_bytes": 120355
+    },
+    {
+      "id": "example_b",
+      "sha256": "350ee5e6b3d72244ea92d119b614b106076738485b19546286a41fa4cc46b0b0",
+      "skipped": false,
+      "elapsed_s": 0.7416885839775205,
+      "size_bytes": 60225
+    },
+    {
+      "id": "example_c",
+      "sha256": "a6dcddcc2492dc919830168a1022c64eb66e8e91085de9986f780818eca11368",
+      "skipped": false,
+      "elapsed_s": 19.455216916278005,
+      "size_bytes": 85250
+    }
+  ]
+}

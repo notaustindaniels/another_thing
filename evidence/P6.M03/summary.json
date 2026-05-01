@@ -1,0 +1,50 @@
+{
+  "milestone_id": "P6.M03",
+  "milestone_title": "Regression test suite: three canonical storyboard golden MP4 hashes",
+  "timestamp": "2026-05-01T13:40:00Z",
+  "git_commit": "596dea5f2ed3b538b2f4d68f1c83aa56b591db91",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "tests_passed": [
+    "tests/test_regression.py::TestGoldenHashFiles (13 tests)",
+    "tests/test_regression.py::TestRegressionByteIdentical (3 tests)",
+    "tests/test_regression.py::TestRenderDeterminismLocal (3 tests)"
+  ],
+  "total_tests": 19,
+  "acceptance_criteria": {
+    "golden_hashes_stored": {
+      "status": "PASS",
+      "files": [
+        "evidence/golden/example_a.sha256",
+        "evidence/golden/example_b.sha256",
+        "evidence/golden/example_c.sha256"
+      ]
+    },
+    "byte_identical_regression": {
+      "status": "PASS",
+      "note": "tests/test_regression.py::TestRegressionByteIdentical all 3 pass"
+    },
+    "render_time_under_5min": {
+      "status": "PASS",
+      "render_times_s": {
+        "example_a": 32.4,
+        "example_b": 0.7,
+        "example_c": 19.5
+      }
+    },
+    "validate_licensing_exits_0": {
+      "status": "PASS"
+    }
+  },
+  "golden_hashes": {
+    "example_a": "7f4f189064f880a739974486d195503e403f2517c720d08352d6b91b6403d1b3",
+    "example_b": "350ee5e6b3d72244ea92d119b614b106076738485b19546286a41fa4cc46b0b0",
+    "example_c": "a6dcddcc2492dc919830168a1022c64eb66e8e91085de9986f780818eca11368"
+  },
+  "scene_yamls": {
+    "example_a": "tests/scenes/canonical_a.yaml",
+    "example_b": "tests/scenes/canonical_b.yaml",
+    "example_c": "tests/scenes/canonical_c.yaml"
+  }
+}

@@ -1,0 +1,37 @@
+# parallax-scene v1 — Canonical regression scene B: keyframed biome pan
+# Represents §11.4.2 "Four Climates" storyboard concept (horizontal camera travel).
+# CI-speed: 192×108, 10fps, 2s = 20 frames.  seed=10002.
+version: 1
+meta:
+  duration_s: 2.0
+  fps: 10
+  resolution: [192, 108]
+  perspective_px: 1200
+  origin: [96, 54]
+  bg_color: "#e8d8a8"
+  seed: 10002
+
+stacks:
+  biome:
+    layers:
+      - { id: sky,        src: assets/sky_dawn.svg,   scene_xyz: [0, 0, -10000], plate_size: [3840, 2160] }
+      - { id: mountains,  src: assets/mountains.svg,  scene_xyz: [0, 0, -7000],  plate_size: [3840, 2160], post: { dof_blur_px: 3, depth_fade: 0.25 } }
+      - { id: trees_far,  src: assets/trees_far.svg,  scene_xyz: [0, 0, -5000],  plate_size: [3840, 2160] }
+      - { id: trees_mid,  src: assets/trees_mid.svg,  scene_xyz: [0, 0, -3000],  plate_size: [3840, 2160] }
+      - { id: leaves_mid, src: assets/leaves_mid.svg, scene_xyz: [0, 0, -1200],  plate_size: [3840, 2160] }
+
+camera:
+  mode: keyframed
+  keyframed:
+    - { t: 0.0, x:    0.0, y: 0.0, z: 0.0 }
+    - { t: 0.5, x:  400.0, y: 0.0, z: 0.0 }
+    - { t: 1.0, x:  900.0, y: 0.0, z: 0.0 }
+    - { t: 1.5, x: 1500.0, y: 0.0, z: 0.0 }
+    - { t: 2.0, x: 2200.0, y: 0.0, z: 0.0 }
+
+masks: []
+
+post:
+  global:
+    vignette: { strength: 0.3, radius: 0.90 }
+    grain:    { sigma: 2 }

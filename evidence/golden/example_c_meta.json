@@ -1,0 +1,18 @@
+{
+  "id": "example_c",
+  "description": "\u00a711.4.3 \u2014 portal transition",
+  "storyboard": "tests/storyboards/example_c.yaml",
+  "scene_yaml": "tests/scenes/canonical_c.yaml",
+  "resolution": [
+    192,
+    108
+  ],
+  "fps": 10,
+  "duration_s": 2.0,
+  "seed": 10003,
+  "render_time_s": 19.455,
+  "mp4_size_bytes": 85250,
+  "sha256": "a6dcddcc2492dc919830168a1022c64eb66e8e91085de9986f780818eca11368",
+  "generated_at": "2026-05-01T17:32:08Z",
+  "spec_anchor": "\u00a77"
+}

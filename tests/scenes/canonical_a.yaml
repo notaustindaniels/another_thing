@@ -1,0 +1,42 @@
+# parallax-scene v1 — Canonical regression scene A: forest drone flythrough
+# Represents §11.4.1 "Through the Pines" storyboard concept.
+# CI-speed: 192×108, 10fps, 2s = 20 frames.  seed=10001.
+version: 1
+meta:
+  duration_s: 2.0
+  fps: 10
+  resolution: [192, 108]
+  perspective_px: 1200
+  origin: [96, 54]
+  bg_color: "#0e1a14"
+  seed: 10001
+
+stacks:
+  forest:
+    layers:
+      - { id: sky,        src: assets/sky_dawn.svg,   scene_xyz: [0, 0, -12000], plate_size: [3840, 2160] }
+      - { id: mountains,  src: assets/mountains.svg,  scene_xyz: [0, 0, -9000],  plate_size: [3840, 2160], post: { dof_blur_px: 4, depth_fade: 0.35 } }
+      - { id: trees_far,  src: assets/trees_far.svg,  scene_xyz: [0, 0, -6500],  plate_size: [3840, 2160], post: { dof_blur_px: 2, depth_fade: 0.20 } }
+      - { id: trees_mid,  src: assets/trees_mid.svg,  scene_xyz: [0, 0, -4500],  plate_size: [3840, 2160] }
+      - { id: trees_near, src: assets/trees_near.svg, scene_xyz: [0, 0, -2500],  plate_size: [3840, 2160] }
+      - { id: foreground, src: assets/leaves_fg.svg,  scene_xyz: [0, 0, -500],   plate_size: [3840, 2160] }
+
+camera:
+  mode: drone
+  drone:
+    path:
+      kind: bezier
+      controls: [[0, 0, 0], [120, 20, -4000], [-80, -15, -8000], [0, 0, -11000]]
+      duration_s: 2.0
+    poi_lookahead_s: 0.55
+    spring_halflife_s: 0.18
+    noise: { z_amp: 18, xy_amp: 5, hz: 0.6 }
+    bank_from_velocity: 0.35
+
+masks: []
+
+post:
+  global:
+    vignette: { strength: 0.5, radius: 0.85 }
+    grain:    { sigma: 3 }
+    fisheye:  { k1: 0.18, k2: 0.03 }

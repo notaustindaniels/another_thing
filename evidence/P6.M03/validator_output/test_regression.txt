@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /Users/austin/parallax-skill/.conda-env/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/austin/parallax-skill
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.13.0
+collecting ... collected 19 items
+
+tests/test_regression.py::TestGoldenHashFiles::test_golden_dir_exists PASSED [  5%]
+tests/test_regression.py::TestGoldenHashFiles::test_sha256_file_present[example_a] PASSED [ 10%]
+tests/test_regression.py::TestGoldenHashFiles::test_sha256_file_present[example_b] PASSED [ 15%]
+tests/test_regression.py::TestGoldenHashFiles::test_sha256_file_present[example_c] PASSED [ 21%]
+tests/test_regression.py::TestGoldenHashFiles::test_sha256_file_is_64_hex_chars[example_a] PASSED [ 26%]
+tests/test_regression.py::TestGoldenHashFiles::test_sha256_file_is_64_hex_chars[example_b] PASSED [ 31%]
+tests/test_regression.py::TestGoldenHashFiles::test_sha256_file_is_64_hex_chars[example_c] PASSED [ 36%]
+tests/test_regression.py::TestGoldenHashFiles::test_meta_json_present[example_a] PASSED [ 42%]
+tests/test_regression.py::TestGoldenHashFiles::test_meta_json_present[example_b] PASSED [ 47%]
+tests/test_regression.py::TestGoldenHashFiles::test_meta_json_present[example_c] PASSED [ 52%]
+tests/test_regression.py::TestGoldenHashFiles::test_canonical_yaml_present[example_a] PASSED [ 57%]
+tests/test_regression.py::TestGoldenHashFiles::test_canonical_yaml_present[example_b] PASSED [ 63%]
+tests/test_regression.py::TestGoldenHashFiles::test_canonical_yaml_present[example_c] PASSED [ 68%]
+tests/test_regression.py::TestRegressionByteIdentical::test_example_a_byte_identical PASSED [ 73%]
+tests/test_regression.py::TestRegressionByteIdentical::test_example_b_byte_identical PASSED [ 78%]
+tests/test_regression.py::TestRegressionByteIdentical::test_example_c_byte_identical PASSED [ 84%]
+tests/test_regression.py::TestRenderDeterminismLocal::test_deterministic_double_render[example_a] PASSED [ 89%]
+tests/test_regression.py::TestRenderDeterminismLocal::test_deterministic_double_render[example_b] PASSED [ 94%]
+tests/test_regression.py::TestRenderDeterminismLocal::test_deterministic_double_render[example_c] PASSED [100%]
+
+======================== 19 passed in 140.22s (0:02:20) ========================

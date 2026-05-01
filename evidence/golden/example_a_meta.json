@@ -1,0 +1,18 @@
+{
+  "id": "example_a",
+  "description": "\u00a711.4.1 \u2014 drone-FPV forest flythrough",
+  "storyboard": "tests/storyboards/example_a.yaml",
+  "scene_yaml": "tests/scenes/canonical_a.yaml",
+  "resolution": [
+    192,
+    108
+  ],
+  "fps": 10,
+  "duration_s": 2.0,
+  "seed": 10001,
+  "render_time_s": 32.396,
+  "mp4_size_bytes": 120355,
+  "sha256": "7f4f189064f880a739974486d195503e403f2517c720d08352d6b91b6403d1b3",
+  "generated_at": "2026-05-01T17:31:48Z",
+  "spec_anchor": "\u00a77"
+}
