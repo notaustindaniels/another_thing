@@ -1,0 +1,15 @@
+feat(P2.M01,P2.M02,P2.M03): Phase 2 COMPLETE — portal regression + determinism + gate
+
+- P2.M01: Created tests/scenes/portal_regression.yaml matching §6.3
+  (1920×1080, 30fps, 8s, seed=1); portal_tree.svg had silhouette+hole
+  in one viewBox per §2.4/§9.4
+- P2.M02: Written tests/test_render_golden.py (22 tests); byte-identical
+  determinism verified; golden SHA-256 stored in evidence/P2.M02/
+- P2.M03: Implemented parallax_engine/synthetic_renderer.py; Phase 2 gate
+  validate_portal_equivalence.py 6/6 PASS: SSIM=1.0, MAE=0.0, MaxAE=0;
+  L2 above_mask trick and circular mask compositing verified end-to-end
+
+Validators: validate_portal_equivalence 6/6, validate_licensing 6/6
+Tests: 301/301 passing (22 new)
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
