@@ -337,9 +337,9 @@
         "P2.M02",
         "P2.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P3.M01/",
+      "notes": "Implemented auth.py (configure_credentials per §3.5), observability.py (pre/post tool hooks + ObservabilityHooks class, append-only JSONL), state.py (write_checkpoint/read_checkpoint with atomic write, is_phase_done, completed_phases, reset_checkpoint). All stdlib only — no new dependencies. 62 new tests, 363 total passing."
     },
     {
       "id": "P3.M02",
