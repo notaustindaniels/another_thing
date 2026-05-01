@@ -1,0 +1,11 @@
+{
+  "milestone": "P1.M02",
+  "session": 1,
+  "timestamp": "2026-04-30T23:00:00",
+  "validation_results": {
+    "validate_projection": "PASS — 11/11 tests passed",
+    "validate_licensing": "PASS — 6/6 checks passed"
+  },
+  "api_note": "project_points implements the validator's locked API (inner perspective-divide). project_world_points implements full SPEC.md §2.1 pipeline with world-to-camera rotation.",
+  "numpy_note": "numpy 1.26.4 copied into .conda-env/lib/python3.11/site-packages/ since pip is blocked by proxy. parallax_engine.pth adds project root to sys.path."
+}

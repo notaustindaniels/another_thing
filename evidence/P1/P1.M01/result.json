@@ -1,0 +1,12 @@
+{
+  "milestone": "P1.M01",
+  "session": 1,
+  "timestamp": "2026-04-30T22:38:00",
+  "validation_results": {
+    "validate_scaffold": "PASS — all 8 checks clean",
+    "validate_licensing": "PASS — 6/6 checks passed (noise=unrecognized/not-forbidden)"
+  },
+  "git_commit": "e43334e",
+  "ffmpeg": "libopenh264=True, gpl_encoders=False",
+  "notes": "Initial scaffold. pyproject.toml with allowed deps only. init.sh executable and idempotent."
+}
