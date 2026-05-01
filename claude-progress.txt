@@ -817,3 +817,78 @@ No new ambiguities this session. Ambiguity 7 remains resolved.
 - init.sh fails due to pip proxy error (network blocked in session). This is a
   network issue, not a code issue. The .conda-env is pre-built and fully functional.
   The init.sh failure does not affect the build — all dependencies are installed.
+
+---
+
+## Session 11 (2026-05-01)
+
+Worked: P4_5.M01 — parallax_engine/director/schema.py — Pydantic v2 storyboard models; three example storyboards validate
+Status: passed
+Evidence: evidence/P4_5.M01/
+Commit: 1397063
+
+Implementation notes:
+
+1. ORIENTATION: init.sh fails with pip proxy error (network blocked) — same as Session 10.
+   This is not a code issue. All 569 prior tests pass (regression check clean).
+
+2. STATE: parallax_engine/director/schema.py, tests/storyboards/*.yaml, and
+   parallax_engine/director/schema.json already existed from prior work (prior session
+   created them but didn't mark the milestone passing). The milestone was correctly
+   `passes: false` because the pytest test file was missing.
+
+3. WHAT WAS MISSING: tests/test_director_schema.py — the pytest CI gate that validates
+   the three YAML examples and tests known-bad storyboards. This is explicitly called out
+   in acceptance criteria: "tests/storyboards/*.yaml files checked in; pytest validates them."
+
+4. CREATED tests/test_director_schema.py (86 tests, 7 classes):
+   - TestExampleA (15 tests): §11.4.1 forest flythrough — title, duration, scene count,
+     arc, palette_progression=warming, hard_rules, camera_intent, transition_in, etc.
+   - TestExampleB (12 tests): §11.4.2 4-biome explainer — 4 scenes, red_bird casting,
+     null canonical_svg at director time, biome_wipe pairing, motif_evolution.
+   - TestExampleC (11 tests): §11.4.3 portal transition — 2 scenes, figure casting,
+     portal_reveal pairing, callback_to_scene=1, music_arc=silent, sfx_notes.
+   - TestKnownBadStoryboards (16 tests): ValidationError raised for: missing fields,
+     biome_wipe pairing mismatch, portal_reveal pairing mismatch, non-dense indices,
+     invalid camera_intent/transition_type enums, custom structure without note,
+     custom_described palette without note, forward callback_to_scene, unknown casting id,
+     non-cut transition without duration_s, duration out of range, too few/many beats.
+   - TestJsonSchemaGeneration (6 tests): schema.json exists, valid JSON, has 'properties'
+     and 'required', model_json_schema() generates, save_json_schema() roundtrip.
+   - TestRoundTrip (7 tests): YAML → Storyboard → model_dump → re-parse for all 3 examples.
+   - TestStoryboardYamlFiles (15 tests): existence + schema conformance for each YAML.
+
+5. ALL ACCEPTANCE CRITERIA MET:
+   - Three §11.4 examples parse: ✓
+   - Known-bad storyboards caught: ✓ (16 test cases)
+   - JSON Schema generated and saved: ✓ (parallax_engine/director/schema.json, 28KB)
+   - tests/storyboards/*.yaml + pytest gate: ✓
+   - validate_licensing.py exits 0: ✓ (6/6)
+
+6. SPEC AMBIGUITY (already resolved, noted for record):
+   - BeatFunction: spec §11.3.3 lists 'turning_point' but §11.4.2 Example B uses 'turning'.
+     Both accepted as aliases (schema.py comment: "treated as alias for turning_point").
+   - density_curve: spec lists 'sparse|medium|dense|rising|falling|rising_then_falling'.
+     §11.4.2 uses 'steady' (not in spec list). Added 'steady' as alias for 'medium'.
+
+Next session should:
+1. Proceed to P4_5.M02: "director/prompt.py + director/agent.py — director invocation
+   (single + decomposed modes)". This is now unblocked (P4_5.M01 passes).
+
+2. For P4_5.M02:
+   - Read SPEC.md §11.5 (Director Agent) in full — single vs decomposed mode
+   - Read §11.5.3 (canonical director prompt) — use verbatim, parameterise brief+refs
+   - Read §11.9.1 (deterministic mode selection Python rule)
+   - Wire prompt caching for schema + examples block (stable prefix before variable brief)
+   - validation_commands: python tools/validate_licensing.py
+
+3. Key design decisions for P4_5.M02:
+   - `director_mode()` must be a deterministic Python function (not LLM-selected):
+     total_duration_s >= 60 OR structure == 'save_the_cat' → 'decomposed', else 'single'
+   - Single mode: one Opus call, returns YAML block, validate against Storyboard schema
+   - Decomposed mode: 4-step chain (brief-decomposer Sonnet, arc-architect Opus,
+     scene-architect Opus, continuity-checker Sonnet) per §11.5.1
+   - Prompt caching: schema JSON + 3 example storyboards form stable prefix
+   - Module layout: parallax_engine/director/prompt.py + director/agent.py
+
+4. REGRESSION: 569 tests pass as of session 11 start. Session 11 adds 86 more → 655 total.
