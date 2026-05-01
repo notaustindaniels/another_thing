@@ -828,9 +828,9 @@
       "blocked_by": [
         "P5.M01"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P5.M02/",
+      "notes": "Switched build backend from hatchling (unavailable, needs network) to setuptools (already installed). README.md rewritten with user-facing installation, FFmpeg LGPL setup, Skill registration, and CLI examples. validate_licensing 6/6 PASS."
     },
     {
       "id": "P5.M03",

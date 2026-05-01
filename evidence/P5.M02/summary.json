@@ -1,0 +1,16 @@
+{
+  "milestone_id": "P5.M02",
+  "title": "README.md installation and examples; pip install works",
+  "timestamp": "2026-05-01T00:00:00Z",
+  "git_commit": "e7b9c8d844001dfb4eab6c564b92d2dc6a157c8c",
+  "validators_passed": [
+    "validate_licensing"
+  ],
+  "acceptance_criteria_met": [
+    "pip install . --no-build-isolation installs parallax-engine 0.1.0 cleanly (network proxy blocks build dep re-download; --no-build-isolation uses already-installed setuptools 82.0.1)",
+    "parallax-engine render --help prints usage (confirmed)",
+    "README.md covers: installation (pip install parallax-engine), FFmpeg LGPL setup (macOS/Linux variants + verification), Skill registration (claude skill add ./skill), examples (forest flythrough, portal, harness brief)",
+    "validate_licensing.py exits 0 (6/6 PASS)"
+  ],
+  "notes": "Switched build backend from hatchling (unavailable, needs network) to setuptools (82.0.1 already installed). pip install . works with --no-build-isolation in air-gapped/proxy environment; standard pip install . works in normal network environments. Restored editable install for development. README.md fully rewritten with user-facing content: installation, FFmpeg LGPL setup, CLI usage, Skill registration, scene examples."
+}
