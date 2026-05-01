@@ -1,0 +1,39 @@
+{
+  "milestone_id": "P4_5.M01",
+  "title": "parallax_engine/director/schema.py — Pydantic v2 storyboard models; three example storyboards validate",
+  "timestamp": "2026-05-01T00:00:00Z",
+  "git_commit": "018888f181344bdc25957a9d95416d43371adac8",
+  "validators_passed": [
+    "validate_licensing.py"
+  ],
+  "pytest_results": {
+    "test_file": "tests/test_director_schema.py",
+    "total_tests": 86,
+    "passed": 86,
+    "failed": 0,
+    "duration_s": 0.48
+  },
+  "implementation_summary": {
+    "schema_py": "parallax_engine/director/schema.py — full Pydantic v2 schema (700 lines) covering all §11.3 sub-models: Storyboard, ProjectMeta, VisualVocabulary, Palette, LookReference, Arc, Beat, CastingEntry, PaletteLocked, SceneEntry, TransitionSpec, PaletteOverride, Continuity, AudioIntent",
+    "schema_json": "parallax_engine/director/schema.json — 28KB JSON Schema generated via model_json_schema()",
+    "storyboards": "tests/storyboards/example_a.yaml, example_b.yaml, example_c.yaml — three canonical storyboards from §11.4",
+    "test_file": "tests/test_director_schema.py — 86 tests across 7 test classes",
+    "cross_field_validators": [
+      "_validate_scene_indices_dense: scene indices must be 1-based and contiguous",
+      "_validate_transition_pairing: biome_wipe and portal_reveal must be paired across scene boundaries",
+      "_validate_callback_scene_refs: callback_to_scene must be < scene.index",
+      "_validate_casting_refs_exist: must_feature/must_avoid reference valid casting ids",
+      "_validate_last_scene_no_transition_out: last scene biome_wipe/portal_reveal raises if no next scene",
+      "VisualVocabulary._require_progression_note: custom_described requires palette_progression_note",
+      "Arc._require_structure_note: custom structure requires structure_note",
+      "TransitionSpec._require_duration_for_non_cuts: non-cut transitions require duration_s"
+    ]
+  },
+  "acceptance_criteria_met": {
+    "three_examples_parse": true,
+    "catches_bad_storyboards": true,
+    "json_schema_generated": true,
+    "yaml_files_in_ci": true,
+    "validate_licensing_exits_0": true
+  }
+}

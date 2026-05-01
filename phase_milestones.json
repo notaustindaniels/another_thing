@@ -598,9 +598,9 @@
         "P4.M03",
         "P4.M04"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4_5.M01/",
+      "notes": "Implemented parallax_engine/director/schema.py (Pydantic v2, 700 lines, 8 cross-field validators). Generated schema.json (28KB). Three canonical storyboard YAMLs in tests/storyboards/. Added tests/test_director_schema.py with 86 tests across 7 classes. All acceptance criteria met: three §11.4 examples parse, known-bad storyboards rejected, JSON Schema generated, pytest CI gate in place, licensing clean."
     },
     {
       "id": "P4_5.M02",

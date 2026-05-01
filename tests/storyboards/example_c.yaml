@@ -1,0 +1,120 @@
+storyboard_version: "1.0"
+project:
+  title: "The Door"
+  logline: "A figure walks into a doorway and emerges in a different world."
+  theme: "transformation"
+  summary: >
+    Eight seconds, two scenes, one portal mask. Scene 1 is a grey corridor;
+    a silhouette walks toward a tall doorway. The doorway's interior is the
+    portal — a world-anchored mask that, as the figure passes through, reveals
+    the second stack: a sunlit field. The transition is not a wipe; it is an
+    in-frame mask reveal. Scene 2 is the figure on the other side, in a wholly
+    different palette and shape language. The shock is the contrast.
+  intended_platform: reels
+  aspect_ratio: "9:16"
+  target_fps: 30
+  total_duration_s: 8.0
+
+visual_vocabulary:
+  palette:
+    primary: ["#2a2a2e", "#3f3f44", "#e8d098"]
+    secondary: ["#f5e9c4"]
+    neutrals: ["#000000", "#fafafa"]
+    forbidden: []
+  palette_progression: custom_described
+  palette_progression_note: >
+    Scene 1 is monochrome cool grey. Scene 2 is warm, saturated, golden.
+    The mask reveal IS the palette transition.
+  shape_language: angular
+  shape_language_note: "Hard architectural geometry on the corridor side; organic on the field side."
+  density_curve: falling
+  lighting_mood: low_key
+  time_of_day: abstract
+  weather: none_specified
+  look_references:
+    - name: "Liminal architectural photography"
+      note: "Corridor side; flat overhead light, hard shadows."
+
+arc:
+  structure: portal_reveal
+  beats:
+    - id: approach
+      label: "approach"
+      function: hook
+      narrative_note: "Figure walks toward doorway; we see only their back."
+      target_time_s: 0.0
+      target_scenes: [1]
+    - id: cross
+      label: "the threshold"
+      function: turning_point
+      narrative_note: "Figure enters the doorway; mask reveals second world."
+      target_time_s: 4.0
+      target_scenes: [1, 2]
+    - id: arrival
+      label: "arrival"
+      function: release
+      narrative_note: "Figure stands in golden field; corridor world is gone."
+      target_time_s: 5.0
+      target_scenes: [2]
+
+casting:
+  - id: figure
+    kind: character
+    canonical_description: >
+      A standing human silhouette, full-body, seen from behind. Solid black
+      fill, no internal detail. Proportions: head ~1/8 of total height, slight
+      shoulder width, neutral standing posture. Walks with subtle vertical bob
+      when animated. Used in both scenes; identical silhouette, identical fill.
+    role_in_story: "The traveller; our point of identification."
+    palette_locked:
+      body: "#000000"
+      forbidden: ["#ffffff"]
+    forbidden_changes:
+      - "must remain pure black silhouette in both scenes; no detail emerges"
+    canonical_svg: null
+    first_appearance_scene: 1
+
+scenes:
+  - index: 1
+    duration_s: 4.0
+    logline: "Figure walks down corridor toward a tall, glowing doorway."
+    emotional_function: establishing
+    camera_intent: cinematic_truck_in
+    transition_in:
+      type: fade_from_black
+      duration_s: 0.5
+    transition_out:
+      type: portal_reveal
+      duration_s: 0.5
+      emotional_intent: "rupture, revelation"
+      paired_scene: 2
+    must_feature: ["figure"]
+    pacing: steady
+    motif_features: ["doorway", "overhead light cone"]
+
+  - index: 2
+    duration_s: 4.0
+    logline: "Figure stands in a golden field; everything is warm and open."
+    emotional_function: release
+    camera_intent: drone_fpv_pullout
+    transition_in:
+      type: portal_reveal
+      duration_s: 0.5
+      paired_scene: 1
+    must_feature: ["figure"]
+    pacing: held
+    motif_features: ["wheat", "long horizon", "sun low on left"]
+    callback_to_scene: 1
+    director_notes: "Figure's silhouette must occupy the same screen position it occupied at the moment of mask reveal in scene 1."
+
+continuity:
+  hard_rules:
+    - "FIGURE silhouette must be byte-identical SVG in both scenes."
+    - "NO color from scene 1's primary palette may appear in scene 2 (and vice versa)."
+    - "THE doorway's geometry and the portal mask must be visually congruent."
+
+audio_intent:
+  music_arc: silent
+  sfx_notes:
+    - "footsteps in scene 1; wind in scene 2; the moment of crossing is silent"
+  vo_intent: none

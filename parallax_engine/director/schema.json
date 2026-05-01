@@ -1,0 +1,1190 @@
+{
+  "$defs": {
+    "Arc": {
+      "additionalProperties": false,
+      "description": "Dramatic structure (\u00a711.3.3).",
+      "properties": {
+        "beats": {
+          "items": {
+            "$ref": "#/$defs/Beat"
+          },
+          "maxItems": 8,
+          "minItems": 2,
+          "title": "Beats",
+          "type": "array"
+        },
+        "structure": {
+          "enum": [
+            "three_act",
+            "save_the_cat",
+            "establish_disrupt_resolve",
+            "biome_tour",
+            "portal_reveal",
+            "custom"
+          ],
+          "title": "Structure",
+          "type": "string"
+        },
+        "structure_note": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required when structure == 'custom'",
+          "title": "Structure Note"
+        }
+      },
+      "required": [
+        "structure",
+        "beats"
+      ],
+      "title": "Arc",
+      "type": "object"
+    },
+    "AudioIntent": {
+      "additionalProperties": false,
+      "description": "Audio intent \u2014 captured but not generated in v1 (\u00a711.3.7).",
+      "properties": {
+        "music_arc": {
+          "anyOf": [
+            {
+              "enum": [
+                "ambient",
+                "building",
+                "sparse",
+                "dense",
+                "silent",
+                "call_response"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Music Arc"
+        },
+        "per_scene": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/AudioPerScene"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Per Scene"
+        },
+        "sfx_notes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sfx Notes"
+        },
+        "vo_intent": {
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "sparse_narration",
+                "dialogue",
+                "textless"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vo Intent"
+        }
+      },
+      "title": "AudioIntent",
+      "type": "object"
+    },
+    "AudioPerScene": {
+      "additionalProperties": false,
+      "description": "Per-scene audio mood note (\u00a711.3.7).",
+      "properties": {
+        "mood": {
+          "title": "Mood",
+          "type": "string"
+        },
+        "scene_index": {
+          "minimum": 1,
+          "title": "Scene Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scene_index",
+        "mood"
+      ],
+      "title": "AudioPerScene",
+      "type": "object"
+    },
+    "Beat": {
+      "additionalProperties": false,
+      "description": "A dramatic beat within the arc (\u00a711.3.3).",
+      "properties": {
+        "function": {
+          "enum": [
+            "hook",
+            "establish",
+            "rising",
+            "turning_point",
+            "turning",
+            "midpoint",
+            "escalation",
+            "climax",
+            "release",
+            "coda"
+          ],
+          "title": "Function",
+          "type": "string"
+        },
+        "id": {
+          "description": "snake_case unique id",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 40,
+          "title": "Label",
+          "type": "string"
+        },
+        "narrative_note": {
+          "description": "One sentence: what this beat does",
+          "title": "Narrative Note",
+          "type": "string"
+        },
+        "target_scenes": {
+          "description": "1-based scene indices this beat covers",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Target Scenes",
+          "type": "array"
+        },
+        "target_time_s": {
+          "description": "When this beat lands (seconds from start)",
+          "minimum": 0.0,
+          "title": "Target Time S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "function",
+        "narrative_note",
+        "target_time_s",
+        "target_scenes"
+      ],
+      "title": "Beat",
+      "type": "object"
+    },
+    "CastingEntry": {
+      "additionalProperties": false,
+      "description": "A recurring visual element in the casting bible (\u00a711.3.4).",
+      "properties": {
+        "allowed_variations": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Allowed Variations"
+        },
+        "appearance_evolution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "One sentence describing how the cast member evolves",
+          "title": "Appearance Evolution"
+        },
+        "canonical_description": {
+          "description": "2\u20134 self-contained sentences; fully describes the asset",
+          "title": "Canonical Description",
+          "type": "string"
+        },
+        "canonical_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "null at director time; filled by asset-generator on first production",
+          "title": "Canonical Svg"
+        },
+        "first_appearance_scene": {
+          "description": "1-based scene index",
+          "minimum": 1,
+          "title": "First Appearance Scene",
+          "type": "integer"
+        },
+        "forbidden_changes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Forbidden Changes"
+        },
+        "id": {
+          "description": "snake_case unique id within project",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "character",
+            "prop",
+            "motif",
+            "environment_element"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "palette_locked": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PaletteLocked"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "role_in_story": {
+          "description": "One sentence role",
+          "title": "Role In Story",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "canonical_description",
+        "role_in_story",
+        "first_appearance_scene"
+      ],
+      "title": "CastingEntry",
+      "type": "object"
+    },
+    "Continuity": {
+      "additionalProperties": false,
+      "description": "Global continuity rules (\u00a711.3.6).",
+      "properties": {
+        "callbacks": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Callbacks"
+        },
+        "hard_rules": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hard Rules"
+        },
+        "motif_evolution": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/MotifEvolution"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Motif Evolution"
+        },
+        "palette_progression_explicit": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/PaletteProgEntry"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Palette Progression Explicit"
+        }
+      },
+      "title": "Continuity",
+      "type": "object"
+    },
+    "LookReference": {
+      "additionalProperties": false,
+      "description": "A named visual style reference (\u00a711.3.2).",
+      "properties": {
+        "name": {
+          "description": "Named visual style, e.g. 'Studio Ghibli pastoral'",
+          "title": "Name",
+          "type": "string"
+        },
+        "note": {
+          "description": "One sentence describing relevance",
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "note"
+      ],
+      "title": "LookReference",
+      "type": "object"
+    },
+    "MotifEvolution": {
+      "additionalProperties": false,
+      "description": "Evolution of a single cast member across scenes (\u00a711.3.6).",
+      "properties": {
+        "cast_id": {
+          "title": "Cast Id",
+          "type": "string"
+        },
+        "stages": {
+          "items": {
+            "$ref": "#/$defs/MotifStage"
+          },
+          "minItems": 1,
+          "title": "Stages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cast_id",
+        "stages"
+      ],
+      "title": "MotifEvolution",
+      "type": "object"
+    },
+    "MotifStage": {
+      "additionalProperties": false,
+      "description": "One stage of a motif evolution arc (\u00a711.3.6).",
+      "properties": {
+        "scenes": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Scenes",
+          "type": "array"
+        },
+        "state": {
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scenes",
+        "state"
+      ],
+      "title": "MotifStage",
+      "type": "object"
+    },
+    "Palette": {
+      "additionalProperties": false,
+      "description": "Color palette block inside VisualVocabulary (\u00a711.3.2).",
+      "properties": {
+        "forbidden": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Colors that must NEVER appear",
+          "title": "Forbidden"
+        },
+        "neutrals": {
+          "description": "1\u20134 hex colors used for text/whitespace",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Neutrals",
+          "type": "array"
+        },
+        "primary": {
+          "description": "2\u20134 dominant hex color tones",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 2,
+          "title": "Primary",
+          "type": "array"
+        },
+        "secondary": {
+          "description": "1\u20133 accent hex colors",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Secondary",
+          "type": "array"
+        }
+      },
+      "required": [
+        "primary",
+        "secondary",
+        "neutrals"
+      ],
+      "title": "Palette",
+      "type": "object"
+    },
+    "PaletteLocked": {
+      "additionalProperties": true,
+      "description": "Locked color constraints for a cast member (\u00a711.3.4).",
+      "properties": {
+        "forbidden": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hex colors that may NOT appear on this cast member",
+          "title": "Forbidden"
+        }
+      },
+      "title": "PaletteLocked",
+      "type": "object"
+    },
+    "PaletteOverride": {
+      "additionalProperties": false,
+      "description": "Per-scene palette override (\u00a711.3.5).",
+      "properties": {
+        "primary": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary"
+        },
+        "reason": {
+          "description": "Required: why this scene overrides the palette",
+          "title": "Reason",
+          "type": "string"
+        },
+        "secondary": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Secondary"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "title": "PaletteOverride",
+      "type": "object"
+    },
+    "PaletteProgEntry": {
+      "additionalProperties": false,
+      "description": "Explicit per-scene palette progression entry (\u00a711.3.6).",
+      "properties": {
+        "palette_shift": {
+          "title": "Palette Shift",
+          "type": "string"
+        },
+        "scene_index": {
+          "minimum": 1,
+          "title": "Scene Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scene_index",
+        "palette_shift"
+      ],
+      "title": "PaletteProgEntry",
+      "type": "object"
+    },
+    "ProjectMeta": {
+      "additionalProperties": false,
+      "description": "Top-level project metadata block (\u00a711.3.1).",
+      "properties": {
+        "aspect_ratio": {
+          "enum": [
+            "9:16",
+            "1:1",
+            "16:9",
+            "4:5",
+            "2.39:1"
+          ],
+          "title": "Aspect Ratio",
+          "type": "string"
+        },
+        "audience_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audience Note"
+        },
+        "intended_platform": {
+          "enum": [
+            "tiktok",
+            "reels",
+            "youtube_short",
+            "square_social",
+            "wide_landscape",
+            "custom"
+          ],
+          "title": "Intended Platform",
+          "type": "string"
+        },
+        "logline": {
+          "maxLength": 200,
+          "title": "Logline",
+          "type": "string"
+        },
+        "summary": {
+          "description": "1 paragraph, 60\u2013400 words",
+          "title": "Summary",
+          "type": "string"
+        },
+        "target_fps": {
+          "enum": [
+            24,
+            30,
+            60
+          ],
+          "title": "Target Fps",
+          "type": "integer"
+        },
+        "theme": {
+          "description": "1\u20133 words, e.g. 'wonder', 'loneliness'",
+          "title": "Theme",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 80,
+          "title": "Title",
+          "type": "string"
+        },
+        "total_duration_s": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 300.0,
+          "title": "Total Duration S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "title",
+        "logline",
+        "theme",
+        "summary",
+        "intended_platform",
+        "aspect_ratio",
+        "target_fps",
+        "total_duration_s"
+      ],
+      "title": "ProjectMeta",
+      "type": "object"
+    },
+    "SceneEntry": {
+      "additionalProperties": false,
+      "description": "One scene in the storyboard's scene list (\u00a711.3.5).",
+      "properties": {
+        "callback_to_scene": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "1-based scene index this scene visually echoes",
+          "title": "Callback To Scene"
+        },
+        "camera_intent": {
+          "enum": [
+            "drone_fpv_forward",
+            "drone_fpv_orbit",
+            "drone_fpv_pullout",
+            "cinematic_pan_left",
+            "cinematic_pan_right",
+            "cinematic_truck_in",
+            "cinematic_pullback",
+            "static_held",
+            "iris_in",
+            "iris_out",
+            "match_cut_setup",
+            "portal_reveal",
+            "biome_wipe_donor",
+            "biome_wipe_receiver"
+          ],
+          "title": "Camera Intent",
+          "type": "string"
+        },
+        "director_notes": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Director Notes"
+        },
+        "duration_s": {
+          "exclusiveMinimum": 0.0,
+          "title": "Duration S",
+          "type": "number"
+        },
+        "emotional_function": {
+          "enum": [
+            "establishing",
+            "rising",
+            "escalation",
+            "reveal",
+            "turning",
+            "climax",
+            "release",
+            "denouement",
+            "coda",
+            "bridge"
+          ],
+          "title": "Emotional Function",
+          "type": "string"
+        },
+        "index": {
+          "description": "1-based, dense, no gaps",
+          "minimum": 1,
+          "title": "Index",
+          "type": "integer"
+        },
+        "logline": {
+          "maxLength": 160,
+          "title": "Logline",
+          "type": "string"
+        },
+        "motif_features": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Non-cast motifs: 'rain on glass', 'long shadow', etc.",
+          "title": "Motif Features"
+        },
+        "must_avoid": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Casting ids that must NOT appear in this scene",
+          "title": "Must Avoid"
+        },
+        "must_feature": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Casting ids that must appear in this scene",
+          "title": "Must Feature"
+        },
+        "pacing": {
+          "enum": [
+            "slow_burn",
+            "steady",
+            "rising",
+            "rapid",
+            "held",
+            "breath"
+          ],
+          "title": "Pacing",
+          "type": "string"
+        },
+        "palette_override": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PaletteOverride"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "transition_in": {
+          "$ref": "#/$defs/TransitionSpec"
+        },
+        "transition_out": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransitionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required on all scenes except the last"
+        }
+      },
+      "required": [
+        "index",
+        "duration_s",
+        "logline",
+        "emotional_function",
+        "camera_intent",
+        "transition_in",
+        "pacing"
+      ],
+      "title": "SceneEntry",
+      "type": "object"
+    },
+    "TransitionSpec": {
+      "additionalProperties": false,
+      "description": "A transition_in or transition_out specification (\u00a711.3.5.2).",
+      "properties": {
+        "duration_s": {
+          "anyOf": [
+            {
+              "maximum": 2.0,
+              "minimum": 0.1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required for non-cut transitions; 0.1 \u2264 x \u2264 2.0",
+          "title": "Duration S"
+        },
+        "emotional_intent": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "One phrase describing the emotional quality of the transition",
+          "title": "Emotional Intent"
+        },
+        "paired_scene": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "1-based scene index this transition is paired with",
+          "title": "Paired Scene"
+        },
+        "type": {
+          "enum": [
+            "hard_cut",
+            "fade_from_black",
+            "fade_from_white",
+            "dissolve",
+            "biome_wipe",
+            "portal_reveal",
+            "iris_in",
+            "iris_out",
+            "match_cut",
+            "j_cut",
+            "l_cut"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "TransitionSpec",
+      "type": "object"
+    },
+    "VisualVocabulary": {
+      "additionalProperties": false,
+      "description": "Visual grammar of the piece \u2014 the 'color script in YAML' (\u00a711.3.2).",
+      "properties": {
+        "density_curve": {
+          "enum": [
+            "sparse",
+            "medium",
+            "steady",
+            "dense",
+            "rising",
+            "falling",
+            "rising_then_falling"
+          ],
+          "title": "Density Curve",
+          "type": "string"
+        },
+        "lighting_mood": {
+          "enum": [
+            "high_key",
+            "low_key",
+            "natural",
+            "neon",
+            "golden_hour",
+            "overcast",
+            "chiaroscuro",
+            "flat"
+          ],
+          "title": "Lighting Mood",
+          "type": "string"
+        },
+        "look_references": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/LookReference"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Look References"
+        },
+        "palette": {
+          "$ref": "#/$defs/Palette"
+        },
+        "palette_progression": {
+          "enum": [
+            "static",
+            "warming",
+            "cooling",
+            "desaturating",
+            "saturating",
+            "custom_described"
+          ],
+          "title": "Palette Progression",
+          "type": "string"
+        },
+        "palette_progression_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required when palette_progression == 'custom_described'",
+          "title": "Palette Progression Note"
+        },
+        "reference_image_uris": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Paths under workspace/references/; URIs only, never image bytes",
+          "title": "Reference Image Uris"
+        },
+        "shape_language": {
+          "enum": [
+            "angular",
+            "rounded",
+            "organic",
+            "geometric",
+            "mixed"
+          ],
+          "title": "Shape Language",
+          "type": "string"
+        },
+        "shape_language_note": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional clarification of shape language, \u2264 200 chars",
+          "title": "Shape Language Note"
+        },
+        "time_of_day": {
+          "enum": [
+            "dawn",
+            "morning",
+            "noon",
+            "afternoon",
+            "dusk",
+            "night",
+            "abstract"
+          ],
+          "title": "Time Of Day",
+          "type": "string"
+        },
+        "weather": {
+          "anyOf": [
+            {
+              "enum": [
+                "clear",
+                "overcast",
+                "rain",
+                "snow",
+                "fog",
+                "wind",
+                "none_specified"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weather"
+        }
+      },
+      "required": [
+        "palette",
+        "palette_progression",
+        "shape_language",
+        "density_curve",
+        "lighting_mood",
+        "time_of_day"
+      ],
+      "title": "VisualVocabulary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Full storyboard artifact (\u00a711.3.1).\n\nWritten by the Director agent; consumed read-only by Scene Designers.\nValidated by Pydantic on every read.",
+  "properties": {
+    "arc": {
+      "$ref": "#/$defs/Arc"
+    },
+    "audio_intent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AudioIntent"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "casting": {
+      "items": {
+        "$ref": "#/$defs/CastingEntry"
+      },
+      "title": "Casting",
+      "type": "array"
+    },
+    "continuity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Continuity"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "director_notes": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Director Notes"
+    },
+    "project": {
+      "$ref": "#/$defs/ProjectMeta"
+    },
+    "scenes": {
+      "items": {
+        "$ref": "#/$defs/SceneEntry"
+      },
+      "minItems": 1,
+      "title": "Scenes",
+      "type": "array"
+    },
+    "storyboard_version": {
+      "description": "Semver of this schema, e.g. '1.0'",
+      "title": "Storyboard Version",
+      "type": "string"
+    },
+    "visual_vocabulary": {
+      "$ref": "#/$defs/VisualVocabulary"
+    }
+  },
+  "required": [
+    "storyboard_version",
+    "project",
+    "visual_vocabulary",
+    "arc",
+    "scenes"
+  ],
+  "title": "Storyboard",
+  "type": "object"
+}

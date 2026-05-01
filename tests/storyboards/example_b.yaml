@@ -1,0 +1,173 @@
+storyboard_version: "1.0"
+project:
+  title: "Four Climates"
+  logline: "A small bird flies through four biomes — desert, forest, tundra, ocean — and each transition is a wipe."
+  theme: "interconnection"
+  summary: >
+    A 24-second educational vignette. Four 5-second scenes, each in a distinct
+    biome, joined by 1-second biome wipes. A single recurring character — a
+    small red bird — flies through all four. The piece's argument is visual:
+    the same creature persists through wildly different worlds. Cool, calm,
+    pedagogical tone.
+  intended_platform: tiktok
+  aspect_ratio: "9:16"
+  target_fps: 30
+  total_duration_s: 24.0
+
+visual_vocabulary:
+  palette:
+    primary: ["#e8d8a8", "#3a6b4f", "#cfe6f0", "#1a3a5a"]
+    secondary: ["#c84032"]                 # reserved for the bird
+    neutrals: ["#0a0a0a", "#fafafa"]
+    forbidden: []
+  palette_progression: custom_described
+  palette_progression_note: >
+    Each scene has its own dominant primary; the bird's #c84032 persists
+    unchanged across all four for visual anchoring.
+  shape_language: rounded
+  shape_language_note: "Friendly, non-threatening; geometric primitives ok for terrain, organic for living things."
+  density_curve: steady
+  lighting_mood: natural
+  time_of_day: noon
+  weather: clear
+  look_references:
+    - name: "Heygen explainer"
+      note: "Bold flat shapes, clean parallax planes, high contrast."
+
+arc:
+  structure: biome_tour
+  beats:
+    - id: introduce
+      label: "desert"
+      function: establish
+      narrative_note: "The bird enters frame in arid landscape."
+      target_time_s: 0.0
+      target_scenes: [1]
+    - id: green
+      label: "forest"
+      function: rising
+      narrative_note: "Wipe to lush forest; same bird, new context."
+      target_time_s: 6.0
+      target_scenes: [2]
+    - id: cold
+      label: "tundra"
+      function: turning
+      narrative_note: "Wipe to icy tundra; bird is small against vastness."
+      target_time_s: 12.0
+      target_scenes: [3]
+    - id: blue
+      label: "ocean"
+      function: release
+      narrative_note: "Wipe to ocean; bird is reflected in water and ascends."
+      target_time_s: 18.0
+      target_scenes: [4]
+
+casting:
+  - id: red_bird
+    kind: character
+    canonical_description: >
+      A small songbird, simplified to two overlapping rounded shapes for body
+      and head. Solid #c84032 fill across the entire silhouette. Black dot eye.
+      Wing rendered as two short curved strokes on the side. No beak detail,
+      no feet. Designed for clean visibility against any biome background.
+    role_in_story: "The thread that connects all four biomes."
+    palette_locked:
+      body: "#c84032"
+      accent: "#000000"
+      forbidden: ["#0000ff", "#00ff00"]
+    allowed_variations:
+      - "may be larger or smaller in frame"
+      - "may be reflected in water (scene 4)"
+    forbidden_changes:
+      - "color must always be exactly #c84032; no shading, no gradients"
+      - "must always be a solid silhouette; never an outline"
+    canonical_svg: null
+    first_appearance_scene: 1
+    appearance_evolution: "starts mid-frame in scene 1; grows progressively smaller in scenes 2-3; grows large again in scene 4 ascent"
+
+scenes:
+  - index: 1
+    duration_s: 5.0
+    logline: "Red bird crosses a sand-dune horizon."
+    emotional_function: establishing
+    camera_intent: cinematic_pan_right
+    transition_in:
+      type: fade_from_white
+      duration_s: 0.5
+      emotional_intent: "bright, neutral arrival"
+    transition_out:
+      type: biome_wipe
+      duration_s: 1.0
+      emotional_intent: "geographic transit"
+      paired_scene: 2
+    must_feature: ["red_bird"]
+    pacing: steady
+    motif_features: ["heat shimmer", "long shadow"]
+
+  - index: 2
+    duration_s: 5.0
+    logline: "Red bird threads between forest canopies."
+    emotional_function: rising
+    camera_intent: cinematic_pan_right
+    transition_in:
+      type: biome_wipe
+      duration_s: 1.0
+      paired_scene: 1
+    transition_out:
+      type: biome_wipe
+      duration_s: 1.0
+      paired_scene: 3
+    must_feature: ["red_bird"]
+    pacing: steady
+    motif_features: ["dappled light", "leaf flutter"]
+
+  - index: 3
+    duration_s: 5.0
+    logline: "Red bird, tiny, against tundra vastness."
+    emotional_function: turning
+    camera_intent: cinematic_pullback
+    transition_in:
+      type: biome_wipe
+      duration_s: 1.0
+      paired_scene: 2
+    transition_out:
+      type: biome_wipe
+      duration_s: 1.0
+      paired_scene: 4
+    must_feature: ["red_bird"]
+    pacing: held
+    motif_features: ["snow drift", "low sun"]
+    callback_to_scene: null
+
+  - index: 4
+    duration_s: 5.0
+    logline: "Red bird ascends from ocean, doubled by its reflection."
+    emotional_function: release
+    camera_intent: drone_fpv_pullout
+    transition_in:
+      type: biome_wipe
+      duration_s: 1.0
+      paired_scene: 3
+    must_feature: ["red_bird"]
+    pacing: rising
+    motif_features: ["water reflection", "rising arc"]
+    callback_to_scene: 1
+
+continuity:
+  motif_evolution:
+    - cast_id: red_bird
+      stages:
+        - scenes: [1, 2]
+          state: "mid-frame, ~10% of frame height"
+        - scenes: [3]
+          state: "tiny, ~3% of frame height, lost in scale"
+        - scenes: [4]
+          state: "growing, ascending arc, doubled by reflection"
+  hard_rules:
+    - "RED_BIRD must appear in every scene."
+    - "RED_BIRD's color must be exactly #c84032 in every frame."
+    - "NO other red object may appear anywhere in the project."
+
+audio_intent:
+  music_arc: ambient
+  vo_intent: none

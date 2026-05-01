@@ -1,0 +1,84 @@
+storyboard_version: "1.0"
+project:
+  title: "Through the Pines"
+  logline: "A breathless forward dive through a sun-shafted pine forest at dawn."
+  theme: "wonder"
+  summary: >
+    A single sustained drone-FPV push through a stylised pine forest. No characters,
+    no narrative beats in the traditional sense — the dramatic interest is the
+    progressive revelation of depth as parallax planes part to disclose a clearing
+    of golden light. Starts dim and tight, ends bright and open. One emotional
+    arc: anticipation resolving into awe.
+  intended_platform: youtube_short
+  aspect_ratio: "9:16"
+  target_fps: 30
+  total_duration_s: 10.0
+
+visual_vocabulary:
+  palette:
+    primary: ["#0e1a14", "#1f3a2e", "#3a6b4f"]
+    secondary: ["#f4c860", "#fff3c2"]
+    neutrals: ["#0a0a0a"]
+    forbidden: ["#ff0000", "#ff00ff"]
+  palette_progression: warming
+  shape_language: organic
+  shape_language_note: "Soft asymmetric pine silhouettes; no hard geometry."
+  density_curve: rising_then_falling
+  lighting_mood: chiaroscuro
+  time_of_day: dawn
+  weather: fog
+  look_references:
+    - name: "Studio Ghibli forest sequences"
+      note: "Layered foliage planes, god-rays, restrained color shifts."
+
+arc:
+  structure: establish_disrupt_resolve
+  beats:
+    - id: enter
+      label: "entering darkness"
+      function: hook
+      narrative_note: "We push through dense, near-silhouette foliage."
+      target_time_s: 0.0
+      target_scenes: [1]
+    - id: depth
+      label: "discovering depth"
+      function: rising
+      narrative_note: "Parallax planes part; light begins to filter through."
+      target_time_s: 4.0
+      target_scenes: [1]
+    - id: release
+      label: "the clearing"
+      function: release
+      narrative_note: "Forest opens into a sun-flooded clearing."
+      target_time_s: 8.0
+      target_scenes: [1]
+
+casting: []        # no recurring characters; single sustained shot
+
+scenes:
+  - index: 1
+    duration_s: 10.0
+    logline: "Drone-FPV forward push through pine forest from gloom to clearing."
+    emotional_function: establishing
+    camera_intent: drone_fpv_forward
+    transition_in:
+      type: fade_from_black
+      duration_s: 0.5
+      emotional_intent: "gentle awakening"
+    pacing: rising
+    motif_features: ["god-rays", "drifting fog", "parted branches"]
+    director_notes: >
+      This is one continuous shot; do not subdivide. Layer count should peak
+      around mid-flight (>= 9 planes) and reduce to <= 4 at the clearing.
+
+continuity:
+  hard_rules:
+    - "NO character or animal appears."
+    - "THE final frame must be at least 60% covered by warm light pixels."
+
+audio_intent:
+  music_arc: building
+  per_scene:
+    - scene_index: 1
+      mood: "low drone rising into airy strings"
+  vo_intent: none

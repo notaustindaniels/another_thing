@@ -1,0 +1,19 @@
+tests/test_director_schema.py - 86 tests PASSED in 0.48s
+
+Test classes:
+  TestExampleA (15 tests) - Example A forest flythrough parses correctly
+  TestExampleB (12 tests) - Example B 4-biome explainer parses, biome wipes paired
+  TestExampleC (11 tests) - Example C portal transition parses, portal reveal paired
+  TestKnownBadStoryboards (16 tests) - Known-bad storyboards rejected with ValidationError
+  TestJsonSchemaGeneration (6 tests) - JSON Schema generated and saved correctly
+  TestRoundTrip (7 tests) - YAML → Storyboard → JSON → Storyboard round-trip
+  TestStoryboardYamlFiles (15 tests) - tests/storyboards/*.yaml validated against schema
+
+Key validations:
+  - All 3 canonical storyboard examples (§11.4.1, §11.4.2, §11.4.3) parse without error
+  - biome_wipe transition pairing validated (Example B: 3 paired scene boundaries)
+  - portal_reveal transition pairing validated (Example C: scenes 1-2 paired)
+  - JSON Schema saved to parallax_engine/director/schema.json (28KB)
+  - Known-bad storyboards catch: missing required fields, pairing mismatch, non-dense
+    indices, forward callback_to_scene references, unknown casting ids, custom structure
+    without note, custom_described palette without note, invalid enum values
