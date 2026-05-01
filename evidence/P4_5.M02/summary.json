@@ -1,0 +1,27 @@
+{
+  "milestone_id": "P4_5.M02",
+  "title": "director/prompt.py + director/agent.py — director invocation (single + decomposed modes)",
+  "timestamp": "2026-05-01T08:30:00Z",
+  "git_commit": "bb84dd283da66184e875bf659d3ff11249dfc608",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "tests_added": 92,
+  "total_tests_passing": 747,
+  "acceptance_criteria": {
+    "AC1_single_mode_produces_valid_storyboard": true,
+    "AC2_decomposed_mode_triggers_correctly": true,
+    "AC3_schema_and_examples_prompt_cached": true,
+    "AC4_director_mode_deterministic_python_function": true,
+    "AC5_validate_licensing_exits_0": true
+  },
+  "modules_created": [
+    "parallax_engine/director/prompt.py",
+    "parallax_engine/director/agent.py"
+  ],
+  "test_files_created": [
+    "tests/test_director_prompt.py",
+    "tests/test_director_agent.py"
+  ],
+  "notes": "Implemented DirectorBrief model, director_mode() per §11.9.1, prompt caching with three stable system blocks (cache_control: ephemeral), DirectorStub for offline tests, and DirectorAgent that dispatches single/decomposed mode. All 92 tests pass offline via stub injection."
+}

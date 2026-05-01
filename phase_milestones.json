@@ -625,9 +625,9 @@
       "blocked_by": [
         "P4_5.M01"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4_5.M02/",
+      "notes": "Implemented DirectorBrief (Pydantic v2), director_mode() per §11.9.1, three-block cached system prompt (role+schema+examples all with cache_control:ephemeral), DirectorStub for offline tests, DirectorAgent dispatching single/decomposed mode. 92 new tests, 747 total passing."
     },
     {
       "id": "P4_5.M03",
