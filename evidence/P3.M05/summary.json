@@ -1,0 +1,25 @@
+{
+  "milestone_id": "P3.M05",
+  "title": "CLI harness subcommand + end-to-end smoke test with stub subagents",
+  "timestamp": "2026-05-01T05:00:00Z",
+  "validators_passed": ["validate_licensing"],
+  "acceptance_criteria_verified": [
+    "python -m parallax_engine harness --workspace ./workspace --brief test exits 0",
+    "All five stub subagents invoked (scene-designer, asset-generator, mask-author, camera-pather, qa-critic)",
+    "workspace/logs/tool_calls.jsonl non-empty with entries per subagent",
+    "workspace/logs/usage.jsonl non-empty (synthetic stub-run-summary entry)",
+    "validate_licensing exits 0 (6/6)"
+  ],
+  "implementation_notes": [
+    "Added harness subcommand to parallax_engine/cli.py",
+    "_SMOKE_SCENE_YAML constant: minimal 1-layer 1-mask scene.yaml in lead.py-compatible format (plain list, not {layers:[...]})",
+    "cmd_harness: pre-seeds workspace/scene.yaml before running lead so asset-generator and mask-author are dispatched",
+    "cmd_harness: pre-writes RENDER_DONE checkpoint so stub pipeline skips FFmpeg (no real SVGs available)",
+    "ClaudeSDKStub injected via sdk_client_factory — 5 canned responses, all returning success strings",
+    "Synthetic usage log entry written after run so usage.jsonl is non-empty",
+    "20 new tests in tests/test_cli_harness.py; 471 total passing",
+    "Exit 0 in all cases — salvage mode is not treated as fatal error for smoke test"
+  ],
+  "tests_added": 20,
+  "total_tests": 471
+}

@@ -1,0 +1,7 @@
+[parallax] Harness run starting
+[parallax] Workspace: /Users/austin/parallax-skill/workspace/smoke_test_3
+[parallax] Brief:     'test'
+[parallax] Seeded workspace/scene.yaml (smoke-test scene)
+[parallax] Pre-wrote render-done checkpoint (stub mode)
+[parallax] Pipeline completed successfully
+[parallax] Phases completed: ['manifest', 'assets-done', 'masks-done', 'camera-done', 'render-done']
