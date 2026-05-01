@@ -508,9 +508,9 @@
       "blocked_by": [
         "P4.M01"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4.M02/",
+      "notes": "gen_image: Anthropic API backend (optional) + deterministic MD5-colored placeholder SVG fallback. autosegment: rembg (optional/MIT) -> GrabCut (cv2/Apache-2.0) -> Otsu fallback chain. No new pip deps. 498/498 tests pass, validate_licensing 6/6."
     },
     {
       "id": "P4.M03",

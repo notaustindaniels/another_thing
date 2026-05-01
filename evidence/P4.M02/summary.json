@@ -1,0 +1,21 @@
+{
+  "milestone_id": "P4.M02",
+  "title": "Image generation tool + auto-segmentation tool integration",
+  "timestamp": "2026-05-01T01:45:00Z",
+  "validators_passed": ["validate_licensing"],
+  "git_commit": "566c7783657cdbfcf2f621a74d95b823d8bf610a",
+  "tests_added": 27,
+  "total_tests_passing": 498,
+  "new_files": [
+    "parallax_engine/tools/gen_image.py",
+    "parallax_engine/tools/autosegment.py",
+    "tests/test_gen_image.py",
+    "tests/test_autosegment.py"
+  ],
+  "implementation_notes": [
+    "gen_image: Anthropic API backend (optional) + deterministic placeholder SVG fallback using MD5 hash of prompt for color",
+    "autosegment: rembg (optional/MIT) -> GrabCut (cv2/Apache-2.0) -> Otsu (cv2/numpy) fallback chain",
+    "No new pip dependencies added to pyproject.toml; all backends use optional imports with try/except",
+    "Both tools return JSON-serializable dicts with ok, path, width, height, backend, message keys"
+  ]
+}
