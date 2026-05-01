@@ -1,0 +1,30 @@
+{
+  "milestone_id": "P4.M01",
+  "title": "All six agent prompt files with full production prompts",
+  "timestamp": "2026-05-01T06:00:00Z",
+  "git_commit": "afc736af5134b59b31efd1f66acbc1eb9a5e7a3a",
+  "validators_passed": ["validate_licensing"],
+  "acceptance_criteria": {
+    "all_six_prompt_files_exist": true,
+    "lead_md_has_effort_scaling_rules": true,
+    "qa_critic_md_has_pass_fail_format": true,
+    "qa_critic_md_has_report_path": true,
+    "subagent_definitions_load_from_files": true,
+    "validate_licensing_exits_0": true
+  },
+  "prompt_files": [
+    "parallax_engine/prompts/lead.md",
+    "parallax_engine/prompts/scene_designer.md",
+    "parallax_engine/prompts/asset_generator.md",
+    "parallax_engine/prompts/mask_author.md",
+    "parallax_engine/prompts/camera_pather.md",
+    "parallax_engine/prompts/qa_critic.md"
+  ],
+  "implementation_notes": [
+    "Added load_prompt(name) function in subagents.py using pathlib relative to __file__",
+    "Added LEAD_PROMPT module-level constant loaded from prompts/lead.md",
+    "Replaced all stub system_prompt strings with load_prompt() calls",
+    "All 471 tests pass; all 27 subagents tests pass including QA-stop-prompt constraint",
+    "Prompts cover §3.3 input/output contracts, §3.4 effort-scaling rules, §9.6 no-Agent constraint"
+  ]
+}

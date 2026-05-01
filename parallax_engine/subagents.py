@@ -6,24 +6,56 @@ Each AgentDefinition captures the static contract for a subagent:
   - model        Claude model string
   - description  one-liner the lead matches against during dispatch
   - allowed_tools strictly-scoped tool list (no Agent tool per ss9.6)
-  - system_prompt stub system prompt; returns a canned status string
-                  matching the ss3.3 return contract
+  - system_prompt full production prompt loaded from parallax_engine/prompts/
 
-These are NOT live agent instances -- they are pure-data declarations
-consumed by the lead orchestrator (lead.py) to configure ClaudeSDKClient
-calls.  The stub prompts will be replaced with full prompts in a later
-milestone; for now they guarantee the return contract is respected.
+System prompts are loaded from markdown files in the prompts/ directory at
+import time.  Each subagent reads from:
+  parallax_engine/prompts/<name_with_underscores>.md
+
+The lead orchestrator's prompt is in:
+  parallax_engine/prompts/lead.md
 
 Model constants
 ---------------
 SONNET = "claude-sonnet-4-5"  (lead uses this too, per ss3.1)
 HAIKU  = "claude-haiku-4-5"   (asset-generator, mask-author)
 
-SPEC anchors: ss3.1, ss3.3, ss9.6
+SPEC anchors: ss3.1, ss3.3, ss3.4, ss9.6
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import pathlib
+from dataclasses import dataclass
+
+# ---------------------------------------------------------------------------
+# Prompt loader
+# ---------------------------------------------------------------------------
+
+#: Directory containing all prompt markdown files.
+_PROMPTS_DIR: pathlib.Path = pathlib.Path(__file__).parent / "prompts"
+
+
+def load_prompt(name: str) -> str:
+    """Load a prompt from parallax_engine/prompts/<name>.md.
+
+    Parameters
+    ----------
+    name:
+        Filename without the ``.md`` extension.  Use underscores, not hyphens,
+        for multi-word names (e.g. ``"scene_designer"``).
+
+    Returns
+    -------
+    str
+        The full prompt text.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the prompt file does not exist.
+    """
+    path = _PROMPTS_DIR / f"{name}.md"
+    return path.read_text(encoding="utf-8")
 
 # ---------------------------------------------------------------------------
 # Model constants (pin here; bump when Anthropic releases new versions)
@@ -34,6 +66,9 @@ SONNET: str = "claude-sonnet-4-5"
 
 #: Haiku model used for parallel, narrow-scope subagents.
 HAIKU: str = "claude-haiku-4-5"
+
+#: Full lead orchestrator prompt loaded from prompts/lead.md at import time.
+LEAD_PROMPT: str = load_prompt("lead")
 
 
 # ---------------------------------------------------------------------------
@@ -57,9 +92,9 @@ class AgentDefinition:
     allowed_tools:
         Strictly-scoped tool list.  Must NOT contain 'Agent' (ss9.6).
     system_prompt:
-        Full system prompt text.  Stub implementation returns a canned
-        status string matching the ss3.3 return contract; the real prompt
-        is a future milestone.
+        Full production prompt text loaded from
+        ``parallax_engine/prompts/<name_underscored>.md`` at import time.
+        Replaces the stub strings used in Phase 3.
     """
 
     name: str
@@ -88,20 +123,7 @@ SCENE_DESIGNER = AgentDefinition(
         "Returns 'scene written: N layers, M masks, duration Ts'."
     ),
     allowed_tools=("Read", "Write"),
-    system_prompt=(
-        "You are the scene-designer subagent for parallax-engine.\n"
-        "\n"
-        "INPUTS:\n"
-        "  workspace/brief.md  -- creative brief\n"
-        "\n"
-        "OUTPUTS:\n"
-        "  workspace/scene.yaml  -- scene manifest (layers, masks, camera stub)\n"
-        "\n"
-        "RETURN VALUE (last line of your response, exactly):\n"
-        "  scene written: <N> layers, <M> masks, duration <T>s\n"
-        "\n"
-        "[STUB] Return: scene written: 0 layers, 0 masks, duration 0s"
-    ),
+    system_prompt=load_prompt("scene_designer"),
 )
 
 ASSET_GENERATOR = AgentDefinition(
@@ -118,22 +140,7 @@ ASSET_GENERATOR = AgentDefinition(
         "mcp__parallax_render__gen_image",
         "mcp__parallax_masks__autosegment",
     ),
-    system_prompt=(
-        "You are the asset-generator subagent for parallax-engine.\n"
-        "\n"
-        "INPUTS:\n"
-        "  workspace/scene.yaml       -- full scene manifest\n"
-        "  LAYER_ID env var           -- which layer to generate\n"
-        "\n"
-        "OUTPUTS:\n"
-        "  workspace/assets/<layer>.svg        -- SVG artwork\n"
-        "  workspace/assets/<layer>.meta.json  -- raster hints\n"
-        "\n"
-        "RETURN VALUE (last line of your response, exactly):\n"
-        "  ok: assets/<layer>.svg\n"
-        "\n"
-        "[STUB] Return: ok: assets/stub_layer.svg"
-    ),
+    system_prompt=load_prompt("asset_generator"),
 )
 
 MASK_AUTHOR = AgentDefinition(
@@ -148,21 +155,7 @@ MASK_AUTHOR = AgentDefinition(
         "Write",
         "mcp__parallax_masks__alpha_refine",
     ),
-    system_prompt=(
-        "You are the mask-author subagent for parallax-engine.\n"
-        "\n"
-        "INPUTS:\n"
-        "  workspace/assets/<silhouette>.svg  -- existing SVG\n"
-        "\n"
-        "OUTPUTS:\n"
-        "  workspace/assets/<silhouette>.svg  -- updated with id='silhouette'\n"
-        "                                        and id='hole' paths\n"
-        "\n"
-        "RETURN VALUE (last line of your response, exactly):\n"
-        "  ok: silhouette + hole paths added to assets/<file>.svg\n"
-        "\n"
-        "[STUB] Return: ok: silhouette + hole paths added to assets/stub.svg"
-    ),
+    system_prompt=load_prompt("mask_author"),
 )
 
 CAMERA_PATHER = AgentDefinition(
@@ -174,21 +167,7 @@ CAMERA_PATHER = AgentDefinition(
         "drone path with K control points'."
     ),
     allowed_tools=("Read", "Write"),
-    system_prompt=(
-        "You are the camera-pather subagent for parallax-engine.\n"
-        "\n"
-        "INPUTS:\n"
-        "  workspace/scene.yaml  -- scene manifest (no camera block yet)\n"
-        "  workspace/brief.md    -- creative brief\n"
-        "\n"
-        "OUTPUTS:\n"
-        "  workspace/scene.yaml  -- updated with camera: block\n"
-        "\n"
-        "RETURN VALUE (last line of your response, exactly):\n"
-        "  camera path written: <M> keyframes / drone path with <K> control points\n"
-        "\n"
-        "[STUB] Return: camera path written: 2 keyframes / drone path with 4 control points"
-    ),
+    system_prompt=load_prompt("camera_pather"),
 )
 
 QA_CRITIC = AgentDefinition(
@@ -206,24 +185,7 @@ QA_CRITIC = AgentDefinition(
         "mcp__parallax_qa__diff_frames",
         "mcp__parallax_qa__ssim_score",
     ),
-    system_prompt=(
-        "You are the qa-critic subagent for parallax-engine.\n"
-        "\n"
-        "INPUTS:\n"
-        "  workspace/frames/         -- rendered frames\n"
-        "  workspace/scene.yaml      -- scene manifest\n"
-        "  workspace/brief.md        -- creative brief\n"
-        "\n"
-        "OUTPUTS:\n"
-        "  workspace/qa/pass_NN_report.md  -- QA report\n"
-        "\n"
-        "RETURN VALUE (last line of your response, exactly):\n"
-        "  PASS\n"
-        "  -- OR --\n"
-        "  FAIL: <comma-separated issues>, see qa/pass_NN_report.md\n"
-        "\n"
-        "[STUB] Return: PASS"
-    ),
+    system_prompt=load_prompt("qa_critic"),
 )
 
 
