@@ -117,9 +117,9 @@
         "P1.M02",
         "P1.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P1/P1.M04/",
+      "notes": "Session 2. seeds.py: stable SeedSequence channel IDs (CAMERA_NOISE=0..QA_SAMPLING=4). camera.py: BezierPath (de Casteljau), SeededNoise (vendored quintic-smoothstep value noise per SPEC para5.1 'noise or vendored simplex'), drone_camera_track (Holden exact-discrete spring + seeded noise + roll-from-velocity), kf_camera_track (linear, easeInOutCubic, easeOutQuint, easeInOutSine). Spring integrator verified against analytic critically-damped formula. Bit-identical determinism verified. 58/58 tests pass."
     },
     {
       "id": "P1.M05",
