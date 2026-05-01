@@ -1667,3 +1667,38 @@ Next session should:
    Acceptance criteria will be in phase_milestones.json — check them carefully.
    This is likely a documentation milestone (no new code).
 3. After P6.M02: P6.M03 (golden hash regression), P6.M04 (demo reel), P6.M05 (README + pip).
+
+## Session 21 (2026-05-01)
+
+Worked: P6.M02 — License audit document + EULA template
+Status: passed
+Evidence: evidence/P6.M02/
+Commit: ad7ecfb567d449fcd7812996b9d89158e9ed591c
+
+### Implementation notes
+
+- LICENSES.md: Complete audit of 50+ installed packages organized into:
+  runtime deps (8 subsections: core rendering, schema, agent harness,
+  HTTP/networking, MCP/ASGI, data validation, crypto, utilities),
+  dev-only deps, build tools, and system-level deps (FFmpeg LGPL +
+  OpenH264/Cisco). License compatibility matrix confirms zero GPL/AGPL.
+  Audit methodology and required attribution notices in section 8.
+
+- EULA.md: Commercial EULA template (9 sections + appendix). Contains
+  both required verbatim attributions per acceptance criteria:
+  1. 'OpenH264 Video Codec provided by Cisco Systems, Inc.' -- section 3.2
+  2. FFmpeg LGPLv2.1+ attribution with dynamic linking notice -- section 3.1
+  Additional attributions for Pillow, NumPy, SciPy, OpenCV, Skia,
+  Anthropic SDK, Pydantic. Appendix A lists all license text URLs.
+
+- validate_licensing.py: 6/6 PASS (no new code; docs milestone only)
+- init.sh: still fails during pip step (network proxy; known, non-fatal)
+
+Next session should:
+1. CHECK: 1093 tests pass; validate_licensing 6/6; parallax_engine imports OK.
+2. Work on P6.M03 -- Regression test suite: three canonical storyboard golden
+   MP4 hashes. Check tests/storyboards/ for canonical storyboards from P4_5.M07.
+   Must: render each, store SHA256 in evidence/golden/*.sha256,
+   write tests/test_regression.py asserting byte-identical re-render.
+   Check phase_milestones.json P6.M03 validation_commands carefully.
+3. After P6.M03: P6.M04 (demo reel), P6.M05 (README + pip publish ready).
