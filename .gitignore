@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Venv
+.venv/
+venv/
+env/
+
+# Build artifacts
+build/
+dist/
+*.whl
+
+# Harness state (resumable; regenerated on next run)
+workspace/.harness/
+workspace/portal_test/
+
+# Reference media — too large for git, must be supplied locally
+references/sources/*.mp4
+references/sources/*.mov
+references/sources/*.webm
+
+# Per-run agent state
+claude-progress.txt
+.claude_settings.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

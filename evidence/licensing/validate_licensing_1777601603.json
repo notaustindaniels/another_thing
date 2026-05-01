@@ -1,0 +1,49 @@
+{
+  "validator": "validate_licensing",
+  "all_passed": false,
+  "fatal_error": null,
+  "results": [
+    {
+      "name": "self_consistency",
+      "passed": true,
+      "detail": "validator constants are internally consistent",
+      "items": [],
+      "elapsed_ms": 0.0019171275198459625
+    },
+    {
+      "name": "declared_dependencies",
+      "passed": false,
+      "detail": "pyproject.toml missing or unparseable",
+      "items": [],
+      "elapsed_ms": 0.01654215157032013
+    },
+    {
+      "name": "installed_distributions",
+      "passed": true,
+      "detail": "no forbidden distributions installed",
+      "items": [],
+      "elapsed_ms": 7.077166810631752
+    },
+    {
+      "name": "source_imports",
+      "passed": true,
+      "detail": "no forbidden imports",
+      "items": [],
+      "elapsed_ms": 0.307250302284956
+    },
+    {
+      "name": "text_artifacts",
+      "passed": true,
+      "detail": "no forbidden strings in scanned text files",
+      "items": [],
+      "elapsed_ms": 0.6134170107543468
+    },
+    {
+      "name": "system_ffmpeg",
+      "passed": true,
+      "detail": "ffmpeg at /Users/austin/parallax-skill/.conda-env/bin/ffmpeg; libopenh264=True, libx264=False, libx265=False",
+      "items": [],
+      "elapsed_ms": 37.56679221987724
+    }
+  ]
+}

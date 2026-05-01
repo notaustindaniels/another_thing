@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "parallax-engine"
+version = "0.1.0"
+description = "2.5D multiplane camera animation engine: renderer + director tier + orchestration"
+readme = "README.md"
+license = { text = "Proprietary" }
+requires-python = ">=3.11"
+dependencies = [
+    # Core rendering stack — all permissive licenses (BSD/MIT/HPND/Apache)
+    "Pillow>=10.0",           # HPND (MIT-style) — PNG I/O, layer compositing primitives
+    "skia-python>=87.0",      # BSD — SVG rasterization, 2D blends
+    "numpy>=1.26",            # BSD — all projection and composite math
+    "scipy>=1.11",            # BSD — gaussian_filter, ndimage
+    "opencv-python-headless>=4.8",  # Apache 2.0 — resize, remap (lens distortion), Lanczos
+    # Schema and config
+    "pydantic>=2.0",          # MIT — Pydantic v2 models for scene schema
+    "pyyaml>=6.0",            # MIT — scene.yaml parsing
+    "pydantic-yaml>=1.2",     # MIT — YAML round-trip for Pydantic models
+    # Agent harness (MIT — Anthropic SDK)
+    "claude-code-sdk>=0.0.25",
+    # Noise for drone camera (MIT — permissive, approved in SPEC.md §5.1)
+    "noise>=1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+]
+
+[project.scripts]
+parallax-engine = "parallax_engine.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["parallax_engine"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true

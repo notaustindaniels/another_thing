@@ -1,0 +1,762 @@
+{
+  "schema_version": "1.0",
+  "project": "parallax-engine",
+  "spec_path": "SPEC.md",
+  "spec_sha256": "a1df0bac4daf8d868880c77f38f0473b541645fe30d6648879116442bd8382b1",
+  "milestones": [
+    {
+      "id": "P1.M01",
+      "phase": 1,
+      "phase_title": "Project scaffold and renderer core",
+      "title": "pyproject.toml, init.sh, package skeleton — scaffold validates clean",
+      "description": "Create pyproject.toml with ONLY allowed dependencies per §5.1, an idempotent init.sh that sets up the dev environment and verifies FFmpeg LGPL build, and the minimal parallax_engine/__init__.py. Both validate_scaffold.py and validate_licensing.py must exit 0.",
+      "acceptance_criteria": [
+        "pyproject.toml declares only packages from SPEC.md §5.1 ALLOWED list; no forbidden packages",
+        "validate_licensing.py exits 0 with no forbidden distributions or imports",
+        "validate_scaffold.py exits 0: required files exist, package imports, git is initialized",
+        "init.sh is executable and idempotent; sets up .venv and installs deps",
+        "parallax_engine is importable from the project root"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py",
+        "python tools/validate_scaffold.py"
+      ],
+      "spec_anchors": ["§5.1", "§5.2", "§5.3", "§5.4", "§8.1", "§9.9"],
+      "blocked_by": [],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P1.M02",
+      "phase": 1,
+      "phase_title": "Project scaffold and renderer core",
+      "title": "parallax_engine/projection.py — project_points passes all validator tests",
+      "description": "Implement the perspective-divide projection function in parallax_engine/projection.py. The validator (tools/validate_projection.py) defines the locked API contract: project_points(x_centered, y_centered, z_cam, perspective_px, canvas_width, canvas_height) -> (x_screen, y_screen). Also implement project_world_points, the full §2.1 function that includes world-to-camera transform, for use by the renderer pipeline. Both must be pure vectorized NumPy with no Python loops over points.",
+      "acceptance_criteria": [
+        "tools/validate_projection.py exits 0 — all 11 tests pass",
+        "project_points satisfies validator's locked API contract exactly",
+        "project_world_points implements the full §2.1 rotation + perspective pipeline",
+        "No Python loops over array elements — fully vectorized",
+        "Deterministic: byte-identical output on repeated calls with same input",
+        "tests/test_projection.py passes with pytest"
+      ],
+      "validation_commands": [
+        "python tools/validate_projection.py",
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.1", "§7", "§9.2"],
+      "blocked_by": ["P1.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": "SPEC AMBIGUITY: validate_projection.py defines project_points with signature (x_centered, y_centered, z_cam, perspective_px, canvas_width, canvas_height) -> (x_screen, y_screen). SPEC.md §2.1 defines project_points with signature (points_xyz, cam, perspective_px, origin_xy) -> (s, screen_xy, z_cam). Resolution: implement the validator's simpler 'inner' function as project_points (validator contract is locked), and implement the full §2.1 pipeline as project_world_points. They share the same math; project_world_points calls project_points internally."
+    },
+    {
+      "id": "P1.M03",
+      "phase": 1,
+      "phase_title": "Project scaffold and renderer core",
+      "title": "parallax_engine/scene.py — Pydantic models and YAML loader for scene.yaml schema",
+      "description": "Implement the full scene.yaml schema as Pydantic v2 models per §2.2. Covers: SceneMeta, LayerSpec, StackSpec, MaskSpec, CameraSpec (drone and keyframed modes), PostSpec (per-layer and global). Includes a YAML loader that validates against the schema and rejects version mismatches. Write tests/test_scene.py covering round-trip YAML parse, schema validation errors, and version rejection.",
+      "acceptance_criteria": [
+        "All scene.yaml schema fields from §2.2 are represented as Pydantic v2 models",
+        "YAML loader validates schema version and rejects version != 1",
+        "Round-trip: parse example scenes from §6, re-serialize, parse again — identical",
+        "tests/test_scene.py passes with pytest",
+        "validate_licensing.py still exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.2", "§9.10"],
+      "blocked_by": ["P1.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P1.M04",
+      "phase": 1,
+      "phase_title": "Project scaffold and renderer core",
+      "title": "parallax_engine/camera.py + parallax_engine/seeds.py — drone and keyframe camera tracks",
+      "description": "Implement drone_camera_track (Bezier path + Holden critically-damped spring + seeded simplex noise + roll-from-velocity) and kf_camera_track (per-segment easing) per §2.3. Implement seeds.py with stable SeedSequence channel IDs per §9.3. Write tests/test_camera.py covering the spring integrator against known trajectory, the Bezier evaluator, and determinism (byte-identical across two calls with same seed).",
+      "acceptance_criteria": [
+        "drone_camera_track produces an (n, 6) float64 array of (x,y,z,yaw,pitch,roll) per frame",
+        "Holden spring integrator is exact-discrete: stable at any dt, same output as analytic formula",
+        "Noise is seeded from SeedSequence(scene.meta.seed).spawn(channel_id); channel_id in seeds.py",
+        "kf_camera_track supports linear, easeInOutCubic, easeOutQuint, easeInOutSine easings",
+        "Byte-identical output across two calls with same scene seed",
+        "tests/test_camera.py passes with pytest"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.3", "§7", "§9.3"],
+      "blocked_by": ["P1.M02", "P1.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P1.M05",
+      "phase": 1,
+      "phase_title": "Project scaffold and renderer core",
+      "title": "parallax_engine/masks.py — mask alpha building and compositing (L2 trick)",
+      "description": "Implement build_mask_alpha (all five growth kinds: perspective, radius, gradient, matte_seq, displaced_edge; all three anchors: world, screen, layer-plane) and composite_with_mask (F = D*M + S*(1-M) plus the in-front-of-mask L2 rule) per §2.4. All buffers are premultiplied float32. Write tests/test_masks.py covering the near-cull handoff, world-anchored mask projection, and the L2 above-mask rule.",
+      "acceptance_criteria": [
+        "build_mask_alpha returns float32 alpha in [0,1] for all anchor/growth combinations",
+        "composite_with_mask correctly applies F = D*M + S*(1-M) with premultiplied RGBA",
+        "Near-cull handoff: when mask layer culls to opacity 0, build_mask_alpha returns ones array",
+        "L2 trick: layers with z_cam closer than mask layer are alpha-over'd unmasked after compositing",
+        "No Python loops over pixels or array elements",
+        "tests/test_masks.py passes with pytest"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.4", "§9.1"],
+      "blocked_by": ["P1.M02", "P1.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P1.M06",
+      "phase": 1,
+      "phase_title": "Project scaffold and renderer core",
+      "title": "parallax_engine/render.py + parallax_engine/encode.py — per-frame render loop and FFmpeg encoder",
+      "description": "Implement the per-frame rendering pipeline per §2.5 (camera pose lookup, back-to-front stack compositing, SVG raster cache, DOF blur, depth fade, near-cull, mask compositing, global post) and encode.py FFmpeg subprocess wrapper per §2.8 (libopenh264, -threads 1, pipe via stdin). Write tests/test_render.py and tests/test_encode.py.",
+      "acceptance_criteria": [
+        "render_scene(scene, workspace) executes all 6 pipeline steps in §2.5 in pinned order",
+        "SVG raster cache keyed on (sha256(svg_bytes), target_size_xy, cache_version_constant)",
+        "Global post order: vignette -> grain -> light_leaks -> fisheye -> color_grade",
+        "FFmpeg invoked as subprocess with -c:v libopenh264 and -threads 1",
+        "Grain seeded from SeedSequence(seed).spawn(GRAIN_CHANNEL) per frame index",
+        "tests/test_render.py and tests/test_encode.py pass with pytest"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.5", "§2.6", "§2.7", "§2.8", "§7", "§9.1", "§9.2", "§9.8"],
+      "blocked_by": ["P1.M04", "P1.M05"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P1.M07",
+      "phase": 1,
+      "phase_title": "Project scaffold and renderer core",
+      "title": "parallax_engine/cli.py + test scenes + smoke renders — Phase 1 complete",
+      "description": "Implement the CLI entry point with the 'render' subcommand per §8 Phase 1. Create tests/scenes/forest.yaml and tests/scenes/portal.yaml matching §6.1 and §6.3 (with placeholder SVGs checked in). Write tests/test_render_smoke.py. All pytest tests pass; smoke renders produce valid MP4s. This milestone is Phase 1's completion gate.",
+      "acceptance_criteria": [
+        "python -m parallax_engine render tests/scenes/forest.yaml --out /tmp/smoke_forest.mp4 exits 0",
+        "python -m parallax_engine render tests/scenes/portal.yaml --out /tmp/smoke_portal.mp4 exits 0",
+        "Both MP4 outputs are non-empty valid video files",
+        "Two consecutive renders of forest.yaml with same seed produce byte-identical MP4s",
+        "tests/test_render_smoke.py passes with pytest",
+        "All Phase 1 pytest tests pass collectively",
+        "validate_scaffold.py exits 0",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_scaffold.py",
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§1.2", "§7", "§8.1", "§9.9"],
+      "blocked_by": ["P1.M06"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P2.M01",
+      "phase": 2,
+      "phase_title": "Port the portal as regression test",
+      "title": "Portal regression scene: portal_regression.yaml + SVG with silhouette and hole",
+      "description": "Translate §6.3 into tests/scenes/portal_regression.yaml. Create the portal SVG asset with both silhouette and hole paths sharing one viewBox per §2.4 and references/portal_mechanic.md §1. Create placeholder layer SVGs for forest and city stacks. The YAML must parse and validate against the scene schema.",
+      "acceptance_criteria": [
+        "tests/scenes/portal_regression.yaml parses without error against the scene schema",
+        "Portal SVG asset contains <path id='silhouette'> and <path id='hole'> in one SVG with one viewBox",
+        "No second SVG file for the same portal layer (enforces §2.4 / §9.4)",
+        "Scene YAML references the portal layer's silhouette and hole by stable IDs",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.4", "§6.3", "§6.4", "§8.2", "§9.4"],
+      "blocked_by": ["P1.M01", "P1.M02", "P1.M03", "P1.M04", "P1.M05", "P1.M06", "P1.M07"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P2.M02",
+      "phase": 2,
+      "phase_title": "Port the portal as regression test",
+      "title": "Determinism test + golden render: byte-identical output across runs",
+      "description": "Write tests/test_render_golden.py that renders portal_regression.yaml twice with the same seed and asserts the two MP4 outputs are byte-identical (cmp). Establish the golden hash. This proves the determinism contract §7 is satisfied end-to-end through encode.",
+      "acceptance_criteria": [
+        "Two consecutive renders of portal_regression.yaml with meta.seed=1 produce byte-identical MP4s",
+        "tests/test_render_golden.py passes with pytest",
+        "The golden MP4 hash is stored in evidence/P2.M02/ for future regression",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§7", "§8.2"],
+      "blocked_by": ["P2.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P2.M03",
+      "phase": 2,
+      "phase_title": "Port the portal as regression test",
+      "title": "THE PHASE 2 GATE: validate_portal_equivalence.py passes — layer compositing and L2 trick verified",
+      "description": "Make the engine render the synthetic test scene that tools/validate_portal_equivalence.py generates in workspace/synthetic_test/scene.yaml. The validator computes the analytical reference frames and compares pixel-by-pixel. This proves the projection equation, back-to-front compositing, mask compositing, and the L2 above-mask trick are all correct. Phases 3+ cannot start until this passes.",
+      "acceptance_criteria": [
+        "tools/validate_portal_equivalence.py exits 0",
+        "Mean absolute per-pixel error < 3.0",
+        "Max single-pixel error < 80",
+        "Global SSIM > 0.97",
+        "All three color regions visible: L0 (back), L1 masked, L2 above-mask",
+        "evidence/P2.M03/ contains the validator's output JSON"
+      ],
+      "validation_commands": [
+        "python tools/validate_portal_equivalence.py",
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.4", "§2.5", "§8.2", "§9.1", "§9.2"],
+      "blocked_by": ["P2.M02"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P3.M01",
+      "phase": 3,
+      "phase_title": "Agent harness skeleton",
+      "title": "parallax_engine/auth.py + observability.py + state.py — harness infrastructure",
+      "description": "Implement the three infrastructure modules for the agent harness. auth.py: credential resolver per §3.5 (ANTHROPIC_API_KEY / CLAUDE_CODE_OAUTH_TOKEN / cloud providers). observability.py: pre/post tool hooks that log every tool call to logs/tool_calls.jsonl and every ResultMessage.usage to logs/usage.jsonl. state.py: checkpoint read/write after each major phase per §3.8.",
+      "acceptance_criteria": [
+        "auth.configure_credentials() returns 'api-key', 'oauth', or 'cloud-provider' correctly",
+        "observability hooks write append-only JSONL to logs/tool_calls.jsonl and logs/usage.jsonl",
+        "state.write_checkpoint() and state.read_checkpoint() round-trip correctly",
+        "All three modules importable; validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.5", "§3.7", "§3.8"],
+      "blocked_by": ["P2.M01", "P2.M02", "P2.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P3.M02",
+      "phase": 3,
+      "phase_title": "Agent harness skeleton",
+      "title": "parallax_engine/tools/render.py + tools/qa.py — MCP tool wrappers for renderer and QA",
+      "description": "Implement the @tool-decorated functions that the lead orchestrator can invoke. render.py: render_scene tool wrapping the Phase 1 renderer. qa.py: diff_frames tool (pixel difference between two frame directories) and ssim_score tool. These are the in-process deterministic tools the harness calls without spawning subagents.",
+      "acceptance_criteria": [
+        "render_scene(scene_yaml_path, workspace) renders to workspace/out.mp4 and returns a status dict",
+        "diff_frames(dir_a, dir_b) returns per-frame max absolute difference",
+        "ssim_score(dir_a, dir_b) returns mean SSIM across frame pairs",
+        "All tools importable; validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.3", "§3.1"],
+      "blocked_by": ["P3.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P3.M03",
+      "phase": 3,
+      "phase_title": "Agent harness skeleton",
+      "title": "parallax_engine/subagents.py — AgentDefinitions for all five subagents (stub prompts)",
+      "description": "Implement subagents.py with AgentDefinition objects for scene-designer, asset-generator, mask-author, camera-pather, and qa-critic. Prompts are stubs that return canned status strings. Each subagent has a strictly scoped allowed_tools list per §3.3. No subagent has the Agent tool.",
+      "acceptance_criteria": [
+        "Five AgentDefinitions exist with correct names and scoped tool lists",
+        "No subagent definition includes the 'Agent' tool",
+        "Stub prompts return valid status strings matching the §3.3 return contract",
+        "Module is importable; validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.1", "§3.3", "§9.6"],
+      "blocked_by": ["P3.M02"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P3.M04",
+      "phase": 3,
+      "phase_title": "Agent harness skeleton",
+      "title": "parallax_engine/lead.py — ParallaxLead orchestrator using ClaudeSDKClient",
+      "description": "Implement the ParallaxLead orchestrator per §3.1 and §3.4. Uses claude-code-sdk ClaudeSDKClient (or equivalent). QA pass counter is a Python integer (max_qa_passes=3). Budget cap enforced in Python. On budget exhaustion or max turns, produce salvage output. The lead never does creative work; it orchestrates and counts.",
+      "acceptance_criteria": [
+        "ParallaxLead.__init__ sets max_turns=80, max_budget_usd=2.50, permission_mode='acceptEdits'",
+        "QA pass counter is an integer; the prompt does NOT say 'stop after N passes'",
+        "Budget cap triggers salvage output, not a crash",
+        "Module is importable; validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.1", "§3.4", "§3.6", "§9.7"],
+      "blocked_by": ["P3.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P3.M05",
+      "phase": 3,
+      "phase_title": "Agent harness skeleton",
+      "title": "CLI harness subcommand + end-to-end smoke test with stub subagents",
+      "description": "Extend parallax_engine/cli.py with the 'harness' subcommand per §8 Phase 3. Run the harness on a trivial brief with stub subagents: each stub returns a canned string and writes a hand-coded scene.yaml. Verify tool_calls.jsonl and usage.jsonl are populated, checkpoints are written, and the run completes without error.",
+      "acceptance_criteria": [
+        "python -m parallax_engine harness --workspace ./workspace --brief 'test' exits 0",
+        "All five stub subagents are invoked and checkpoint their completion",
+        "workspace/logs/tool_calls.jsonl is non-empty with at least one entry per subagent",
+        "workspace/logs/usage.jsonl is non-empty",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.1", "§3.2", "§3.3", "§3.7", "§3.8", "§8.3"],
+      "blocked_by": ["P3.M04"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4.M01",
+      "phase": 4,
+      "phase_title": "Subagent prompts and asset generation",
+      "title": "All six agent prompt files with full production prompts",
+      "description": "Write parallax_engine/prompts/lead.md, scene_designer.md, asset_generator.md, mask_author.md, camera_pather.md, and qa_critic.md with complete production-quality prompts per §3.3 and §3.4. Replace stub prompts in subagents.py with the markdown content. Each prompt must fully specify the agent's input contract, output contract, tool use policy, and effort-scaling rules.",
+      "acceptance_criteria": [
+        "All six prompt files exist under parallax_engine/prompts/",
+        "lead.md includes effort-scaling rules: one scene-designer, parallel asset-generators, parallel mask-authors, one camera-pather, then render, then QA",
+        "qa_critic.md specifies PASS/FAIL return format and QA report path",
+        "SubagentDefinitions load prompts from these files at import time",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.3", "§3.4", "§8.4"],
+      "blocked_by": ["P3.M01", "P3.M02", "P3.M03", "P3.M04", "P3.M05"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4.M02",
+      "phase": 4,
+      "phase_title": "Subagent prompts and asset generation",
+      "title": "Image generation tool + auto-segmentation tool integration",
+      "description": "Implement the mcp__parallax_render__gen_image tool (image generation via Anthropic API or external) and mcp__parallax_masks__autosegment tool (background removal / layer segmentation using rembg or similar LGPL/MIT-licensed tool). Wire these into the asset-generator and mask-author subagent tool surfaces.",
+      "acceptance_criteria": [
+        "gen_image tool produces an SVG or PNG asset from a text prompt",
+        "autosegment tool produces a masked PNG or SVG from an input image",
+        "Both tools use only LGPL/MIT/BSD/Apache licensed libraries",
+        "validate_licensing.py exits 0 (no new forbidden deps introduced)"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.3", "§5.1", "§8.4"],
+      "blocked_by": ["P4.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4.M03",
+      "phase": 4,
+      "phase_title": "Subagent prompts and asset generation",
+      "title": "Full subagent intelligence: real LLM subagents producing real output",
+      "description": "Replace stub subagent returns with real LLM invocations. scene-designer produces real scene.yaml from brief.md. asset-generator produces real SVG layers. mask-author adds silhouette+hole paths to SVGs. camera-pather writes real camera blocks. qa-critic reads rendered frames and reports PASS/FAIL. QA loop cap enforced at 3 passes by Python integer.",
+      "acceptance_criteria": [
+        "scene-designer produces a scene.yaml that parses against the scene schema",
+        "asset-generator produces valid SVG files with correct id attributes",
+        "mask-author produces SVGs with silhouette and hole in one viewBox",
+        "QA loop counter is an integer in Python; prompt does not say 'stop after 3'",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.3", "§3.4", "§9.4", "§9.6", "§9.7"],
+      "blocked_by": ["P4.M02"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4.M04",
+      "phase": 4,
+      "phase_title": "Subagent prompts and asset generation",
+      "title": "tests/test_harness_e2e.py: three reference briefs produce valid MP4s under $2.50",
+      "description": "Write and run tests/test_harness_e2e.py with three end-to-end tests: (1) forest drone flythrough brief, (2) 4-biome explainer brief, (3) portal transition brief. Each should produce a valid non-empty MP4 without manual intervention. QA loop bounded at 3 passes. Costs tracked and verified under $2.50/render average.",
+      "acceptance_criteria": [
+        "All three briefs produce non-empty MP4 files in workspace/out.mp4",
+        "No human intervention required during any of the three runs",
+        "QA loop never exceeds 3 passes per run (Python counter enforced)",
+        "Per-render cost logged and at most $2.50 on the canonical briefs",
+        "tests/test_harness_e2e.py passes with pytest",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§3.4", "§3.6", "§8.4"],
+      "blocked_by": ["P4.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4_5.M01",
+      "phase": 4.5,
+      "phase_title": "Director tier",
+      "title": "parallax_engine/director/schema.py — Pydantic v2 storyboard models; three example storyboards validate",
+      "description": "Implement the full Storyboard schema as Pydantic v2 models per §11.3. Covers all sub-schemas: VisualVocabulary, Arc, Beat, CastingEntry, SceneEntry, TransitionSpec, Continuity, AudioIntent. Generate JSON Schema. Round-trip-test all three canonical storyboard examples from §11.4. Write tests/storyboards/ with the three YAML examples and CI validation.",
+      "acceptance_criteria": [
+        "All three §11.4 storyboard examples parse without error against the schema",
+        "Schema validation catches known-bad storyboards (transition pairing violations, missing required fields)",
+        "JSON Schema is generated and saved for use in director prompt grounding",
+        "tests/storyboards/*.yaml files checked in; pytest validates them",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§11.3", "§11.4", "§11.14"],
+      "blocked_by": ["P4.M01", "P4.M02", "P4.M03", "P4.M04"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4_5.M02",
+      "phase": 4.5,
+      "phase_title": "Director tier",
+      "title": "director/prompt.py + director/agent.py — director invocation (single + decomposed modes)",
+      "description": "Implement the director prompt builder per §11.5.3 with aggressive prompt caching for the schema+examples block. Implement the director agent with single mode (one Opus call) and decomposed mode (four-step chain for >=60s briefs). Deterministic mode selection: Python rule in §11.9.1, not the director itself.",
+      "acceptance_criteria": [
+        "Single-mode director produces a valid Storyboard YAML from a brief string",
+        "Decomposed mode triggers for duration >= 60s or save_the_cat structure",
+        "Schema and three examples are prompt-cached (stable prefix before variable brief)",
+        "director_mode() Python function selects mode deterministically",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§11.5", "§11.9.1"],
+      "blocked_by": ["P4_5.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4_5.M03",
+      "phase": 4.5,
+      "phase_title": "Director tier",
+      "title": "casting/bible.py — read/append-only casting API with hash verification",
+      "description": "Implement the casting bible API per §11.7. Provides: read_casting_entry(id), append_canonical_svg(id, path), hash_verify_canonical(id). Atomic writes for canonical_svg paths. Hash-based equality check for canonical SVG variants. Write tests for the lifecycle of a cast member per §11.7.1.",
+      "acceptance_criteria": [
+        "append_canonical_svg is atomic (write to temp, rename)",
+        "hash_verify_canonical compares SHA256 of canonical SVG against stored hash",
+        "read_casting_entry returns None for unknown ids without crashing",
+        "Tests cover the full cast member lifecycle (§11.7.1 steps 1-6)",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§11.7", "§11.14"],
+      "blocked_by": ["P4_5.M02"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4_5.M04",
+      "phase": 4.5,
+      "phase_title": "Director tier",
+      "title": "scene/designer.py — scene-designer as translator consuming storyboard + casting",
+      "description": "Reimplement scene-designer per §11.6. Input contract: storyboard.yaml, casting.yaml, prior scene fragments, scene index. Output: scene_NN.yaml fragment + manifest JSON. When a casting entry has canonical_svg=null, emit kind:produce_canonical in manifest and reserve the path. Scene-designer is forbidden from re-describing cast members.",
+      "acceptance_criteria": [
+        "scene_designer.run(storyboard, casting, prior_fragments, scene_index) produces YAML + JSON manifest",
+        "produce_canonical entries reference the casting description, not re-invented descriptions",
+        "Fragment conforms to the scene.yaml fragment schema (no top-level project metadata)",
+        "test validates that scene-designer for canonical example B produces a fragment with red_bird manifest entry",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§11.6", "§11.14"],
+      "blocked_by": ["P4_5.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4_5.M05",
+      "phase": 4.5,
+      "phase_title": "Director tier",
+      "title": "scene/merger.py — deterministic Python merger (no LLM) producing final scene.yaml",
+      "description": "Implement the pure-Python scene merger per §11.6.5. Stitches scene fragments into a scenes list, validates transition pairing, propagates palette from visual_vocabulary, computes timing offsets (start_t from cumulative durations), writes final scene.yaml and scene.merge.log.json. If transition pairing fails, raises MergeError with the offending scene index.",
+      "acceptance_criteria": [
+        "merge(fragment_dir, storyboard) produces a valid scene.yaml and scene.merge.log.json",
+        "Transition pairing validated: biome_wipe donor/receiver pair must reference each other",
+        "portal_reveal validated: both scenes declare it with each other as paired_scene",
+        "MergeError raised with clear message on pairing violations",
+        "Merger is pure Python — no LLM calls (per §11.13 anti-pattern 12)",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§11.6.5", "§11.13", "§11.14"],
+      "blocked_by": ["P4_5.M04"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4_5.M06",
+      "phase": 4.5,
+      "phase_title": "Director tier",
+      "title": "Update asset/generator.py, qa/critic.py, manager.py — director-era topology",
+      "description": "Wire all three tiers together. asset/generator.py: handle kind in (canonical, produce_canonical, local, variant) per §11.7.1-2. qa/critic.py: support --level=(asset,scene,storyboard) with classification taxonomies per §11.8.2. manager.py: implement §11.9.1 sequence, --resume via storyboard diff, Python retry caps, QA routing. manager.py prompt per §11.9.2.",
+      "acceptance_criteria": [
+        "asset-generator no-ops for kind=canonical; reads canonical_description for kind=produce_canonical",
+        "qa-critic --level=storyboard invokes Opus; scene and asset levels invoke Sonnet",
+        "manager.py Python counters: MAX_ASSET_RETRIES_PER_ASSET=3, MAX_SCENE_REDESIGNS_PER_SCENE=2, MAX_STORYBOARD_REGENERATIONS=1",
+        "--resume diffs storyboard.yaml against .cache/storyboard.yaml.last and rebuilds only changed scenes",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§11.7.2", "§11.8", "§11.9", "§11.11", "§11.13"],
+      "blocked_by": ["P4_5.M05"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P4_5.M07",
+      "phase": 4.5,
+      "phase_title": "Director tier",
+      "title": "Integration tests: three canonical storyboards end-to-end; tests/storyboards/ CI",
+      "description": "Run all three §11.4 canonical storyboards end-to-end through the full director-era pipeline (director -> scene-designers -> merger -> asset-generator parallel wave -> renderer -> QA all three levels). Verify each produces a valid MP4. Update SKILL.md to document --resume, --budget, and --director-mode flags. All CI steps pass.",
+      "acceptance_criteria": [
+        "All three canonical storyboards produce valid non-empty MP4s",
+        "tests/storyboards/ YAML schema validation passes in CI",
+        "tests/integration/ run at least one full end-to-end per canonical storyboard",
+        "SKILL.md documents --resume, --budget, --director-mode flags",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§11.4", "§11.12", "§11.14"],
+      "blocked_by": ["P4_5.M06"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P5.M01",
+      "phase": 5,
+      "phase_title": "Skill packaging",
+      "title": "skill/SKILL.md + skill/scripts/run.sh — verbatim from §4.2 and §4.3",
+      "description": "Create the Anthropic Skill wrapper per §4. skill/SKILL.md verbatim from §4.2 with name: parallax-video. skill/scripts/run.sh verbatim from §4.3 (thin shim calling python -m parallax_engine.cli). The Skill is NOT the engine — it is a thin wrapper that invokes the engine. Do not put multi-agent prompts or renderer logic in SKILL.md.",
+      "acceptance_criteria": [
+        "skill/SKILL.md exists and matches the §4.2 template exactly (name, description, usage, notes, examples)",
+        "skill/scripts/run.sh is executable and invokes python -m parallax_engine.cli",
+        "SKILL.md does not contain multi-agent prompts or renderer code",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§4.1", "§4.2", "§4.3", "§4.4"],
+      "blocked_by": ["P4_5.M01", "P4_5.M02", "P4_5.M03", "P4_5.M04", "P4_5.M05", "P4_5.M06", "P4_5.M07"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P5.M02",
+      "phase": 5,
+      "phase_title": "Skill packaging",
+      "title": "README.md installation and examples; pip install works",
+      "description": "Write complete installation instructions in README.md: pip install parallax-engine, FFmpeg LGPL setup, Skill registration steps. Verify that pip install . from the project root installs the package correctly and parallax-engine CLI is available.",
+      "acceptance_criteria": [
+        "pip install . installs parallax-engine cleanly",
+        "parallax-engine render --help prints usage",
+        "README.md covers installation, FFmpeg setup, Skill registration, and examples",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§1.6", "§4.1", "§5.2", "§8.5"],
+      "blocked_by": ["P5.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P5.M03",
+      "phase": 5,
+      "phase_title": "Skill packaging",
+      "title": "Skill trigger test: Claude Code session invokes skill on example prompts",
+      "description": "Register the Skill in a Claude Code session and verify it triggers correctly on the §4.2 example prompts. Verify end-to-end: Skill triggers -> run.sh executes -> engine produces MP4 -> path returned to user.",
+      "acceptance_criteria": [
+        "Skill triggers on 'Make a 10-second drone flythrough of a redwood forest at golden hour'",
+        "Skill triggers on 'Show a portal in a tree opening into a neon city'",
+        "run.sh executes without error",
+        "workspace/out.mp4 is produced",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§4.2", "§4.4", "§8.5"],
+      "blocked_by": ["P5.M02"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P6.M01",
+      "phase": 6,
+      "phase_title": "Distribution, regression, and commercial readiness",
+      "title": "Post-processing polish: LUT color grading, light leaks, fisheye, vignette, grain tuned",
+      "description": "Complete and tune all global post-processing effects in render.py per §2.7: 3D LUT .cube file support, light leak sprites (screen blend), fisheye/lens distortion (backward warp with precomputed pixel map), vignette (smoothstep), grain (seeded Gaussian luma noise). Test with the three canonical storyboard briefs and verify the aesthetic matches reference/sources/ drone footage.",
+      "acceptance_criteria": [
+        "Color grading: .cube LUT files parse and apply correctly",
+        "Light leaks: screen blend formula correct; opacity 0 = invisible, 1 = full screen blend",
+        "Fisheye: backward warp uses precomputed pixel map; two frames with same params are byte-identical",
+        "Grain seeded per §9.3: same seed + frame index always produces same grain pattern",
+        "All effects run in pinned order: vignette -> grain -> light_leaks -> fisheye -> color_grade",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§2.7", "§7", "§9.3", "§9.8"],
+      "blocked_by": ["P5.M01", "P5.M02", "P5.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P6.M02",
+      "phase": 6,
+      "phase_title": "Distribution, regression, and commercial readiness",
+      "title": "License audit document + EULA template",
+      "description": "Write a complete license audit document listing every dependency, its license, and commercial resale status. Write a EULA template that includes required attributions: FFmpeg LGPL notice, OpenH264 Cisco attribution. Verify no GPL-tainted dependency exists transitively.",
+      "acceptance_criteria": [
+        "License audit document covers all direct and transitive dependencies",
+        "EULA includes 'OpenH264 Video Codec provided by Cisco Systems, Inc.' attribution",
+        "EULA includes standard FFmpeg LGPL attribution",
+        "validate_licensing.py exits 0 with zero forbidden findings",
+        "License audit is human-readable Markdown in LICENSES.md"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§1.6", "§5.2", "§5.3", "§8.6", "§9.9"],
+      "blocked_by": ["P6.M01"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P6.M03",
+      "phase": 6,
+      "phase_title": "Distribution, regression, and commercial readiness",
+      "title": "Regression test suite: three canonical storyboard golden MP4 hashes",
+      "description": "Render all three canonical storyboards from §11.4 deterministically and store golden MP4 hashes in evidence/golden/. Write tests/test_regression.py that re-renders each and asserts byte-identical output. This is the final correctness gate for the whole engine.",
+      "acceptance_criteria": [
+        "Three golden MP4 hashes stored in evidence/golden/*.sha256",
+        "tests/test_regression.py re-renders all three and passes byte-identical assert",
+        "All three renders complete in under 5 minutes each on a standard laptop",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§7", "§8.6", "§11.4"],
+      "blocked_by": ["P6.M02"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P6.M04",
+      "phase": 6,
+      "phase_title": "Distribution, regression, and commercial readiness",
+      "title": "Demo reel: 3-5 produced MP4s across all three behavior families",
+      "description": "Produce a demo reel of 3-5 videos demonstrating all three engine behaviors: (1) drone-FPV forest flythrough, (2) 4-biome explainer with wipes, (3) portal transition. Save to evidence/demo/. Videos should represent the aesthetic of references/sources/ drone footage, not the prior Remotion output.",
+      "acceptance_criteria": [
+        "At least 3 demo MP4s in evidence/demo/",
+        "At least one demo per behavior family (drone, biome-wipe, portal)",
+        "Each demo is at least 6 seconds",
+        "validate_licensing.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py"
+      ],
+      "spec_anchors": ["§1.3", "§8.6"],
+      "blocked_by": ["P6.M03"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    },
+    {
+      "id": "P6.M05",
+      "phase": 6,
+      "phase_title": "Distribution, regression, and commercial readiness",
+      "title": "Final README, multi-platform test, pip publish ready",
+      "description": "Complete README.md with installation, examples, troubleshooting, cost expectations, and links to demo reel. Verify pip install works on macOS and Linux (CI matrix). Verify the Skill triggers correctly after a fresh pip install. The project is now ship-ready.",
+      "acceptance_criteria": [
+        "README.md covers installation, examples, cost expectations, demo reel link, troubleshooting",
+        "pip install parallax-engine works on macOS and Linux",
+        "All Phase 1-6 validation commands pass in sequence",
+        "validate_licensing.py exits 0",
+        "validate_scaffold.py exits 0"
+      ],
+      "validation_commands": [
+        "python tools/validate_licensing.py",
+        "python tools/validate_scaffold.py"
+      ],
+      "spec_anchors": ["§1.6", "§8.6"],
+      "blocked_by": ["P6.M04"],
+      "passes": false,
+      "evidence": null,
+      "notes": null
+    }
+  ]
+}

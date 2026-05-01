@@ -1,0 +1,22 @@
+{
+  "validator": "validate_scaffold",
+  "timestamp": "20260430T223757",
+  "ok": false,
+  "checks_run": [
+    "required_files",
+    "required_dirs",
+    "package_files",
+    "package_imports",
+    "init_executable",
+    "git_initialized",
+    "phase_milestones",
+    "no_forbidden_files"
+  ],
+  "failures": [
+    {
+      "category": "no_git",
+      "what": "project is not a git repository",
+      "fix": "git init && git add . && git commit -m 'initial scaffold'"
+    }
+  ]
+}

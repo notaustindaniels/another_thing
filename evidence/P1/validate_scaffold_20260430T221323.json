@@ -1,0 +1,37 @@
+{
+  "validator": "validate_scaffold",
+  "timestamp": "20260430T221323",
+  "ok": false,
+  "checks_run": [
+    "required_files",
+    "required_dirs",
+    "package_files",
+    "package_imports",
+    "init_executable",
+    "git_initialized",
+    "phase_milestones",
+    "no_forbidden_files"
+  ],
+  "failures": [
+    {
+      "category": "missing_file",
+      "what": "required file does not exist: pyproject.toml",
+      "fix": "create pyproject.toml per SPEC.md and the initializer prompt"
+    },
+    {
+      "category": "missing_file",
+      "what": "required file does not exist: init.sh",
+      "fix": "create init.sh per SPEC.md and the initializer prompt"
+    },
+    {
+      "category": "missing_file",
+      "what": "required file does not exist: phase_milestones.json",
+      "fix": "create phase_milestones.json per SPEC.md and the initializer prompt"
+    },
+    {
+      "category": "no_git",
+      "what": "project is not a git repository",
+      "fix": "git init && git add . && git commit -m 'initial scaffold'"
+    }
+  ]
+}
