@@ -1,0 +1,26 @@
+{
+  "milestone_id": "P2.M02",
+  "title": "Determinism test + golden render: byte-identical output across runs",
+  "timestamp": "2026-05-01T04:05:00Z",
+  "git_commit": "8c45972b4f240de3485db875060b6d039b52f2c0",
+  "validators_passed": ["validate_licensing"],
+  "tests_passed": [
+    "tests/test_render_golden.py — 22/22 PASS"
+  ],
+  "golden_hash": {
+    "sha256": "078114f55f009989c09592205f896f4655f3714602eb1ce77457ba3750a78447",
+    "ci_resolution": [192, 108],
+    "ci_fps": 10,
+    "ci_duration_s": 1.0,
+    "seed": 1,
+    "mp4_size_bytes": 22357
+  },
+  "implementation_notes": [
+    "Written tests/test_render_golden.py with 22 tests across 3 test classes",
+    "TestPortalRegressionSceneParsing: verifies structure matches §6.3 (forest 6 layers, city 3 layers, portal mask)",
+    "TestPortalRegressionDeterminism: two renders with seed=1 are byte-identical (§7 end-to-end)",
+    "TestGoldenHash: computes SHA-256 of rendered MP4 and writes to evidence/P2.M02/golden_hash.json",
+    "CI-speed override: 192×108 @ 10fps × 1.0s (10 frames) — determinism is resolution-independent",
+    "Both determinism test and MP4 header validity check pass"
+  ]
+}

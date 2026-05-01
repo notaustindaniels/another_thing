@@ -1,0 +1,15 @@
+{
+  "milestone": "P2.M02",
+  "timestamp": "2026-05-01T04:07:25Z",
+  "scene": "tests/scenes/portal_regression.yaml",
+  "ci_resolution": [
+    192,
+    108
+  ],
+  "ci_fps": 10,
+  "ci_duration_s": 1.0,
+  "seed": 1,
+  "mp4_size_bytes": 22357,
+  "sha256": "078114f55f009989c09592205f896f4655f3714602eb1ce77457ba3750a78447",
+  "spec_anchor": "\u00a77"
+}

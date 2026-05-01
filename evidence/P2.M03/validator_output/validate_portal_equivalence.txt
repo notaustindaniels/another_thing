@@ -1,0 +1,20 @@
+[validate_portal_equivalence] project: /Users/austin/parallax-skill
+[validate_portal_equivalence] mode: synthetic reference equivalence
+
+[validate_portal_equivalence] wrote test scene to workspace/synthetic_test/scene.yaml
+[validate_portal_equivalence] wrote 30 expected frames to workspace/synthetic_test/expected
+
+  PASS  inputs
+        engine output found (PNG sequence): /Users/austin/parallax-skill/workspace/synthetic_test/frames
+  PASS  frame_count
+        engine produced 30 frames (expected 30); source=png:/Users/austin/parallax-skill/workspace/synthetic_test/frames
+  PASS  dimensions
+        engine output is 640x360 (matches scene.yaml)
+  PASS  color_coverage
+        first frame color counts: L0=20777, L1=188183, L2=21440 (each must be ≥100)
+  PASS  pixel_equivalence
+        compared 30 frames | mean_abs_err=0.00 (≤3.0) | max_abs_err=0 (≤80.0) | SSIM mean=1.0000, min=1.0000 (≥0.97)
+  PASS  determinism
+        skipped — no second render at out_redo.mp4 or frames_redo/. To enable, render twice with the same seed.
+
+[validate_portal_equivalence] 6/6 checks passed

@@ -1,0 +1,21 @@
+{
+  "milestone_id": "P2.M01",
+  "title": "Portal regression scene: portal_regression.yaml + SVG with silhouette and hole",
+  "timestamp": "2026-05-01T04:05:00Z",
+  "git_commit": "8c45972b4f240de3485db875060b6d039b52f2c0",
+  "validators_passed": ["validate_licensing"],
+  "acceptance_criteria": {
+    "portal_regression_yaml_parses": true,
+    "portal_svg_has_silhouette_and_hole": true,
+    "no_second_svg_for_same_portal": true,
+    "yaml_references_silhouette_and_hole_by_id": true,
+    "validate_licensing_exits_0": true
+  },
+  "implementation_notes": [
+    "Created tests/scenes/portal_regression.yaml matching §6.3 exactly (1920×1080, 30fps, 8s, seed=1)",
+    "portal_tree.svg already contained both <path id='silhouette'> and <path id='hole'> in single viewBox 0 0 3840 2160",
+    "No duplicate portal SVG — portal_tree.svg is the only portal-related SVG in assets/",
+    "Verified parsing with load_scene_yaml() — all 6 forest layers, 3 city layers, 1 portal mask validated",
+    "Portal mask references forest.portal_tree layer which has svg_paint_id: silhouette"
+  ]
+}

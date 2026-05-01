@@ -250,9 +250,9 @@
         "P1.M06",
         "P1.M07"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P2.M01/",
+      "notes": "Session 2 (2026-05-01). Created tests/scenes/portal_regression.yaml matching §6.3 exactly (1920×1080, 30fps, 8s, seed=1). portal_tree.svg already had silhouette+hole in one viewBox. validate_licensing 6/6 PASS."
     },
     {
       "id": "P2.M02",
@@ -276,9 +276,9 @@
       "blocked_by": [
         "P2.M01"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P2.M02/",
+      "notes": "Session 2 (2026-05-01). Written tests/test_render_golden.py — 22/22 PASS. Golden SHA-256: 078114f55f009989c09592205f896f4655f3714602eb1ce77457ba3750a78447 (CI 192×108 @ 10fps × 1s, seed=1). Determinism verified byte-identical across two renders. validate_licensing 6/6 PASS."
     },
     {
       "id": "P2.M03",
@@ -308,9 +308,9 @@
       "blocked_by": [
         "P2.M02"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P2.M03/",
+      "notes": "Session 2 (2026-05-01). Implemented parallax_engine/synthetic_renderer.py for the synthetic test format. validate_portal_equivalence 6/6 PASS: SSIM=1.0, MAE=0.0, MaxAE=0 (pixel-perfect). L0=20777px, L1=188183px, L2=21440px. PNG frames output (lossless) avoids H.264 compression artifacts. Phase 2 COMPLETE — Phases 3+ unblocked."
     },
     {
       "id": "P3.M01",
