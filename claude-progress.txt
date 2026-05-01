@@ -624,3 +624,40 @@ All 471 existing tests pass. Subagents tests (27) all green. test_qa_prompt_does
 
 No new ambiguities this session. Existing Ambiguity 7 (scene.yaml format) was
 addressed by having scene_designer.md specify the plain-list format.
+
+---
+
+## Session 8 (2026-05-01)
+
+Worked: P4.M02 — Image generation tool + auto-segmentation tool integration
+Status: passed
+Evidence: evidence/P4.M02/
+
+Implementation notes:
+- gen_image (mcp__parallax_render__gen_image): Two-backend design. Primary: Anthropic
+  API (claude-haiku-4-5), tries to generate a complete SVG from the prompt. Falls back
+  to a deterministic placeholder SVG using MD5(prompt) for a unique fill color per layer.
+  No new pip deps; anthropic SDK is optional import guarded by try/except.
+- autosegment (mcp__parallax_masks__autosegment): Three-backend fallback chain:
+  rembg (MIT, optional) -> GrabCut (cv2/Apache-2.0) -> Otsu threshold (cv2/numpy).
+  Always produces a valid RGBA PNG with transparent background. cv2 is available in
+  conda env (apache build); no new deps added to pyproject.toml.
+- Both tools return JSON-serializable dicts: {ok, path, width, height, format/n_foreground_pixels, backend, message}.
+- 27 new tests (test_gen_image.py: 12, test_autosegment.py: 15); 498/498 total pass.
+- validate_licensing 6/6. Commit: 4ef96ab.
+
+Next session should:
+1. Proceed to P4.M03: Full subagent intelligence (real LLM subagents).
+   - scene-designer produces real scene.yaml from brief.md
+   - asset-generator produces real SVG layers using gen_image tool
+   - mask-author adds silhouette+hole paths to SVGs using autosegment
+   - camera-pather writes real camera blocks
+   - qa-critic reads rendered frames and reports PASS/FAIL
+   - QA loop counter must be a Python integer (not prompt-based)
+2. Check: validate_licensing.py 6/6 (always first)
+3. Check: 498 tests still pass (regression check)
+4. P4.M03 validation_commands: python tools/validate_licensing.py
+
+SPEC AMBIGUITIES (continuing from prior sessions):
+- Ambiguity 7 (scene.yaml format) remains unresolved; scene_designer.md uses
+  plain-list stacks format. Human should confirm before P4.M03.
