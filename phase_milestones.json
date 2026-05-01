@@ -146,9 +146,9 @@
         "P1.M02",
         "P1.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P1/P1.M05/",
+      "notes": "Session 2. masks.py: alpha_over (premultiplied over), build_mask_alpha (all 5 growth kinds x 3 anchors), composite_with_mask (F=D*M+S*(1-M) + L2 rule). Near-cull handoff implemented. cv2 (abi3, Python 3.11 compatible) used for GaussianBlur and fillPoly. 31/31 tests pass."
     },
     {
       "id": "P1.M06",

@@ -1,0 +1,11 @@
+{
+  "milestone": "P1.M05",
+  "session": 2,
+  "timestamp": "2026-04-30T23:45:00",
+  "validation_results": {
+    "tests_test_masks_pytest": "PASS — 31/31 tests passed",
+    "validate_licensing": "PASS — 6/6 checks passed",
+    "full_suite": "PASS — 182/182 total tests"
+  },
+  "notes": "masks.py: alpha_over (premultiplied over operator per para2.5), build_mask_alpha (all 5 growth kinds: perspective/radius/gradient/displaced_edge/matte_seq; all 3 anchors: world/screen/layer-plane), composite_with_mask (F=D*M+S*(1-M) + L2 in-front-of-mask rule). Near-cull handoff: when cull_opacity<0.001 returns ones. cv2 copied from miniforge3 (abi3 binary, compatible with Python 3.11). All buffers float32. No pixel loops — all vectorized. scipy not needed (cv2.GaussianBlur used for feathering, numpy for polygon fill via cv2.fillPoly)."
+}
