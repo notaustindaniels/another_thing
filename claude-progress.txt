@@ -892,3 +892,79 @@ Next session should:
    - Module layout: parallax_engine/director/prompt.py + director/agent.py
 
 4. REGRESSION: 569 tests pass as of session 11 start. Session 11 adds 86 more → 655 total.
+
+---
+
+## Session 12 (2026-05-01)
+
+Worked: P4_5.M02 — director/prompt.py + director/agent.py — director invocation (single + decomposed modes)
+Status: passed
+Evidence: evidence/P4_5.M02/
+Commit: f330644
+
+Implementation notes:
+
+1. ORIENTATION: init.sh fails with pip proxy error (network blocked) — persistent issue.
+   All 655 prior tests pass; clean state confirmed.
+
+2. SPEC READING: §11.5 (Director Agent) and §11.9.1 (mode selection rule) read fully.
+   Key decisions:
+   - director_mode() exactly matches §11.9.1 Python pseudocode: >=60s OR save_the_cat → decomposed
+   - Prompt caching: three system blocks all have cache_control:{"type":"ephemeral"}
+     Block 0: Director role + 10-point instructions (§11.5.3 verbatim)
+     Block 1: schema.json content in json fence
+     Block 2: All three example YAMLs concatenated with separators
+   - User message contains ONLY the brief (variable, not cached)
+
+3. MODULES CREATED:
+   A. parallax_engine/director/prompt.py (320 lines):
+      - DirectorBrief: Pydantic v2 model (text, target_duration_s, requested_structure,
+        config_budget, references)
+      - director_mode(): pure Python, no LLM involvement per §11.9.1
+      - build_single_mode_system_blocks(): returns 3 cached blocks
+      - build_single_mode_messages(): returns user-turn messages list
+      - build_decomposed_system_prompts(): 4-key dict with sub-agent system prompts
+      - build_decomposed_user_messages(): chained user messages for 4-step decomposed mode
+      - extract_yaml_block(): parses yaml fence from LLM response
+      - ensure_prompts_directory(): writes prompts/director/*.md files
+
+   B. parallax_engine/director/agent.py (280 lines):
+      - MODEL_OPUS, MODEL_SONNET, MODEL_HAIKU constants
+      - _MODE_MODELS dict for model selection by budget tier
+      - DirectorResult dataclass (storyboard, mode_used, raw_yaml, steps)
+      - DirectorStub: offline test stub, response_map, call recording
+      - _AnthropicClient: lazy-import real client (ImportError if not installed)
+      - DirectorAgent: dispatches single/decomposed mode, validates output
+
+   C. parallax_engine/director/__init__.py: updated to export all new symbols
+
+4. TESTS: 92 new tests (test_director_prompt.py + test_director_agent.py)
+   All 747 total tests pass.
+
+5. DESIGN DECISIONS:
+   - The real _AnthropicClient uses anthropic.Anthropic().messages.create() with
+     system list and messages list. This is the standard pattern for prompt caching.
+     anthropic is NOT installed in the conda-env but is in ALLOWED_DISTS.
+   - DirectorStub accepts path strings as response values: if the string is a
+     .yaml/.yml path that exists on disk, it reads + wraps the content. This lets
+     tests use the actual example_a/b/c.yaml files as responses.
+   - Decomposed mode passes intermediate YAMLs between steps. If extract_yaml_block()
+     fails on an intermediate step, _try_extract_yaml() falls back to raw text
+     (prevents chain breakage on partial responses).
+   - MODEL_OPUS = "claude-opus-4-7-20261231" etc. — using versioned model strings
+     per §11.5.2 pricing note (Opus 4.7 at $5/$25 per MTok).
+
+Next session should:
+1. CHECK: 747 tests pass; validate_licensing passes.
+2. Proceed to P4_5.M03: "casting/bible.py — read/append-only casting API with hash verification"
+   - This is now unblocked (P4_5.M02 passes).
+   - Read §11.7 (Casting / Continuity System) and §11.14 in full.
+   - acceptance_criteria:
+     * append_canonical_svg is atomic (write to temp, rename)
+     * hash_verify_canonical compares SHA256 of canonical SVG against stored hash
+     * read_casting_entry returns None for unknown ids without crashing
+     * Tests cover the full cast member lifecycle (§11.7.1 steps 1-6)
+     * validate_licensing.py exits 0
+   - Module: parallax_engine/casting/bible.py
+   - No LLM calls needed — pure Python file I/O with atomic writes.
+3. P4_5.M03 validation_commands: python tools/validate_licensing.py (same as M02)

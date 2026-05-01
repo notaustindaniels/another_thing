@@ -1,0 +1,11 @@
+feat(P4_5.M02): director/prompt.py + director/agent.py — validation passing
+
+- Implemented DirectorBrief (Pydantic v2), director_mode() per §11.9.1
+- Three-block cached system prompt (role+schema+examples, all cache_control:ephemeral)
+- DirectorAgent dispatching single-mode (one Opus call) and decomposed-mode (4-step chain)
+- DirectorStub for offline testing; _AnthropicClient lazy-imports anthropic
+- 92 new tests in test_director_prompt.py + test_director_agent.py; 747 total passing
+- Validators passed: python tools/validate_licensing.py
+- Evidence: evidence/P4_5.M02/
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
