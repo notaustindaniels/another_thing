@@ -418,9 +418,9 @@
       "blocked_by": [
         "P3.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P3.M04/",
+      "notes": "Implemented ParallaxLead with lazy SDK import (importable without anthropic). ClaudeSDKStub injected in tests. QA loop uses Python integer range() counter (\u00a79.7). Budget/turns exhaustion calls _salvage() returning RunResult(salvage=True) without raising. 37 new tests; 451 total pass."
     },
     {
       "id": "P3.M05",

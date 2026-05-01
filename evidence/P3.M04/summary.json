@@ -1,0 +1,28 @@
+{
+  "milestone_id": "P3.M04",
+  "title": "parallax_engine/lead.py — ParallaxLead orchestrator using ClaudeSDKClient",
+  "timestamp": "2026-05-01T00:45:00Z",
+  "git_commit": "pre-commit (see final commit after flip)",
+  "validators_passed": ["validate_licensing"],
+  "tests_added": 37,
+  "total_tests_passing": 451,
+  "acceptance_criteria": {
+    "max_turns_80": true,
+    "max_budget_usd_2_50": true,
+    "permission_mode_acceptEdits": true,
+    "qa_counter_is_python_int": true,
+    "qa_prompt_does_not_say_stop": true,
+    "budget_cap_triggers_salvage": true,
+    "module_importable_without_anthropic": true,
+    "validate_licensing_exits_0": true
+  },
+  "implementation_notes": [
+    "Lazy SDK import: lead.py imports cleanly without anthropic installed",
+    "ClaudeSDKStub provided for offline testing; real SDK used when available",
+    "_default_sdk_factory() auto-selects stub vs real based on import availability",
+    "QA pass counter is `for qa_pass in range(passes_done, self.max_qa_passes)` — a Python integer loop, never a prompt instruction (§9.7)",
+    "Budget/turns exhaustion calls self._salvage() which returns RunResult(salvage=True) without raising",
+    "ObservabilityHooks wired correctly (before_tool/after_tool, workspace= kwarg)",
+    "Checkpoint resumption tested: skips phases already marked done in state.json"
+  ]
+}
