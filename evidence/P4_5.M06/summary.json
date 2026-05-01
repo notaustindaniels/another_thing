@@ -1,0 +1,35 @@
+{
+  "milestone_id": "P4_5.M06",
+  "title": "Update asset/generator.py, qa/critic.py, manager.py — director-era topology",
+  "timestamp": "2026-05-01T09:30:00Z",
+  "git_commit": "e7b9f016837cb0bf19c921d11e2f9afac6df873a",
+  "validators_passed": ["validate_licensing"],
+  "tests_added": 106,
+  "tests_total": 984,
+  "modules_created": [
+    "parallax_engine/asset/__init__.py",
+    "parallax_engine/asset/generator.py",
+    "parallax_engine/qa/__init__.py",
+    "parallax_engine/qa/critic.py",
+    "parallax_engine/manager.py"
+  ],
+  "tests_created": [
+    "tests/test_asset_generator.py",
+    "tests/test_qa_critic.py",
+    "tests/test_manager.py"
+  ],
+  "acceptance_criteria_verified": {
+    "canonical_noop": "generate() with kind='canonical' returns ok=True without creating any new SVG file (TestCanonical.test_canonical_no_svg_generated)",
+    "produce_canonical_reads_casting": "generate() with kind='produce_canonical' reads only casting_data[id].canonical_description (TestProduceCanonical.test_produce_canonical_reads_from_casting_not_scene)",
+    "qa_storyboard_uses_opus": "critique('storyboard') always uses MODEL_OPUS regardless of budget tier (TestCritiqueStoryboard.test_storyboard_always_uses_opus)",
+    "qa_asset_uses_sonnet": "critique('asset') uses MODEL_SONNET (TestCritiqueAsset.test_dry_run_uses_sonnet)",
+    "qa_scene_premium_uses_opus": "critique('scene', budget='premium') uses MODEL_OPUS (TestCritiqueScene.test_dry_run_premium_uses_opus)",
+    "manager_retry_caps": "MAX_ASSET_RETRIES_PER_ASSET=3, MAX_SCENE_REDESIGNS_PER_SCENE=2, MAX_STORYBOARD_REGENERATIONS=1 (TestConstants)",
+    "resume_diff": "_compute_changed_scenes() diffs storyboard.yaml vs .cache/storyboard.yaml.last (TestResumeDiff)"
+  },
+  "implementation_notes": {
+    "asset_generator": "Dispatches on kind in (canonical, produce_canonical, local, variant). Variant uses SVG wrapper transform (scale+translate+feColorMatrix). No LLM at module level.",
+    "qa_critic": "Three levels with distinct prompts and model selection. Offline stub returns PASS when no API key. Critic writes no files (anti-pattern §11.13.7).",
+    "manager": "ProjectManager implements §11.9.1 sequence with Python retry counters. --resume diffs raw YAML (not model_dump) to avoid false positives from default field injection. System prompt verbatim from §11.9.2."
+  }
+}

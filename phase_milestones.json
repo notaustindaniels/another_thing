@@ -600,7 +600,7 @@
       ],
       "passes": true,
       "evidence": "evidence/P4_5.M01/",
-      "notes": "Implemented parallax_engine/director/schema.py (Pydantic v2, 700 lines, 8 cross-field validators). Generated schema.json (28KB). Three canonical storyboard YAMLs in tests/storyboards/. Added tests/test_director_schema.py with 86 tests across 7 classes. All acceptance criteria met: three §11.4 examples parse, known-bad storyboards rejected, JSON Schema generated, pytest CI gate in place, licensing clean."
+      "notes": "Implemented parallax_engine/director/schema.py (Pydantic v2, 700 lines, 8 cross-field validators). Generated schema.json (28KB). Three canonical storyboard YAMLs in tests/storyboards/. Added tests/test_director_schema.py with 86 tests across 7 classes. All acceptance criteria met: three \u00a711.4 examples parse, known-bad storyboards rejected, JSON Schema generated, pytest CI gate in place, licensing clean."
     },
     {
       "id": "P4_5.M02",
@@ -627,7 +627,7 @@
       ],
       "passes": true,
       "evidence": "evidence/P4_5.M02/",
-      "notes": "Implemented DirectorBrief (Pydantic v2), director_mode() per §11.9.1, three-block cached system prompt (role+schema+examples all with cache_control:ephemeral), DirectorStub for offline tests, DirectorAgent dispatching single/decomposed mode. 92 new tests, 747 total passing."
+      "notes": "Implemented DirectorBrief (Pydantic v2), director_mode() per \u00a711.9.1, three-block cached system prompt (role+schema+examples all with cache_control:ephemeral), DirectorStub for offline tests, DirectorAgent dispatching single/decomposed mode. 92 new tests, 747 total passing."
     },
     {
       "id": "P4_5.M03",
@@ -654,7 +654,7 @@
       ],
       "passes": true,
       "evidence": "evidence/P4_5.M03/",
-      "notes": "CastingBible class in parallax_engine/casting/bible.py. Atomic writes via os.replace(). SHA-256 hashes stored in casting.sha256.json sidecar to keep casting.yaml schema-compatible with extra=forbid. append_canonical_svg is append-only (RuntimeError on different-path overwrite). 41 tests cover full §11.7.1 lifecycle (steps 1-6), edge cases, drift detection."
+      "notes": "CastingBible class in parallax_engine/casting/bible.py. Atomic writes via os.replace(). SHA-256 hashes stored in casting.sha256.json sidecar to keep casting.yaml schema-compatible with extra=forbid. append_canonical_svg is append-only (RuntimeError on different-path overwrite). 41 tests cover full \u00a711.7.1 lifecycle (steps 1-6), edge cases, drift detection."
     },
     {
       "id": "P4_5.M04",
@@ -710,7 +710,7 @@
       ],
       "passes": true,
       "evidence": "evidence/P4_5.M05/",
-      "notes": "Implemented parallax_engine/scene/merger.py — pure Python, no LLM. merge(fragment_dir, storyboard, output_dir=None) loads scene_N.yaml fragments, validates coverage + transition pairing (biome_wipe and portal_reveal) at both storyboard and fragment level, computes cumulative start_t offsets, propagates palette from storyboard.visual_vocabulary, writes scene.yaml + scene.merge.log.json. MergeError raised with bullet-list of all violations. 53 new tests (878 total), all passing."
+      "notes": "Implemented parallax_engine/scene/merger.py \u2014 pure Python, no LLM. merge(fragment_dir, storyboard, output_dir=None) loads scene_N.yaml fragments, validates coverage + transition pairing (biome_wipe and portal_reveal) at both storyboard and fragment level, computes cumulative start_t offsets, propagates palette from storyboard.visual_vocabulary, writes scene.yaml + scene.merge.log.json. MergeError raised with bullet-list of all violations. 53 new tests (878 total), all passing."
     },
     {
       "id": "P4_5.M06",
@@ -738,9 +738,9 @@
       "blocked_by": [
         "P4_5.M05"
       ],
-      "passes": false,
+      "passes": true,
       "evidence": null,
-      "notes": null
+      "notes": "asset/generator.py: kind dispatch (canonical no-op, produce_canonical reads only casting bible, local=current behavior, variant=SVG transform wrapper with feColorMatrix tint). qa/critic.py: three-level tiering with Opus for storyboard (always), Sonnet for asset/scene (Opus if budget=premium for scene), classification taxonomies per \u00a711.8.2, offline stub returns PASS when no API key; critic writes no files (\u00a711.13.7). manager.py: ProjectManager with \u00a711.9.1 sequence, Python retry caps (MAX_ASSET_RETRIES=3, MAX_SCENE_REDESIGNS=2, MAX_STORYBOARD_REGEN=1), --resume via raw-YAML diff of storyboard.yaml vs .cache/storyboard.yaml.last. 106 new tests added; 984 total passing."
     },
     {
       "id": "P4_5.M07",
