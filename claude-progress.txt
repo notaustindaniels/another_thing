@@ -1043,3 +1043,76 @@ Next session should:
      local for assets not in casting
    * Tests cover stub mode and structural validation of output
    * validate_licensing.py exits 0
+
+---
+
+## Session 14 (2026-05-01)
+
+Worked: P4_5.M04 — scene/designer.py — scene-designer as translator consuming storyboard + casting
+Status: passed
+Evidence: evidence/P4_5.M04/
+Commit: d05e2f0af6b9f46f816d45b3ff32a5a07605e3a8
+
+Implementation notes:
+
+1. ORIENTATION: init.sh fails with pip proxy error (network blocked) — persistent issue.
+   All 788 prior tests pass; parallax_engine imports cleanly.
+
+2. KEY DISCOVERY: Creating parallax_engine/scene/ package shadowed the existing
+   parallax_engine/scene.py module. Python uses the package over the module file.
+   Fix: moved scene.py content to parallax_engine/scene/_renderer.py, then
+   parallax_engine/scene/__init__.py re-exports everything from _renderer + designer.
+   This restored backward compatibility for all 71 test_scene.py tests.
+   Also needed to re-export _validate_raw (private function imported directly by test_scene.py).
+
+3. MODULES CREATED:
+   A. parallax_engine/scene/_renderer.py (474 lines): verbatim copy of old scene.py
+   B. parallax_engine/scene/__init__.py: re-exports from _renderer + designer
+   C. parallax_engine/scene/designer.py (430 lines):
+      - ManifestEntry (Pydantic, kind: canonical|produce_canonical|local)
+      - SceneFragment (extra=allow, rejects project-level keys via @model_validator(mode=before))
+      - SceneDesignerInput / SceneDesignerOutput dataclasses
+      - build_scene_designer_messages(): builds (system_blocks, messages) with
+        verbatim §11.6.6 system prompt + schema hints + per-scene user message
+      - extract_yaml_block() / extract_json_block(): regex block extractors
+      - parse_fragment() / parse_manifest(): YAML + JSON to validated Pydantic
+      - _resolve_manifest_entry(): enforces produce_canonical description from casting
+      - SceneDesignerStub: dict[int, str] keyed on scene_index
+      - SceneDesigner.run(): one Sonnet call, validates scene_index + duration match
+
+4. CRITICAL INVARIANT: In _resolve_manifest_entry(), for produce_canonical entries,
+   the canonical_description is ALWAYS overwritten with the CastingBible entry's
+   canonical_description. This is structurally enforced; the LLM cannot inject
+   a re-invented description even if it tries.
+
+5. TESTS: 37 new tests in tests/test_scene_designer.py (825 total, all passing)
+   TestSceneFragment (11): required fields, extra allowed, project-level keys rejected
+   TestManifestEntry (5): kind validation, canonical_description required for produce_canonical
+   TestBlockExtraction (5): yaml/json block parsing
+   TestParseFragment (3): valid, project key rejection, non-mapping
+   TestParseManifest (4): local, produce_canonical description sourcing, path set, non-list
+   TestSceneDesignerRun (6): basic run, scene_index mismatch, duration mismatch, stub errors,
+     no project metadata in fragment, prior_fragments forwarded
+   TestExampleBAcceptanceCriterion (3): example B scene 1 has red_bird as produce_canonical
+     with casting description; scene 2 has canonical; fragment has no project metadata
+
+Next session should:
+1. CHECK: 825 tests pass; validate_licensing passes.
+2. Proceed to P4_5.M05: "scene/merger.py — deterministic Python merger (no LLM) producing final scene.yaml"
+   - This is now unblocked (P4_5.M04 passes).
+   - Read §11.6.5 (Scene Merger) in full before implementation.
+   - Module: parallax_engine/scene/merger.py (pure Python, NO LLM calls)
+   - acceptance_criteria:
+     * merge(fragment_dir, storyboard) produces valid scene.yaml + scene.merge.log.json
+     * Transition pairing validated: biome_wipe and portal_reveal pairs validated
+     * MergeError raised with clear message on pairing violations
+     * validate_licensing.py exits 0
+3. merger.py is smallest milestone in Phase 4.5 — should complete in one session.
+
+## SPEC AMBIGUITIES (Session 14)
+- §11.6.3 says fragment has "stack, layers, masks, camera, and transitions" but does not
+  define exact key names in fragment YAML. Used extra=allow since merger spec (§11.6.5)
+  will define the exact format at merge time.
+- §11.6.6 says system prompt should include "renderer's scene.yaml schema (§2.2) as
+  canonical reference". Used compact _FRAGMENT_SCHEMA_HINT rather than full Pydantic
+  JSON schema (too verbose). Cheapest-to-change interpretation.

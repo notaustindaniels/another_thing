@@ -2,7 +2,7 @@
   "milestone_id": "P4_5.M04",
   "title": "scene/designer.py — scene-designer as translator consuming storyboard + casting",
   "timestamp": "2026-05-01T09:00:00Z",
-  "git_commit": "pending",
+  "git_commit": "d05e2f0af6b9f46f816d45b3ff32a5a07605e3a8",
   "validators_passed": [
     "python tools/validate_licensing.py"
   ],
