@@ -1,0 +1,3 @@
+[validate_scaffold] project: /Users/austin/parallax-skill
+
+[validate_scaffold] PASS — all 8 checks clean

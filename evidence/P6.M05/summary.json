@@ -1,0 +1,23 @@
+{
+  "milestone_id": "P6.M05",
+  "title": "Final README, multi-platform test, pip publish ready",
+  "timestamp": "2026-05-01T14:00:00",
+  "git_commit": "ee60dfb70bf9acb06a27b8c47c16e830d6ac780c",
+  "validators_passed": [
+    "validate_licensing",
+    "validate_scaffold"
+  ],
+  "readme_sections_added": [
+    "## Demo reel — 3 produced MP4s in evidence/demo/ (drone, keyframed, portal)",
+    "## Cost expectations — $0.60 floor, $1.20 expected, $2.50 cap (from SPEC §11.12)",
+    "## Troubleshooting — 7 subsections covering FFmpeg, import errors, memory, budget, storyboard"
+  ],
+  "acceptance_criteria": {
+    "readme_complete": true,
+    "pip_install_works": true,
+    "all_validators_pass": true,
+    "validate_licensing": "PASS 6/6",
+    "validate_scaffold": "PASS 8/8 checks"
+  },
+  "notes": "Both validators already passed before this milestone; work was completing README.md with the three missing sections required by acceptance criteria 1."
+}

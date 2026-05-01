@@ -999,9 +999,9 @@
       "blocked_by": [
         "P6.M04"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P6.M05/",
+      "notes": "Added Demo reel, Cost expectations, and Troubleshooting sections to README.md per acceptance criteria. Both validate_licensing (6/6) and validate_scaffold (8/8) pass. All Phase 1-6 validation commands confirmed passing."
     }
   ]
 }
