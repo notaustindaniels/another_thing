@@ -247,6 +247,83 @@ def cmd_harness(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# cmd_run — director-era manager (default Skill invocation path, §4.3)
+# ---------------------------------------------------------------------------
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    """
+    Run the director-era ProjectManager pipeline.
+
+    This is the **default** action when ``parallax-engine`` is invoked with
+    ``--workspace`` but without a subcommand — i.e. exactly the form produced
+    by ``skill/scripts/run.sh`` (§4.3).
+
+    Reads the brief from ``workspace/brief.md`` (written by the Skill before
+    invoking run.sh per the SKILL.md §4.2 usage instructions).  The ``--brief``
+    flag can also inject a brief directly (it is written to brief.md first).
+
+    Returns
+    -------
+    0 on success (out.mp4 produced); 1 on failure.
+    """
+    from parallax_engine.manager import MAX_TOTAL_BUDGET_USD, ProjectManager
+
+    workspace = Path(getattr(args, "workspace", "workspace")).resolve()
+    workspace.mkdir(parents=True, exist_ok=True)
+
+    brief_path = workspace / "brief.md"
+
+    # If --brief TEXT was given, write it to brief.md first
+    brief_text: str | None = getattr(args, "brief", None)
+    if brief_text:
+        brief_path.write_text(brief_text, encoding="utf-8")
+        print(f"[parallax] Brief written to {brief_path}")
+
+    if not brief_path.exists():
+        print(
+            f"error: {brief_path} not found.\n"
+            "Write your brief to workspace/brief.md before invoking run.sh,\n"
+            "or pass --brief 'Your brief text' on the command line.",
+            file=sys.stderr,
+        )
+        return 1
+
+    budget: str = getattr(args, "budget", "standard") or "standard"
+    resume: bool = bool(getattr(args, "resume", False))
+    dry_run: bool = bool(getattr(args, "dry_run", False))
+
+    # Dollar cap: --max-budget overrides MAX_TOTAL_BUDGET_USD
+    max_budget: float = float(getattr(args, "max_budget", MAX_TOTAL_BUDGET_USD) or MAX_TOTAL_BUDGET_USD)
+
+    print(f"[parallax] Director-era pipeline starting")
+    print(f"[parallax] Workspace: {workspace}")
+    print(f"[parallax] Brief:     {brief_path}")
+    print(f"[parallax] Budget:    {budget}  cap=${max_budget:.2f}")
+    if resume:
+        print("[parallax] Mode: --resume (incremental rebuild)")
+
+    manager = ProjectManager(
+        workspace_dir=workspace,
+        brief_path=brief_path,
+        budget=budget,
+        max_budget_usd=max_budget,
+        dry_run=dry_run,
+    )
+
+    result = manager.run(resume=resume)
+
+    if result.success:
+        print(f"[parallax] Done.  Output: {result.output_path}")
+        return 0
+
+    print("[parallax] Pipeline failed.  Check logs/manager.log for details.", file=sys.stderr)
+    if result.fatal_json_path and Path(result.fatal_json_path).exists():
+        print(f"[parallax] Fatal report: {result.fatal_json_path}", file=sys.stderr)
+    return 1
+
+
+# ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
 
@@ -255,7 +332,87 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="parallax-engine",
         description="parallax-engine: 2.5D multiplane camera animation renderer.",
+        epilog=(
+            "Default invocation (from skill/scripts/run.sh §4.3):\n"
+            "  parallax-engine --workspace ./workspace\n"
+            "  (reads workspace/brief.md and runs the full director pipeline)"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+
+    # ------------------------------------------------------------------
+    # Global options — parsed before any subcommand.
+    # These are used by the default director-era pipeline (run.sh §4.3)
+    # and also made available to subcommands via args inheritance.
+    # ------------------------------------------------------------------
+    parser.add_argument(
+        "--workspace",
+        default="workspace",
+        metavar="DIR",
+        help=(
+            "Root workspace directory (default: ./workspace).  "
+            "Used as the base for brief.md, storyboard.yaml, scenes/, "
+            "assets/, and out.mp4."
+        ),
+    )
+    parser.add_argument(
+        "--brief",
+        default=None,
+        metavar="TEXT",
+        help=(
+            "Natural-language brief.  Written to workspace/brief.md before "
+            "invoking the pipeline.  If omitted, workspace/brief.md must "
+            "already exist (the Skill writes it before calling run.sh)."
+        ),
+    )
+    parser.add_argument(
+        "--budget",
+        default="standard",
+        choices=["thrift", "standard", "premium", "longform"],
+        metavar="TIER",
+        help=(
+            "Budget tier controlling LLM effort and asset quality "
+            "(thrift | standard | premium | longform; default: standard).  "
+            "Maps to --budget in SKILL.md §4.2 Notes."
+        ),
+    )
+    parser.add_argument(
+        "--max-budget",
+        default=None,
+        type=float,
+        metavar="USD",
+        dest="max_budget",
+        help="Hard dollar cap per render (default: 8.00).  Example: --max-budget 5.00",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        default=False,
+        help=(
+            "Resume from an existing storyboard.yaml (§11.11): diff changed "
+            "scenes and rebuild only those, then re-render."
+        ),
+    )
+    parser.add_argument(
+        "--director-mode",
+        dest="director_mode",
+        default=None,
+        choices=["single", "decomposed"],
+        metavar="MODE",
+        help=(
+            "Override the automatic director-mode selector (single | decomposed). "
+            "Normally chosen deterministically from brief duration and budget tier."
+        ),
+    )
+    # Internal flag for tests — not documented in --help
+    parser.add_argument(
+        "--dry-run",
+        dest="dry_run",
+        action="store_true",
+        default=False,
+        help=argparse.SUPPRESS,
+    )
+
     subparsers = parser.add_subparsers(dest="command", metavar="<command>")
 
     # --- render subcommand ---
@@ -288,11 +445,12 @@ def build_parser() -> argparse.ArgumentParser:
     # --- harness subcommand ---
     harness_p = subparsers.add_parser(
         "harness",
-        help="Run the agent harness on a natural-language brief",
+        help="Run the Phase-3 stub harness (smoke test; no LLM API required)",
         description=(
-            "Run the full parallax-engine agent harness (§3, §8.3).  "
-            "In offline/stub mode (no SDK installed), all five subagents "
-            "return canned strings and the run completes without error."
+            "Run the legacy Phase-3 agent harness (§3, §8.3).  "
+            "All five subagents return canned strings; no LLM API key needed.  "
+            "Useful for CI smoke tests.  For production use, omit the subcommand "
+            "and pass --workspace (the Skill's run.sh does this)."
         ),
     )
     harness_p.add_argument(
@@ -333,7 +491,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "harness":
         return cmd_harness(args)
 
-    # No subcommand given
+    # No subcommand: run the director-era pipeline (§4.3 default Skill path).
+    # If no --workspace was given and no brief.md exists in the default workspace,
+    # fall through to help so bare `parallax-engine` still prints usage.
+    workspace_path = Path(args.workspace).resolve()
+    brief_path = workspace_path / "brief.md"
+    brief_text: str | None = getattr(args, "brief", None)
+
+    if brief_text or brief_path.exists():
+        return cmd_run(args)
+
+    # Nothing to do — print help
     parser.print_help()
     return 1
 

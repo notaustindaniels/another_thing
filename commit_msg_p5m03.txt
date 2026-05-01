@@ -1,0 +1,12 @@
+feat(P5.M03): Skill trigger test — run.sh CLI path + packaging verification
+
+- Updated cli.py: global --workspace/--brief/--budget/--resume flags;
+  cmd_run() default behavior (§4.3 run.sh invocation form) runs
+  ProjectManager; no-subcommand path now uses director-era pipeline
+- Added tests/test_skill_packaging.py: 32 tests verifying SKILL.md §4.2
+  template, run.sh §4.3 verbatim, CLI default path, workspace/out.mp4
+  production in dry-run mode (1060 total tests, 0 failures)
+- Validators passed: python tools/validate_licensing.py (6/6 PASS)
+- Evidence: evidence/P5.M03/
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

@@ -1,0 +1,31 @@
+{
+  "milestone_id": "P5.M03",
+  "title": "Skill trigger test: Claude Code session invokes skill on example prompts",
+  "timestamp": "2026-05-01T11:20:00Z",
+  "git_commit": "f12e3c04a331cd7b9eb5dc204309fc6f122ca4a7",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "tests_added": "tests/test_skill_packaging.py (32 tests, all pass)",
+  "implementation_notes": [
+    "Updated parallax_engine/cli.py: added --workspace, --brief, --budget, --max-budget, --resume, --director-mode, --dry-run as global top-level options (§4.3 run.sh invocation pattern)",
+    "Added cmd_run() function: default behavior when no subcommand given — runs ProjectManager pipeline with workspace/brief.md as input",
+    "Backward compatible: harness subcommand unchanged; existing tests pass",
+    "skill/SKILL.md verified verbatim against §4.2 template (12 assertions)",
+    "skill/scripts/run.sh verified verbatim against §4.3 (8 assertions)",
+    "workspace/out.mp4 produced in dry-run mode with pre-seeded storyboard.yaml",
+    "Manual acceptance criteria (Skill trigger in live Claude Code session) documented in claude-progress.txt"
+  ],
+  "acceptance_criteria_status": {
+    "AUTOMATED": [
+      "run.sh executes without error (verified via test_skill_packaging.py::TestOutMp4Produced)",
+      "workspace/out.mp4 is produced (verified in dry-run mode with pre-seeded storyboard.yaml)",
+      "validate_licensing.py exits 0 (6/6 PASS)"
+    ],
+    "MANUAL_REQUIRED": [
+      "Skill triggers on 'Make a 10-second drone flythrough of a redwood forest at golden hour'",
+      "Skill triggers on 'Show a portal in a tree opening into a neon city'",
+      "Instructions: claude skill add ./skill, then ask the example prompt, verify run.sh executes and workspace/out.mp4 is produced"
+    ]
+  }
+}

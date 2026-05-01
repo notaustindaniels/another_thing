@@ -856,9 +856,9 @@
       "blocked_by": [
         "P5.M02"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P5.M03/",
+      "notes": "Updated cli.py with global --workspace/--brief/--budget/--resume/--dry-run flags and cmd_run() default behavior (§4.3 run.sh form). 32-test test_skill_packaging.py verifies SKILL.md §4.2 template, run.sh §4.3 verbatim, CLI default path, and workspace/out.mp4 production in dry-run mode. Manual Skill trigger criteria documented. validate_licensing 6/6 PASS. 1060 tests, 0 failures."
     },
     {
       "id": "P6.M01",

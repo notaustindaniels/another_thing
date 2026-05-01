@@ -1,0 +1,42 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /Users/austin/parallax-skill/.conda-env/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/austin/parallax-skill
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.13.0
+collecting ... collected 32 items
+
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_exists PASSED  [  3%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_has_yaml_frontmatter PASSED [  6%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_name_is_parallax_video PASSED [  9%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_description_covers_trigger_phrases PASSED [ 12%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_usage_section_present PASSED [ 15%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_usage_references_run_sh PASSED [ 18%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_notes_section_present PASSED [ 21%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_notes_no_multi_agent_delegation PASSED [ 25%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_examples_section_present PASSED [ 28%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_example_prompts_match_spec PASSED [ 31%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_no_renderer_code PASSED [ 34%]
+tests/test_skill_packaging.py::TestSkillMD::test_skill_md_budget_override_documented PASSED [ 37%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_exists PASSED      [ 40%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_is_executable PASSED [ 43%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_content_verbatim PASSED [ 46%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_shebang PASSED     [ 50%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_set_euo_pipefail PASSED [ 53%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_workspace_default PASSED [ 56%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_invokes_cli_module PASSED [ 59%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_passes_workspace_flag PASSED [ 62%]
+tests/test_skill_packaging.py::TestRunSh::test_run_sh_passes_remaining_args PASSED [ 65%]
+tests/test_skill_packaging.py::TestCLIDefaultPath::test_cli_exits_1_without_brief_md PASSED [ 68%]
+tests/test_skill_packaging.py::TestCLIDefaultPath::test_cli_parses_workspace_flag_without_subcommand PASSED [ 71%]
+tests/test_skill_packaging.py::TestCLIDefaultPath::test_cli_parses_budget_flag PASSED [ 75%]
+tests/test_skill_packaging.py::TestCLIDefaultPath::test_cli_parses_resume_flag PASSED [ 78%]
+tests/test_skill_packaging.py::TestCLIDefaultPath::test_cli_parses_max_budget_flag PASSED [ 81%]
+tests/test_skill_packaging.py::TestCLIDefaultPath::test_cli_with_brief_flag_runs_pipeline PASSED [ 84%]
+tests/test_skill_packaging.py::TestCLIDefaultPath::test_cli_with_brief_md_runs_pipeline PASSED [ 87%]
+tests/test_skill_packaging.py::TestOutMp4Produced::test_out_mp4_created_after_dry_run PASSED [ 90%]
+tests/test_skill_packaging.py::TestOutMp4Produced::test_manager_log_written PASSED [ 93%]
+tests/test_skill_packaging.py::TestOutMp4Produced::test_out_mp4_path_returned_in_result PASSED [ 96%]
+tests/test_skill_packaging.py::test_validate_licensing_exits_0 PASSED    [100%]
+
+============================== 32 passed in 0.50s ==============================
