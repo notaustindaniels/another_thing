@@ -1,0 +1,217 @@
+"""
+parallax_engine/encode.py — FFmpeg encoder subprocess wrapper (§2.8).
+
+Receives premultiplied-RGBA ``float32`` frames from the render pipeline,
+converts each to ``uint8`` RGBA, and streams them to an FFmpeg subprocess
+that encodes with ``libopenh264`` to an MP4 file.
+
+Encoding parameters (non-negotiable per §2.8 and §7):
+    -c:v libopenh264       — LGPL H.264 codec; Cisco pays MPEG-LA royalties
+    -threads 1             — required for byte-identical (deterministic) output
+    -pix_fmt yuv420p       — standard H.264 chroma sub-sampling
+    -movflags +faststart   — moov atom at start for streaming
+
+Usage
+-----
+Low-level::
+
+    proc = open_encoder(out_path, width, height, fps)
+    for frame_rgba_f32 in frames:
+        write_frame(proc, frame_rgba_f32)
+    close_encoder(proc)
+
+Context manager::
+
+    with Encoder(out_path, width, height, fps) as enc:
+        for frame in frames:
+            enc.write(frame)
+
+SPEC anchors: §2.8, §5.2, §7
+"""
+
+from __future__ import annotations
+
+import subprocess
+from pathlib import Path
+
+import numpy as np
+
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+#: FFmpeg arguments that are non-negotiable (§2.8, §7).
+_ENCODER_ARGS_TEMPLATE = [
+    "ffmpeg", "-y",
+    "-f", "rawvideo",
+    "-pix_fmt", "rgba",
+    # -s and -r inserted at call time
+    "-i", "-",
+    "-c:v", "libopenh264",
+    # -b:v and -g inserted at call time
+    "-pix_fmt", "yuv420p",
+    "-movflags", "+faststart",
+    "-threads", "1",   # determinism guarantee (§7)
+]
+
+
+# ---------------------------------------------------------------------------
+# Low-level API
+# ---------------------------------------------------------------------------
+
+def open_encoder(
+    out_path: str | Path,
+    width: int,
+    height: int,
+    fps: int,
+    bitrate_kbps: int = 8000,
+) -> subprocess.Popen:
+    """
+    Open FFmpeg subprocess for encoding.
+
+    Parameters
+    ----------
+    out_path:
+        Destination MP4 file path.
+    width, height:
+        Frame dimensions in pixels.
+    fps:
+        Output frame rate.
+    bitrate_kbps:
+        Target bitrate in kbps (default 8000 = 8 Mbit/s).
+
+    Returns
+    -------
+    A :class:`subprocess.Popen` object.  Caller must write frames to
+    ``proc.stdin`` and call :func:`close_encoder` when done.
+    """
+    gop = fps * 2   # keyframe interval
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "rawvideo",
+        "-pix_fmt", "rgba",
+        "-s", f"{width}x{height}",
+        "-r", str(fps),
+        "-i", "-",
+        "-c:v", "libopenh264",
+        "-b:v", f"{bitrate_kbps}k",
+        "-g", str(gop),
+        "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart",
+        "-threads", "1",   # determinism (§7)
+        str(out_path),
+    ]
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.PIPE)
+    return proc
+
+
+def write_frame(proc: subprocess.Popen, frame_f32: np.ndarray) -> None:
+    """
+    Write one frame to the encoder.
+
+    Parameters
+    ----------
+    proc:
+        Open encoder process returned by :func:`open_encoder`.
+    frame_f32:
+        ``(H, W, 4)`` float32 premultiplied RGBA in ``[0.0, 1.0]``.
+        Values are clipped before conversion.
+    """
+    frame_u8 = (np.clip(frame_f32, 0.0, 1.0) * 255.0).astype(np.uint8)
+    proc.stdin.write(frame_u8.tobytes())  # type: ignore[union-attr]
+
+
+def close_encoder(proc: subprocess.Popen) -> None:
+    """
+    Close the encoder subprocess and wait for it to finish.
+
+    Closes stdin (signals end-of-stream to FFmpeg) then waits for the
+    process to exit.
+
+    Raises
+    ------
+    RuntimeError
+        If FFmpeg exits with a non-zero return code.
+    """
+    # Close stdin to signal EOF to FFmpeg, wait for it to finish,
+    # then read any stderr output for diagnostics.
+    if proc.stdin and not proc.stdin.closed:
+        proc.stdin.close()  # type: ignore[union-attr]
+    proc.wait()
+    stderr_bytes = b""
+    if proc.stderr:
+        try:
+            stderr_bytes = proc.stderr.read()
+        except Exception:
+            pass
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"FFmpeg exited with code {proc.returncode}:\n"
+            + (stderr_bytes.decode("utf-8", errors="replace") if stderr_bytes else "")
+        )
+
+
+# ---------------------------------------------------------------------------
+# Context-manager wrapper
+# ---------------------------------------------------------------------------
+
+class Encoder:
+    """
+    Context-manager wrapper around the FFmpeg encoder subprocess.
+
+    Ensures ``close_encoder`` is always called even if the render loop
+    raises an exception.
+
+    Example::
+
+        with Encoder("out.mp4", 1920, 1080, 30) as enc:
+            for frame in frames:
+                enc.write(frame)
+    """
+
+    def __init__(
+        self,
+        out_path: str | Path,
+        width: int,
+        height: int,
+        fps: int,
+        bitrate_kbps: int = 8000,
+    ) -> None:
+        self.out_path = out_path
+        self.width = width
+        self.height = height
+        self.fps = fps
+        self.bitrate_kbps = bitrate_kbps
+        self._proc: subprocess.Popen | None = None
+
+    def __enter__(self) -> "Encoder":
+        self._proc = open_encoder(
+            self.out_path, self.width, self.height,
+            self.fps, self.bitrate_kbps,
+        )
+        return self
+
+    def write(self, frame_f32: np.ndarray) -> None:
+        """Write one premultiplied float32 RGBA frame."""
+        assert self._proc is not None, "Encoder not started"
+        write_frame(self._proc, frame_f32)
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        if self._proc is not None:
+            try:
+                if exc_type is None:
+                    # Normal exit: close stdin + wait + check return code
+                    close_encoder(self._proc)
+                else:
+                    # Error path: close stdin gracefully; don't raise on FFmpeg error
+                    try:
+                        if self._proc.stdin and not self._proc.stdin.closed:
+                            self._proc.stdin.close()  # type: ignore[union-attr]
+                        self._proc.wait(timeout=5)
+                    except Exception:
+                        pass
+            finally:
+                self._proc = None
+        return False   # do not suppress exceptions

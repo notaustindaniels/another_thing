@@ -181,9 +181,9 @@
         "P1.M04",
         "P1.M05"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P1/P1.M06/",
+      "notes": "Session 3. render.py: full §2.5 pipeline, SVG cache (sha256+size+VERSION), per-layer post (DOF blur cv2.GaussianBlur + depth fade), near-cull, mask compositing (L2 rule), global post (vignette→grain→light_leaks→fisheye→color_grade pinned order). SVG rasterization via rsvg-convert CLI fallback (§5.3). encode.py: FFmpeg subprocess (-c:v libopenh264, -threads 1, RGBA stdin pipe). Grain seeded from SeedSequence(seed).spawn(GRAIN_CHANNEL).spawn(n_frames)[frame_idx]. Determinism verified. PIL 9.5.0 (cp311) installed. 250/250 total tests pass."
     },
     {
       "id": "P1.M07",
