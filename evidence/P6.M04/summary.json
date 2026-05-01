@@ -1,0 +1,86 @@
+{
+  "milestone_id": "P6.M04",
+  "milestone_title": "Demo reel: 3-5 produced MP4s across all three behavior families",
+  "timestamp": "2026-05-01T13:55:00Z",
+  "git_commit": "e997408",
+  "validators_passed": [
+    "python tools/validate_licensing.py"
+  ],
+  "acceptance_criteria": {
+    "at_least_3_demos": {
+      "status": "PASS",
+      "count": 3,
+      "files": [
+        "evidence/demo/demo_a.mp4",
+        "evidence/demo/demo_b.mp4",
+        "evidence/demo/demo_c.mp4"
+      ]
+    },
+    "one_per_behavior_family": {
+      "status": "PASS",
+      "coverage": {
+        "drone-FPV": "demo_a.mp4 — §11.4.1 forest flythrough with bezier path, POI lookahead, spring damping, bank from velocity, fisheye, grain",
+        "biome-wipe": "demo_b.mp4 — §11.4.2 keyframed pan across 4 depth planes, rightward parallax reveal",
+        "portal": "demo_c.mp4 — §11.4.3 portal transition with perspective mask growth, in-front-of-mask rule"
+      }
+    },
+    "each_at_least_6_seconds": {
+      "status": "PASS",
+      "durations_s": {
+        "demo_a": 8.0,
+        "demo_b": 8.0,
+        "demo_c": 8.0
+      }
+    },
+    "validate_licensing_exits_0": {
+      "status": "PASS"
+    }
+  },
+  "demo_details": [
+    {
+      "id": "demo_a",
+      "file": "evidence/demo/demo_a.mp4",
+      "family": "drone-FPV",
+      "spec_anchor": "§11.4.1 / §1.3",
+      "scene_yaml": "tests/scenes/demo_a.yaml",
+      "seed": 20001,
+      "resolution": [192, 108],
+      "fps": 10,
+      "duration_s": 8.0,
+      "frames": 80,
+      "mp4_size_bytes": 455699,
+      "render_time_s": 106.4,
+      "highlights": ["bezier drone path", "POI lookahead", "spring-damped smoothing", "bank from velocity", "fisheye k1=0.20", "grain sigma=4", "depth-of-field blur", "vignette"]
+    },
+    {
+      "id": "demo_b",
+      "file": "evidence/demo/demo_b.mp4",
+      "family": "biome-wipe",
+      "spec_anchor": "§11.4.2 / §1.3",
+      "scene_yaml": "tests/scenes/demo_b.yaml",
+      "seed": 20002,
+      "resolution": [192, 108],
+      "fps": 10,
+      "duration_s": 8.0,
+      "frames": 80,
+      "mp4_size_bytes": 167456,
+      "render_time_s": 1.4,
+      "highlights": ["keyframed camera", "rightward pan 7800 world-units", "5-layer depth stack", "grain sigma=2", "vignette"]
+    },
+    {
+      "id": "demo_c",
+      "file": "evidence/demo/demo_c.mp4",
+      "family": "portal",
+      "spec_anchor": "§11.4.3 / §1.3",
+      "scene_yaml": "tests/scenes/demo_c.yaml",
+      "seed": 20003,
+      "resolution": [192, 108],
+      "fps": 10,
+      "duration_s": 8.0,
+      "frames": 80,
+      "mp4_size_bytes": 316976,
+      "render_time_s": 59.7,
+      "highlights": ["world-anchored portal mask", "perspective growth", "in-front-of-mask rule", "two-stack compositing", "near-cull handoff", "fisheye k1=0.15", "grain sigma=3"]
+    }
+  ]
+}

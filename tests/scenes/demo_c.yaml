@@ -1,0 +1,59 @@
+# parallax-scene v1 — Demo reel C: portal transition (§11.4.3 / §1.3)
+# Demonstrates the portal behavior family: world-anchored mask with perspective
+# growth, in-front-of-mask rule, near-cull handoff, stack compositing.
+# 8 seconds at 192x108 10fps = 80 frames.  seed=20003.
+version: 1
+meta:
+  duration_s: 8.0
+  fps: 10
+  resolution: [192, 108]
+  perspective_px: 1200
+  origin: [96, 54]
+  bg_color: "#000000"
+  seed: 20003
+
+stacks:
+  forest:
+    layers:
+      - { id: sky,         src: assets/sky.svg,         scene_xyz: [0, 0, -10500], plate_size: [3840, 2160] }
+      - { id: trees_far,   src: assets/trees_far.svg,   scene_xyz: [0, 0, -8500],  plate_size: [3840, 2160] }
+      - { id: trees_mid,   src: assets/trees_mid.svg,   scene_xyz: [0, 0, -6500],  plate_size: [3840, 2160] }
+      - { id: portal_tree, src: assets/portal_tree.svg, scene_xyz: [0, 0, -4500],  plate_size: [3840, 2160], svg_paint_id: silhouette }
+      - { id: leaves_mid,  src: assets/leaves_mid.svg,  scene_xyz: [0, 0, -2500],  plate_size: [3840, 2160] }
+      - { id: leaves_fg,   src: assets/leaves_fg.svg,   scene_xyz: [0, 0, -500],   plate_size: [3840, 2160] }
+  city:
+    layers:
+      - { id: city_sky,  src: assets/city_sky.svg,  scene_xyz: [0, 0, -10500], plate_size: [3840, 2160] }
+      - { id: city_far,  src: assets/city_far.svg,  scene_xyz: [0, 0, -7000],  plate_size: [3840, 2160] }
+      - { id: city_near, src: assets/city_near.svg, scene_xyz: [0, 0, -3500],  plate_size: [3840, 2160] }
+
+# Drone path: slow approach, pass through portal, arrive in city world
+camera:
+  mode: drone
+  drone:
+    path:
+      kind: bezier
+      controls: [[0, 0, 0], [20, 5, -1500], [-15, -5, -3000], [5, 2, -4200]]
+      duration_s: 8.0
+    poi_lookahead_s: 0.50
+    spring_halflife_s: 0.20
+    noise: { z_amp: 18, xy_amp: 5, hz: 0.6 }
+    bank_from_velocity: 0.25
+
+masks:
+  - id: portal
+    path_svg: assets/portal_tree.svg
+    silhouette_id_in_svg: silhouette
+    path_id_in_svg: hole
+    attached_to_layer: forest.portal_tree
+    anchor: world
+    src_stack: forest
+    dest_stack: city
+    matte: alpha
+    growth: { kind: perspective }
+
+post:
+  global:
+    vignette: { strength: 0.45, radius: 0.85 }
+    grain:    { sigma: 3 }
+    fisheye:  { k1: 0.15 }

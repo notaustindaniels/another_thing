@@ -971,9 +971,9 @@
       "blocked_by": [
         "P6.M03"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P6.M04/",
+      "notes": "Three 8s demo MP4s in evidence/demo/: demo_a (forest drone-FPV, 106s render), demo_b (biome keyframed pan, 1.4s render), demo_c (portal transition, 60s render). All at 192x108 10fps 8s = 80 frames. Covers all three behavior families: drone-FPV, biome-wipe, portal."
     },
     {
       "id": "P6.M05",

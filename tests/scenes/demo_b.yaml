@@ -1,0 +1,45 @@
+# parallax-scene v1 — Demo reel B: 4-biome explainer / keyframed pan (§11.4.2 / §1.3)
+# Demonstrates the biome-wipe behavior family: keyframed camera with rightward
+# travel through layered depth planes, representing a world journey.
+# 8 seconds at 192x108 10fps = 80 frames.  seed=20002.
+version: 1
+meta:
+  duration_s: 8.0
+  fps: 10
+  resolution: [192, 108]
+  perspective_px: 1200
+  origin: [96, 54]
+  bg_color: "#e8d8a8"
+  seed: 20002
+
+stacks:
+  biome:
+    layers:
+      - { id: sky,        src: assets/sky_dawn.svg,   scene_xyz: [0, 0, -10000], plate_size: [3840, 2160] }
+      - { id: mountains,  src: assets/mountains.svg,  scene_xyz: [0, 0, -7000],  plate_size: [3840, 2160], post: { dof_blur_px: 3, depth_fade: 0.25 } }
+      - { id: trees_far,  src: assets/trees_far.svg,  scene_xyz: [0, 0, -5000],  plate_size: [3840, 2160] }
+      - { id: trees_mid,  src: assets/trees_mid.svg,  scene_xyz: [0, 0, -3000],  plate_size: [3840, 2160] }
+      - { id: leaves_mid, src: assets/leaves_mid.svg, scene_xyz: [0, 0, -1200],  plate_size: [3840, 2160] }
+
+# Keyframed pan: accelerate right across 8000 world-units over 8 seconds
+# This demonstrates parallax depth separation as layers at different z
+# shift at different rates relative to the camera.
+camera:
+  mode: keyframed
+  keyframed:
+    - { t: 0.0, x:    0.0, y:  0.0, z: 0.0 }
+    - { t: 1.0, x:  500.0, y:  0.0, z: 0.0 }
+    - { t: 2.0, x: 1200.0, y:  0.0, z: 0.0 }
+    - { t: 3.0, x: 2200.0, y:  0.0, z: 0.0 }
+    - { t: 4.0, x: 3500.0, y:  0.0, z: 0.0 }
+    - { t: 5.0, x: 4800.0, y:  0.0, z: 0.0 }
+    - { t: 6.0, x: 6000.0, y:  0.0, z: 0.0 }
+    - { t: 7.0, x: 7000.0, y:  0.0, z: 0.0 }
+    - { t: 8.0, x: 7800.0, y:  0.0, z: 0.0 }
+
+masks: []
+
+post:
+  global:
+    vignette: { strength: 0.3, radius: 0.90 }
+    grain:    { sigma: 2 }
