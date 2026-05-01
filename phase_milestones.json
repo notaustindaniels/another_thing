@@ -800,9 +800,9 @@
         "P4_5.M06",
         "P4_5.M07"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P5.M01/",
+      "notes": "Trimmed SKILL.md to exactly the §4.2 verbatim template (prior session had added Director-Era Flags section). run.sh already correct and executable. All 4 acceptance criteria met; validate_licensing 6/6 PASS."
     },
     {
       "id": "P5.M02",

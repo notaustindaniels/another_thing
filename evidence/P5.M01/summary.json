@@ -1,0 +1,16 @@
+{
+  "milestone_id": "P5.M01",
+  "title": "skill/SKILL.md + skill/scripts/run.sh — verbatim from §4.2 and §4.3",
+  "timestamp": "2026-05-01T00:00:00Z",
+  "git_commit": "37da275056e8f3515ec905d03300d1039a884ab6",
+  "validators_passed": [
+    "validate_licensing"
+  ],
+  "acceptance_criteria_met": [
+    "skill/SKILL.md exists and matches §4.2 template exactly (name, description, usage, notes, examples)",
+    "skill/scripts/run.sh is executable (-rwxr-xr-x) and invokes python -m parallax_engine.cli",
+    "SKILL.md does not contain multi-agent prompts or renderer code — thin wrapper only",
+    "validate_licensing.py exits 0 (6/6 checks passed)"
+  ],
+  "notes": "Trimmed skill/SKILL.md to exactly the §4.2 verbatim template. Prior session had added Director-Era Flags section which violated 'verbatim' requirement. run.sh already correct and executable from session 17."
+}
