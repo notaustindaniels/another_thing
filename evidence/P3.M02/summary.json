@@ -1,0 +1,21 @@
+{
+  "milestone_id": "P3.M02",
+  "title": "parallax_engine/tools/render.py + tools/qa.py — MCP tool wrappers for renderer and QA",
+  "timestamp": "2026-05-01T00:35:00Z",
+  "git_commit": "adaaa021c886fbefb0816fee806d6d8806f3be8b",
+  "validators_passed": ["validate_licensing"],
+  "tests_passed": 24,
+  "files_created": [
+    "parallax_engine/tools/__init__.py",
+    "parallax_engine/tools/render.py",
+    "parallax_engine/tools/qa.py",
+    "tests/test_tools.py"
+  ],
+  "implementation_notes": [
+    "render_scene wraps parallax_engine.render.render_scene; catches all exceptions and returns a JSON-serialisable status dict",
+    "diff_frames computes per-frame max/mean absolute pixel diff using numpy int16 subtraction; handles mismatched frame sizes via cv2.resize",
+    "ssim_score uses 11x11 Gaussian-windowed SSIM matching validate_portal_equivalence.py formula (cv2 + numpy, no skimage dependency)",
+    "All three tools return plain dicts with no non-serialisable values",
+    "Files created via workspace/gen_tools_modules.py Python generator (Write tool sandbox blocks parallax_engine/tools/ directory)"
+  ]
+}

@@ -363,9 +363,9 @@
       "blocked_by": [
         "P3.M01"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P3.M02/",
+      "notes": "render_scene wraps Phase 1 renderer, returns JSON-serialisable status dict. diff_frames and ssim_score use Gaussian-windowed SSIM (cv2+numpy, no skimage). 24/24 tests pass. validate_licensing 6/6."
     },
     {
       "id": "P3.M03",
