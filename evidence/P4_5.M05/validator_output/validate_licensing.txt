@@ -1,0 +1,15 @@
+[validate_licensing] 6 checks
+  PASS  self_consistency  (0.0ms)
+        validator constants are internally consistent
+  PASS  declared_dependencies  (1.6ms)
+        all declared deps allowed
+  PASS  installed_distributions  (12.0ms)
+        no forbidden distributions installed
+  PASS  source_imports  (118.5ms)
+        no forbidden imports
+  PASS  text_artifacts  (8.0ms)
+        no forbidden strings in scanned text files
+  PASS  system_ffmpeg  (39.1ms)
+        ffmpeg at /Users/austin/parallax-skill/.conda-env/bin/ffmpeg; libopenh264=True, libx264=False, libx265=False
+
+[validate_licensing] 6/6 checks passed

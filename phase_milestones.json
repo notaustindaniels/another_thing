@@ -708,9 +708,9 @@
       "blocked_by": [
         "P4_5.M04"
       ],
-      "passes": false,
-      "evidence": null,
-      "notes": null
+      "passes": true,
+      "evidence": "evidence/P4_5.M05/",
+      "notes": "Implemented parallax_engine/scene/merger.py — pure Python, no LLM. merge(fragment_dir, storyboard, output_dir=None) loads scene_N.yaml fragments, validates coverage + transition pairing (biome_wipe and portal_reveal) at both storyboard and fragment level, computes cumulative start_t offsets, propagates palette from storyboard.visual_vocabulary, writes scene.yaml + scene.merge.log.json. MergeError raised with bullet-list of all violations. 53 new tests (878 total), all passing."
     },
     {
       "id": "P4_5.M06",

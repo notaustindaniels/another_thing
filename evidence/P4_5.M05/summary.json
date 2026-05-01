@@ -1,0 +1,26 @@
+{
+  "milestone_id": "P4_5.M05",
+  "title": "scene/merger.py — deterministic Python merger (no LLM) producing final scene.yaml",
+  "timestamp": "2026-05-01T09:00:00Z",
+  "git_commit": "7d45cbead807c6cd1e4f281bed7b8d81142374c2",
+  "validators_passed": [
+    "validate_licensing"
+  ],
+  "tests_added": 53,
+  "total_tests": 878,
+  "modules_created": [
+    "parallax_engine/scene/merger.py"
+  ],
+  "modules_updated": [
+    "parallax_engine/scene/__init__.py"
+  ],
+  "key_decisions": [
+    "merge() accepts fragment_dir (containing scene_N.yaml files) + Storyboard; returns (merged_dict, log_dict)",
+    "Two levels of transition-pairing validation: storyboard-level (Pydantic models) + fragment-level (raw dicts)",
+    "output_dir=None means no file I/O; when provided writes scene.yaml + scene.merge.log.json",
+    "start_t offsets computed as cumulative sum of fragment duration_s values",
+    "Palette promoted from storyboard.visual_vocabulary to project block (§11.6.5)",
+    "Pure Python — no LLM calls, no anthropic import (§11.13 anti-pattern 12)",
+    "MergeError raised with bullet-list of all violations found (not just first)"
+  ]
+}

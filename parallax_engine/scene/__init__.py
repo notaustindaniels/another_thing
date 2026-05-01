@@ -57,6 +57,12 @@ from parallax_engine.scene.designer import (
     SceneFragment,
 )
 
+# ── Scene-merger (§11.6.5, P4_5.M05) ────────────────────────────────────────
+from parallax_engine.scene.merger import (
+    MergeError,
+    merge,
+)
+
 __all__ = [
     # Renderer schema
     "BezierPath",
@@ -92,4 +98,7 @@ __all__ = [
     "SceneDesignerOutput",
     "SceneDesignerStub",
     "SceneFragment",
+    # Scene-merger
+    "MergeError",
+    "merge",
 ]
