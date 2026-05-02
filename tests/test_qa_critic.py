@@ -226,35 +226,38 @@ class TestCritiqueStoryboard:
 
 
 # ---------------------------------------------------------------------------
-# critique() — offline stub (no API key, no dry_run)
+# critique() — no credentials (no API key, no dry_run) raises RuntimeError
 # ---------------------------------------------------------------------------
 
 
 class TestCritiqueOfflineStub:
-    def test_asset_without_api_key_returns_pass(
+    def test_asset_raises_when_no_credentials(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """When no API key is set, the stub PASS is returned."""
+        """When neither credential env var is set, critique() raises RuntimeError."""
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
-        result = critique("asset", workspace_dir=tmp_path, dry_run=False)
-        assert result.verdict == "pass"
+        with pytest.raises(RuntimeError, match="no credentials"):
+            critique("asset", workspace_dir=tmp_path, dry_run=False)
 
-    def test_scene_without_api_key_returns_pass(
+    def test_scene_raises_when_no_credentials(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
-        result = critique("scene", workspace_dir=tmp_path, dry_run=False)
-        assert result.verdict == "pass"
+        with pytest.raises(RuntimeError, match="no credentials"):
+            critique("scene", workspace_dir=tmp_path, dry_run=False)
 
-    def test_storyboard_without_api_key_returns_pass(
+    def test_storyboard_raises_when_no_credentials(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
-        result = critique("storyboard", workspace_dir=tmp_path, dry_run=False)
-        assert result.verdict == "pass"
+        with pytest.raises(RuntimeError, match="no credentials"):
+            critique("storyboard", workspace_dir=tmp_path, dry_run=False)
 
 
 # ---------------------------------------------------------------------------

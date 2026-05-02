@@ -382,6 +382,10 @@ class ProjectManager:
             # Write storyboard.yaml
             sb_path = self.workspace_dir / "storyboard.yaml"
             sb_path.write_text(yaml.dump(sb.model_dump()), encoding="utf-8")
+            # Persist casting.yaml so scene-designer's resolver can populate
+            # canonical_description from the casting bible (designer.py:498-505).
+            from parallax_engine.casting.bible import CastingBible
+            CastingBible(self.workspace_dir / "casting.yaml").write_entries(sb.casting)
             self._log("director complete", extra={"scenes": len(sb.scenes)})
             return sb
         except Exception as exc:
@@ -449,10 +453,16 @@ class ProjectManager:
                 prior_fragments=prior_fragments,
                 scene_index=scene_index,
             )
-            # Write fragment
+            # Write fragment + manifest (asset-generator reads manifest from this file
+            # via _collect_manifest_entries; without it, no assets are produced).
             frag_path = self.workspace_dir / "scenes" / f"scene_{scene_index:02d}.yaml"
-            frag_path.write_text(yaml.dump(output.fragment.model_dump()), encoding="utf-8")
-            self._log("scene designer OK", extra={"scene_index": scene_index})
+            combined = output.fragment.model_dump()
+            combined["manifest"] = [m.model_dump() for m in output.manifest]
+            frag_path.write_text(yaml.dump(combined), encoding="utf-8")
+            self._log(
+                "scene designer OK",
+                extra={"scene_index": scene_index, "n_manifest": len(output.manifest)},
+            )
             return True
         except Exception as exc:
             self._log("scene designer error", extra={"scene_index": scene_index, "error": str(exc)})
@@ -584,8 +594,68 @@ class ProjectManager:
                 pass
         return entries
 
+    _ASPECT_TO_RES: dict[str, tuple[int, int]] = {
+        "9:16": (1080, 1920),
+        "16:9": (1920, 1080),
+        "1:1": (1080, 1080),
+    }
+
+    def _split_to_single_scene(
+        self,
+        scene_dict: dict[str, Any],
+        project_dict: dict[str, Any],
+        scene_idx: int,
+    ) -> dict[str, Any]:
+        """Derive a Phase-1 single-scene dict from a merged-scene fragment + project block.
+
+        The merger emits multi-scene format ({project, scenes, version}) per SPEC §11.6.5,
+        but the Phase-1 renderer requires single-scene format (version + meta + stacks +
+        camera + masks + post). Bridge them here.
+        """
+        fps = int(project_dict.get("fps", 30))
+        aspect = project_dict.get("aspect_ratio", "16:9")
+        width, height = self._ASPECT_TO_RES.get(aspect, (1920, 1080))
+        palette = project_dict.get("palette", {})
+        bg = (palette.get("neutrals") or palette.get("primary") or ["#000000"])[0]
+
+        # ── Inject defaults for renderer-required fields the scene-designer prompt
+        #    doesn't mention. Only fills missing keys — never overwrites scene-designer
+        #    output. (Renderer schema vs scene-designer prompt drift; full
+        #    reconciliation deferred to post-first-render hardening.)
+        camera = dict(scene_dict.get("camera", {}))
+        if camera.get("mode") == "drone" and isinstance(camera.get("drone"), dict):
+            drone = dict(camera["drone"])
+            if "noise" not in drone:
+                drone["noise"] = {"z_amp": 10.0, "xy_amp": 3.0, "hz": 0.5}
+            camera["drone"] = drone
+
+        return {
+            "version": 1,
+            "meta": {
+                "duration_s": float(scene_dict["duration_s"]),
+                "fps": fps,
+                "resolution": [width, height],
+                "perspective_px": 1200,
+                "origin": [width / 2, height / 2],
+                "bg_color": bg,
+                "seed": (hash((project_dict.get("title", ""), scene_idx)) & 0x7FFFFFFF) or 1,
+            },
+            "stacks": scene_dict.get("stacks", {}),
+            "camera": camera,
+            "masks": scene_dict.get("masks", []),
+            "post": scene_dict.get("post"),
+        }
+
     def _run_renderer(self, result: RunResult) -> bool:
-        """Invoke the renderer.  Returns True on success."""
+        """Render each scene from merged scene.yaml, then ffmpeg-concat into out.mp4.
+
+        The merger produces multi-scene scene.yaml ({project, scenes, version}) per
+        SPEC §11.6.5, but the Phase-1 renderer (parallax_engine.render.render_scene)
+        consumes single-scene format. We bridge here: derive a single-scene dict per
+        merged scene via _split_to_single_scene(), render each to scene_NN.mp4, then
+        ffmpeg-concat into the final out.mp4. Hard cuts only — dissolve transitions
+        are not honoured (xfade is deferred).
+        """
         if self.dry_run:
             # Stub: write a placeholder out.mp4
             out_path = self.workspace_dir / "out.mp4"
@@ -593,7 +663,10 @@ class ProjectManager:
                 out_path.write_bytes(b"")
             return True
 
+        import subprocess
+
         try:
+            from parallax_engine.encode import _ffmpeg_binary
             from parallax_engine.tools.render import render_scene
 
             scene_path = self.workspace_dir / "scene.yaml"
@@ -601,10 +674,84 @@ class ProjectManager:
                 self._log("renderer: scene.yaml not found")
                 return False
 
+            merged = yaml.safe_load(scene_path.read_text(encoding="utf-8")) or {}
+            project = merged.get("project", {})
+            scenes = merged.get("scenes", [])
+            if not scenes:
+                self._log("renderer: no scenes in merged scene.yaml")
+                return False
+
+            per_scene_mp4s: list[Path] = []
+            tmp_out = self.workspace_dir / "out.mp4"
+            for i, scene_dict in enumerate(scenes, 1):
+                single = self._split_to_single_scene(scene_dict, project, i)
+                single_path = self.workspace_dir / "scenes" / f"scene_{i:02d}.render.yaml"
+                single_path.write_text(yaml.dump(single), encoding="utf-8")
+
+                # render_scene wrapper always writes to workspace_dir/out.mp4 — clear
+                # any stale file, render, then move to per-scene name before next loop.
+                if tmp_out.exists():
+                    tmp_out.unlink()
+                res = render_scene(str(single_path), str(self.workspace_dir))
+                if not res.get("ok"):
+                    self._log(
+                        "per-scene render failed",
+                        extra={"scene_index": i, "message": str(res.get("message", ""))[:500]},
+                    )
+                    return False
+                if not tmp_out.exists() or tmp_out.stat().st_size == 0:
+                    self._log(
+                        "per-scene render produced no output",
+                        extra={"scene_index": i},
+                    )
+                    return False
+                per_scene_mp4 = self.workspace_dir / f"scene_{i:02d}.mp4"
+                tmp_out.rename(per_scene_mp4)
+                per_scene_mp4s.append(per_scene_mp4)
+                self._log(
+                    "per-scene render OK",
+                    extra={"scene_index": i, "size_bytes": per_scene_mp4.stat().st_size},
+                )
+
+            # FFmpeg concat (hard cuts; transitions handled per-scene already).
+            list_file = self.workspace_dir / "concat_list.txt"
+            list_file.write_text(
+                "\n".join(f"file '{p}'" for p in per_scene_mp4s) + "\n",
+                encoding="utf-8",
+            )
             out_path = self.workspace_dir / "out.mp4"
-            render_scene(str(scene_path), str(out_path))
-            self._log("renderer OK", extra={"output": str(out_path)})
+            subprocess.run(
+                [
+                    _ffmpeg_binary(), "-y",
+                    "-f", "concat", "-safe", "0",
+                    "-i", str(list_file),
+                    "-c", "copy",
+                    str(out_path),
+                ],
+                check=True,
+                capture_output=True,
+            )
+            if not out_path.exists() or out_path.stat().st_size == 0:
+                self._log("ffmpeg concat produced no output")
+                return False
+            self._log(
+                "renderer OK",
+                extra={
+                    "output": str(out_path),
+                    "size_bytes": out_path.stat().st_size,
+                    "n_scenes": len(scenes),
+                },
+            )
             return True
+        except subprocess.CalledProcessError as exc:
+            self._log(
+                "ffmpeg concat failed",
+                extra={
+                    "returncode": exc.returncode,
+                    "stderr": exc.stderr.decode("utf-8", errors="replace")[:500] if exc.stderr else "",
+                },
+            )
+            return False
         except Exception as exc:
             self._log("renderer error", extra={"error": str(exc)})
             return False

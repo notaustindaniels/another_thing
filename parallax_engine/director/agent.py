@@ -181,7 +181,24 @@ class _AnthropicClient:
                 "parallax-engine director: 'anthropic' package is not installed. "
                 "Install it with: pip install anthropic"
             ) from exc
-        self._client = anthropic.Anthropic()  # type: ignore[attr-defined]
+        import os
+        openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        oauth_token = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
+        if openrouter_key:
+            self._client = anthropic.Anthropic(  # type: ignore[attr-defined]
+                base_url="https://openrouter.ai/api",
+                auth_token=openrouter_key,
+            )
+        elif api_key:
+            self._client = anthropic.Anthropic(api_key=api_key)  # type: ignore[attr-defined]
+        elif oauth_token:
+            self._client = anthropic.Anthropic(auth_token=oauth_token)  # type: ignore[attr-defined]
+        else:
+            raise RuntimeError(
+                "parallax-engine director: no credentials found. "
+                "Set OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or CLAUDE_CODE_OAUTH_TOKEN."
+            )
 
     def complete(
         self,

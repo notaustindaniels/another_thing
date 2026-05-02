@@ -1828,3 +1828,204 @@ Final validation state:
 
 There is no next session milestone. The harness should detect build
 completion (all milestones passes=true) and end cleanly.
+
+## Session 24 (2026-05-02) — debugging session, not milestone work
+
+Real-render debugging session (audit-driven). No milestones touched.
+Findings recorded for future work.
+
+### Meta-observation: integration glue is the consistent failure surface
+
+Across this session, **six distinct production-blocking bugs** were uncovered,
+all of the same shape: component A produces an output, component B expects it,
+and the orchestrator (manager.py or its immediate handoffs) drops or
+mishandles the handoff. Every component passes its unit tests in isolation;
+every integration is unverified against real outputs.
+
+This is empirical confirmation of the original audit's central finding: the
+build's "completeness" is an artifact of which paths the validation strategy
+actually exercised. Stub-shaped tests cannot detect missing wiring between
+real components, because with stubs the integration glue never has to exist.
+
+**Iteration cap: 8 total bug-fix cycles before pivoting to a different
+strategy.** Recorded so future sessions don't keep grinding indefinitely on
+the same architectural pattern. If we're not producing a recognisable
+parallax MP4 by the 8th cycle, the right move is to step back from
+incremental patches and consider whether the agent pipeline itself needs to
+be rebuilt from a different foundation.
+
+1. **`cmd_harness` was never replaced by `cmd_run`.** Operators reaching
+   for `python -m parallax_engine harness ...` hit a stub-only path that
+   pre-seeds scene.yaml and pre-writes the RENDER_DONE checkpoint. The
+   real entry point (`cmd_run`, invoked with no subcommand) existed but
+   was reachable only via the Skill wrapper or by knowing not to type
+   "harness". See the original audit for full detail.
+
+2. **`tests/test_auth.py:42-46` `_remove_auth_vars()` mutates `os.environ`
+   directly** instead of using `monkeypatch.delenv`. Pollutes process env
+   for every subsequent test in the same pytest invocation. The
+   pre-existing silent-degradation paths in `gen_image` (placeholder
+   fallback) and `qa.critic` (stub PASS) masked it. Surfaced only when
+   those silent fallbacks were tightened to raise on missing credentials.
+
+3. **`manager.py:_invoke_director()` writes `storyboard.yaml` but not
+   `casting.yaml`.** The line-297 comment literally says
+   `"# Step 1: Director → storyboard.yaml + casting.yaml"`, but only the
+   storyboard write was implemented. Scene-designer's resolver depends on
+   `casting.yaml` to populate `canonical_description` for
+   `produce_canonical` manifest entries; without the file, every such
+   entry fails Pydantic validation. Fixed in this session.
+
+4. **`manager.py:_invoke_scene_designer()` drops the manifest.** Wrote
+   only `output.fragment.model_dump()` to `scenes/scene_NN.yaml`,
+   discarding `output.manifest` (the entire reason scene-designer exists
+   from the asset-generator's perspective). Then
+   `_collect_manifest_entries` reads each scene file looking for a
+   `manifest` key — always finds `[]` — asset-generator iterates over
+   nothing — no assets created — no error logged. Fixed in this session.
+
+5. **Renderer wrapper called with wrong signature; return value
+   discarded.** `tools/render.py:render_scene(scene_yaml_path, workspace)`
+   was called by `manager._run_renderer()` as
+   `render_scene(scene_path_str, out_path_str)` — passing the output
+   path as the *workspace* argument. The wrapper "never raises; all
+   exceptions are caught and reported in the status dict" (its own
+   docstring) so the manager saw no exception and unconditionally
+   logged `"renderer OK"` while no MP4 was produced. Fixed in this
+   session by passing `workspace_dir`, checking `res["ok"]`, and
+   verifying `out_path` exists with non-zero size.
+
+6. **QA tiers pass vacuously when there's nothing to evaluate.**
+   `_run_asset_qa` iterates over the (empty) manifest list and computes
+   `all([]) == True`. `_run_scene_qa` calls the QA Sonnet judge on
+   fragments with no rendered frames; the judge has no signal to fail
+   on and returns `pass`. Result: pipeline reports
+   `success: true` and `result.output_path = workspace_dir / "out.mp4"`
+   even when the file doesn't exist. **Deferred** to post-first-render
+   hardening (see below) — fixing QA strictness while we still don't
+   know if the render works adds risk for no benefit; right now QA is
+   hiding what would be a louder failure, but it's not blocking
+   anything.
+
+### Why the regression tests didn't catch any of these
+
+Phase 4 e2e tests (`tests/test_harness_e2e.py`) and Phase 6 regression
+tests (`tests/integration/test_storyboard_ci.py`,
+`tests/integration/test_e2e_storyboards.py`) all run with stubs
+(`ClaudeSDKStub` or `dry_run=True`). The integration glue between
+components only has to *exist* when the components do real work against
+real artifacts. With stubs, the missing glue is invisible:
+
+- The stub harness pre-writes scene.yaml, so `cmd_run` vs `cmd_harness`
+  routing doesn't matter — both paths "produce" output.
+- `dry_run=True` short-circuits the director, so the missing
+  `casting.yaml` write is skipped along with the rest.
+- Stubbed tests don't exercise the credential resolution path that
+  `test_auth.py`'s pollution affects.
+
+**The pattern: stub-shaped validation cannot detect missing wiring between
+real components.** Each unit passes its tests; each integration is
+unverified against real outputs. Phase 6 "regression tests" failed to
+catch these for the same reason Phase 4 e2e tests failed: both ran with
+stubs, so the integration glue never had to exist.
+
+This is the corollary of the original audit's finding (the build's
+"completeness" is an artifact of the validation strategy). Naming the
+pattern explicitly so it doesn't get rediscovered piecemeal across future
+sessions.
+
+### Status — fixes applied this session
+
+- Auth precedence ladder installed at four LLM call sites
+  (OPENROUTER_API_KEY → ANTHROPIC_API_KEY → CLAUDE_CODE_OAUTH_TOKEN →
+  raise). OpenRouter routing via `anthropic.Anthropic(base_url=...,
+  auth_token=...)`.
+- `manager.py:_invoke_director()` now writes `casting.yaml` from
+  `storyboard.casting`.
+- `manager.py:_invoke_scene_designer()` now writes the manifest
+  alongside the fragment (combined dict with top-level `manifest:` key).
+- `manager.py:_run_renderer()` now passes `workspace_dir` (not
+  `out_path`) as the wrapper's second arg, checks `res["ok"]`, and
+  verifies `out_path` exists with non-zero size before logging success.
+- `tests/test_gen_image.py` and `tests/test_qa_critic.py` updated to
+  assert RuntimeError on the no-credentials path (was: assert silent
+  fallback).
+
+### Post-first-render hardening (deferred — DO NOT touch until first
+real MP4 is verified)
+
+- **QA strictness (bug 6 from this session).** `_run_asset_qa` and
+  `_run_scene_qa` should fail (or at minimum surface a warning) when
+  expected artifacts are missing — not pass vacuously. `_run_qa_loop`
+  should refuse to set `result.success = True` if the output MP4
+  doesn't exist on disk.
+- **`tests/test_auth.py` env-var pollution.** `_remove_auth_vars()` at
+  lines 42-46 should use `monkeypatch.delenv` instead of mutating
+  `os.environ` directly.
+- **`gen_image` placeholder fallback** when API call fails for
+  non-auth reasons (rate-limit / timeout). Today it returns ok=True
+  with a placeholder; should fail loudly when real generation was
+  expected.
+- **`qa.critic` stub-PASS fallback** when API call fails for non-auth
+  reasons. Same pattern as gen_image.
+- **`lead.py:_default_sdk_factory`** silent fallback to `ClaudeSDKStub`
+  when `anthropic`/`claude-code-sdk` is not installed. Should require
+  an explicit `--allow-stub` flag.
+- **`cmd_harness` rename / removal.** Still named "harness" — operators
+  still reach for it first. Either remove (now that `cmd_run` is the
+  production path) or rename to `smoke`.
+- **Real-LLM end-to-end test in CI.** Tighten milestone validation so
+  it can't pass against stub output.
+- **Director duration override** (brief said 6s, director made 15s).
+  See `audit_report.md` addendum 2026-05-02 for diagnostic. Likely
+  sites: `parallax_engine/director/prompt.py` (search for
+  `target_duration`, `15`, or `duration`) and the Storyboard schema.
+- **Scene-designer prompt vs renderer Pydantic schema drift** (latent
+  risks discovered in cycle 7 schema-dump comparison). The bridge
+  defaults in `manager._split_to_single_scene()` work around individual
+  fields, but the structural fix is to regenerate the scene-designer
+  prompt's camera / mask / layer schema sections from the renderer's
+  Pydantic models directly so they cannot drift. Three concrete latent
+  gaps already identified:
+    1. `BezierPath.kind` is a `const: "bezier"` but the scene-designer
+       prompt at `parallax_engine/scene/designer.py:284` says
+       `kind: bezier | linear`. If the LLM ever picks `linear`, the
+       renderer rejects it. Has not bitten yet — model has favoured
+       bezier.
+    2. `MaskSpec` requires `[id, anchor, src_stack, dest_stack, growth]`
+       and `growth.kind` is required; `anchor` enum is
+       `[world, screen, layer-plane]`. Scene-designer prompt at
+       `parallax_engine/scene/designer.py:288-300` describes a
+       partially-overlapping shape and only mentions `world` anchor.
+       Will surface when a brief uses portals or biome wipes.
+    3. `KeyframedEntry` (used when `camera.mode == "keyframed"`)
+       requires `t`; the scene-designer prompt at
+       `parallax_engine/scene/designer.py:286` doesn't describe the
+       keyframe schema at all. Will surface on briefs the director
+       routes through keyframed mode.
+
+### Iteration arc bookkeeping
+
+Cycles consumed (loose count, render-attempt-shaped):
+1. Auth precedence + OAuth fallback support — failed (OAuth not
+   accepted by Messages API).
+2. Switched to ANTHROPIC_API_KEY — failed (account had no balance).
+3. After Anthropic billing top-off — still failed (top-off didn't
+   propagate; subsequently learned the user has wider Anthropic billing
+   issues, fix in ~3 business days).
+4. OpenRouter routing added — failed (key total limit was hit).
+5. After OpenRouter limit raised — first real director output;
+   blocked at scene-designer by missing `casting.yaml`.
+6. `casting.yaml` write added — director through merger ran cleanly;
+   "success" logged but no MP4 (manifest dropped + renderer wrong sig
+   + QA vacuous).
+7. (current — manifest write + renderer fix applied; rerun pending).
+
+3 cycles remaining before pivot per user-set cap of 8. Pivot strategies
+to consider if exhausted: (a) bypass the multi-agent pipeline and drive
+a hand-written `scene.yaml` straight to the renderer to verify the
+renderer itself works; (b) suspect the renderer/encoder is also stubbed
+and audit `parallax_engine/render.py` directly.
+
+Build's "all milestones pass" status unchanged. No milestone, evidence,
+or phase_milestones.json edits this session.

@@ -8,7 +8,7 @@ Covers:
   - Determinism: same prompt + seed -> same color in placeholder output
   - Result dict keys and types are correct
   - output_path parent dirs are created automatically
-  - Missing ANTHROPIC_API_KEY does not raise; falls back to placeholder
+  - Missing ANTHROPIC_API_KEY and CLAUDE_CODE_OAUTH_TOKEN raises RuntimeError
 """
 from __future__ import annotations
 
@@ -53,13 +53,13 @@ class TestGenImagePlaceholder:
         assert result["width"] == 1280
         assert result["height"] == 720
 
-    def test_placeholder_backend_when_no_key(self, tmp_path: pathlib.Path, monkeypatch) -> None:
+    def test_raises_when_no_credentials(self, tmp_path: pathlib.Path, monkeypatch) -> None:
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
         out = tmp_path / "layer.svg"
-        result = gen_image("city skyline at night", str(out))
-        assert result["ok"] is True
-        assert result["backend"] == "placeholder"
+        with pytest.raises(RuntimeError, match="no credentials"):
+            gen_image("city skyline at night", str(out))
 
     def test_parent_dirs_created(self, tmp_path: pathlib.Path) -> None:
         out = tmp_path / "deep" / "nested" / "dir" / "layer.svg"

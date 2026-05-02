@@ -481,13 +481,25 @@ def _call_llm(model: str, prompt: str, workspace_dir: Path) -> str:
         return _stub_pass_response()
 
     import os
-    api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
-    if not api_key:
-        logger.warning("qa.critic: no API key; returning stub PASS")
-        return _stub_pass_response()
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    oauth_token = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
+    if not (openrouter_key or api_key or oauth_token):
+        raise RuntimeError(
+            "parallax-engine qa.critic: no credentials found. "
+            "Set OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or CLAUDE_CODE_OAUTH_TOKEN."
+        )
 
     try:
-        client = anthropic.Anthropic(api_key=api_key)
+        if openrouter_key:
+            client = anthropic.Anthropic(
+                base_url="https://openrouter.ai/api",
+                auth_token=openrouter_key,
+            )
+        elif api_key:
+            client = anthropic.Anthropic(api_key=api_key)
+        else:
+            client = anthropic.Anthropic(auth_token=oauth_token)
         response = client.messages.create(
             model=model,
             max_tokens=512,

@@ -99,14 +99,25 @@ def _try_anthropic_backend(
     except ImportError:
         return {"ok": False, "message": "anthropic SDK not installed"}
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get(
-        "CLAUDE_CODE_OAUTH_TOKEN"
-    )
-    if not api_key:
-        return {"ok": False, "message": "ANTHROPIC_API_KEY not set; skipping Anthropic backend"}
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    oauth_token = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
+    if not (openrouter_key or api_key or oauth_token):
+        raise RuntimeError(
+            "parallax-engine gen_image: no credentials found. "
+            "Set OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or CLAUDE_CODE_OAUTH_TOKEN."
+        )
 
     try:
-        client = anthropic.Anthropic(api_key=api_key)
+        if openrouter_key:
+            client = anthropic.Anthropic(
+                base_url="https://openrouter.ai/api",
+                auth_token=openrouter_key,
+            )
+        elif api_key:
+            client = anthropic.Anthropic(api_key=api_key)
+        else:
+            client = anthropic.Anthropic(auth_token=oauth_token)
         sys_req = (
             "Generate a complete, valid SVG for a 2.5D parallax animation layer.\n"
             "The layer depicts: " + prompt + "\n\n"
