@@ -980,6 +980,7 @@ def render_scene(
                 result = composite_with_mask(
                     scene, mask, src, dst,
                     cam, (H, W), t, merged_sprites,
+                    workspace=workspace,
                 )
                 # Replace dest stack buffer with composited result
                 stack_bufs[mask.dest_stack] = result

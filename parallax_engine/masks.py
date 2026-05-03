@@ -25,6 +25,11 @@ L2 in-front-of-mask rule (§2.4):
 
 from __future__ import annotations
 
+import functools
+import re
+import warnings
+import xml.etree.ElementTree as ET
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import cv2
@@ -34,6 +39,79 @@ from parallax_engine.projection import compute_near_cull, project_points
 
 if TYPE_CHECKING:
     from parallax_engine.scene import MaskSpec, Scene
+
+
+# ===========================================================================
+# SVG path rasterization (for world-anchored portal masks, §2.4 / §6.4)
+# ===========================================================================
+
+@functools.lru_cache(maxsize=8)
+def _rasterize_path_from_svg(
+    svg_path_str: str,
+    path_id: str,
+    target_w: int,
+    target_h: int,
+) -> np.ndarray:
+    """
+    Rasterize ONLY the path with the given ``id`` from the source SVG.
+
+    Builds a temporary minimal SVG containing just the named element, painted
+    white on transparent background, and rasterizes it via the renderer's
+    standard SVG → RGBA pipeline. Returns the alpha channel as a ``(target_h,
+    target_w) uint8`` mask: 255 inside the path, 0 outside.
+
+    Cached on (svg_path_str, path_id, target_w, target_h) — the source SVG
+    doesn't change during a render, so we rasterize once and warp per frame.
+
+    Used by ``_build_perspective_matte`` to produce SPEC §6.4 silhouette+hole
+    portal masks. The shared viewBox guarantee from §6.4 means the rasterized
+    hole is in the same coordinate frame as the silhouette layer's plate.
+    """
+    svg_path = Path(svg_path_str)
+    src_text = svg_path.read_text()
+
+    # ElementTree adds awkward `ns0:` prefixes when a default xmlns is present.
+    # Strip the default namespace so element tags stay bare and id-based search
+    # works without namespace gymnastics.
+    src_text = re.sub(r'\sxmlns="[^"]*"', '', src_text, count=1)
+    root = ET.fromstring(src_text)
+
+    vb_raw = root.attrib.get("viewBox", "").strip()
+    vb_parts = vb_raw.split()
+    if len(vb_parts) != 4:
+        raise ValueError(f"SVG {svg_path}: missing or malformed viewBox: {vb_raw!r}")
+
+    target = None
+    for el in root.iter():
+        if el.attrib.get("id") == path_id:
+            target = el
+            break
+    if target is None:
+        raise ValueError(f"SVG {svg_path}: no element with id={path_id!r}")
+
+    # Build a minimal SVG with the target painted white on transparent.
+    new_root = ET.Element("svg", attrib={
+        "xmlns": "http://www.w3.org/2000/svg",
+        "viewBox": vb_raw,
+    })
+    new_el = ET.SubElement(new_root, target.tag)
+    for k, v in target.attrib.items():
+        if k in ("fill", "stroke"):
+            continue
+        new_el.set(k, v)
+    new_el.set("fill", "#ffffff")
+
+    new_svg_bytes = ET.tostring(new_root, encoding="utf-8")
+
+    # Lazy import: render.py imports masks.py, so pulling its rasterizer at
+    # module-load time would create a cycle. Local import is fine — the call
+    # site is already inside a function body.
+    from parallax_engine.render import _rasterize_svg_bytes
+
+    rgba = _rasterize_svg_bytes(new_svg_bytes, target_w, target_h)
+    # Premultiplied RGBA: alpha channel IS the mask coverage.
+    alpha = (rgba[:, :, 3] * 255.0).clip(0.0, 255.0).astype(np.uint8)
+    return alpha
 
 
 # ===========================================================================
@@ -82,25 +160,32 @@ def _build_perspective_matte(
     cam: dict,
     H: int,
     W: int,
+    workspace: Path | None = None,
 ) -> np.ndarray:
     """
     World-anchored perspective mask (§2.4 anchor=world, growth=perspective).
 
-    The mask path is a polygon (convex hull of control points approximated
-    from the mask's SVG bounding box, or an explicit polygon field if present).
-    Rasterized via cv2.fillPoly after projecting through the camera.
+    Two paths:
 
-    For v1 we use a unit-square polygon in the layer's local plane and scale
-    it by the plate_size.  The renderer will later supply the actual SVG path
-    vertices.
+    1. **SVG-driven (real portal mechanic)** — when ``mask.path_svg`` and
+       ``mask.path_id_in_svg`` are set and the SVG file is reachable, the
+       named path is rasterized in plate-local space and warped onto the
+       frame via a perspective homography from the plate's 4 scene-space
+       corners to their projected screen positions. This implements the
+       §6.4 silhouette+hole portal mechanic: ``M=1`` inside the projected
+       hole, ``M=0`` everywhere else.
+
+    2. **Plate-bbox legacy** — when no SVG path is supplied (or it fails to
+       resolve), the mask is the projected bounding box of the entire plate.
+       This matches the synthetic-test behavior the Phase 2 validator
+       exercised, so existing rectangle-on-rectangle tests remain green.
     """
     layer = scene.find_layer(mask.attached_to_layer)
     xyz = np.array(layer.scene_xyz, dtype=np.float64)
-
-    # Half-extents of the plate in scene space
     pw, ph = float(layer.plate_size[0]) / 2.0, float(layer.plate_size[1]) / 2.0
 
-    # Build four corners of the plate at the layer's z-depth
+    # Plate corners in scene space, ordered TL, TR, BR, BL — the same order
+    # we use for the rasterized SVG buffer corners below.
     corners_3d = np.array([
         [xyz[0] - pw, xyz[1] - ph, xyz[2]],
         [xyz[0] + pw, xyz[1] - ph, xyz[2]],
@@ -108,7 +193,6 @@ def _build_perspective_matte(
         [xyz[0] - pw, xyz[1] + ph, xyz[2]],
     ], dtype=np.float64)
 
-    # Project to screen
     cx = float(cam["cx"]); cy_c = float(cam["cy"]); cz = float(cam["cz"])
     yaw = float(cam.get("yaw", 0.0))
     pitch = float(cam.get("pitch", 0.0))
@@ -125,6 +209,45 @@ def _build_perspective_matte(
         (ox, oy),
     )
 
+    # ---- Path 1: SVG hole-path raster + perspective warp ----
+    if mask.path_svg and mask.path_id_in_svg:
+        svg_path = Path(mask.path_svg)
+        if not svg_path.is_absolute() and workspace is not None:
+            svg_path = Path(workspace) / svg_path
+        if svg_path.exists():
+            try:
+                # Fixed working resolution keyed on plate aspect — the cache
+                # hit rate is then 100% across all frames of one render.
+                target_w = 1920
+                aspect = float(layer.plate_size[1]) / max(float(layer.plate_size[0]), 1e-9)
+                target_h = max(1, int(round(target_w * aspect)))
+                hole_alpha = _rasterize_path_from_svg(
+                    str(svg_path), mask.path_id_in_svg, target_w, target_h,
+                )
+                src_pts = np.array([
+                    [0.0,             0.0           ],
+                    [float(target_w), 0.0           ],
+                    [float(target_w), float(target_h)],
+                    [0.0,             float(target_h)],
+                ], dtype=np.float32)
+                dst_pts = screen_xy.astype(np.float32)
+                M_homog = cv2.getPerspectiveTransform(src_pts, dst_pts)
+                warped = cv2.warpPerspective(
+                    hole_alpha, M_homog, (W, H),
+                    flags=cv2.INTER_LINEAR,
+                    borderMode=cv2.BORDER_CONSTANT,
+                    borderValue=0,
+                )
+                return (warped.astype(np.float32) / 255.0).clip(0.0, 1.0)
+            except Exception as exc:
+                warnings.warn(
+                    f"_build_perspective_matte: SVG path raster failed for "
+                    f"{mask.path_svg!r}#{mask.path_id_in_svg}: {exc}; "
+                    f"falling back to plate-bbox matte.",
+                    stacklevel=2,
+                )
+
+    # ---- Path 2: legacy plate-bbox matte ----
     pts = screen_xy.astype(np.int32)
     matte = np.zeros((H, W), dtype=np.uint8)
     cv2.fillPoly(matte, [pts], 255)
@@ -284,6 +407,7 @@ def build_mask_alpha(
     cam: dict,
     frame_resolution: tuple[int, int],
     t: float,
+    workspace: Path | None = None,
 ) -> np.ndarray:
     """
     Build the mask alpha matte ``M`` for one frame (§2.4).
@@ -335,7 +459,7 @@ def build_mask_alpha(
     kind = mask.growth.kind
 
     if anchor == "world":
-        M = _build_perspective_matte(mask, scene, cam, H, W)
+        M = _build_perspective_matte(mask, scene, cam, H, W, workspace=workspace)
     elif anchor == "screen":
         if kind == "radius":
             M = _build_radius_matte(mask, t, H, W)
@@ -408,6 +532,7 @@ def composite_with_mask(
     frame_resolution: tuple[int, int],
     t: float,
     layer_sprites: dict | None = None,
+    workspace: Path | None = None,
 ) -> np.ndarray:
     """
     Apply one mask to produce the composited frame ``F`` (§2.4).
@@ -447,7 +572,7 @@ def composite_with_mask(
     ``(H, W, 4)`` float32 premultiplied-RGBA composite.
     """
     H, W = frame_resolution
-    M = build_mask_alpha(mask, scene, cam, frame_resolution, t)  # (H, W) f32
+    M = build_mask_alpha(mask, scene, cam, frame_resolution, t, workspace=workspace)  # (H, W) f32
 
     # Core composite: F = D * M + S * (1 - M)
     m4 = M[:, :, None]                 # broadcast to (H, W, 1)
