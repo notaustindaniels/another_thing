@@ -2029,3 +2029,156 @@ and audit `parallax_engine/render.py` directly.
 
 Build's "all milestones pass" status unchanged. No milestone, evidence,
 or phase_milestones.json edits this session.
+
+## Session 25 (2026-05-03) — handoff_prompt.md execution: portal mechanic
+                              implemented, forest + portal demos rendered,
+                              SVG pipeline design doc written
+
+### What this session accomplished
+
+Worked through the three tasks in handoff_prompt.md (Task 1 portal, Task 2
+forest, Task 3 SVG pipeline design doc). User chose option B+C from my
+initial finding (see "the big architectural fix" below): do Task 2 first,
+then implement the missing SVG hole rasterization, then do Task 1.
+
+1. **Mask hole rasterization implemented** (parallax_engine/masks.py).
+   The v1 stub at `_build_perspective_matte` used the plate's 4-corner
+   bounding box as the mask, ignoring the SVG hole-path entirely. Comment
+   in the code admitted this: "For v1 we use a unit-square polygon... The
+   renderer will later supply the actual SVG path vertices." This made
+   the SPEC §6.4 portal mechanic unimplementable in practice — silhouette
+   + hole sharing one viewBox didn't actually do anything.
+
+   Fix: new `_rasterize_path_from_svg(svg_path, path_id, w, h)` helper that
+   extracts the named element from the source SVG, builds a minimal
+   single-path SVG painted white, rasterizes via the renderer's existing
+   pipeline, and returns the alpha channel. Cached on (path, id, w, h).
+   `_build_perspective_matte` now (when path_svg + path_id_in_svg are set)
+   builds a perspective homography from the rasterized hole's viewBox
+   corners → projected screen corners and warps the alpha through it via
+   cv2.warpPerspective. Falls back to plate-bbox legacy path otherwise
+   (keeps synthetic SSIM tests green).
+
+   Threaded `workspace: Path | None` through `composite_with_mask` and
+   `build_mask_alpha` so relative path_svg paths resolve against the
+   scene's directory, matching how layer src paths resolve.
+
+   Validated end-to-end with examples/portal/scene_minitest.yaml — a
+   simple forest_bg (green) + city_bg (orange) + hand-authored
+   portal_tree.svg scene. The frame at t=0 shows orange ONLY through the
+   oval hole, green everywhere else. The hole grows with perspective as
+   the camera approaches.
+
+2. **Task 2 (Forest) rendered.** examples/forest/scene.yaml at full
+   duration (10s @ 30fps @ 960×540, 300 frames). Six SVG layers Sonnet-
+   generated via scripts/gen_assets_oneshot.py. Output verified at t=0,
+   1, 3, 6, 9 frames: dramatic parallax differential between trees_near
+   and sky_dawn; post-processing (vignette, fisheye, grain, god-rays)
+   visible. /tmp/forest_full.mp4 (~10 MB, 7.98 Mbps).
+
+3. **Task 1 (Portal) rendered.** examples/portal/scene.yaml at full
+   duration (8s @ 30fps @ 960×540, 240 frames). 9 SVG layers (1 hand-
+   authored portal_tree, 1 hand-authored city_near, 5 Sonnet-generated,
+   3 reused from forest). t=0 shows forest with city visible through
+   the oval portal hole; t=5 shows the hole grown ~3× via perspective;
+   t=7 shows the hole nearly filling the frame as camera approaches
+   z=-4400. Visual confirmation that the L2 in-front-of-mask rule fires
+   (leaves_mid + leaves_fg occlude the city correctly at edges).
+   /tmp/portal_full.mp4 (~7.86 MB).
+
+4. **Task 3 (SVG pipeline design)** at svg_pipeline_design.md (708 lines).
+   Architecture-only spec for the 4-tier replacement of broken
+   tools/gen_image.py: Director (Opus, unchanged) → Scene Architect
+   (Opus, NEW) → SVG Prompt Engineer (Sonnet, NEW) → SVG Craftsman
+   (Sonnet, replaces Haiku). Includes per-tier I/O contracts, the Tier 4
+   prompt template (most important piece), casting bible integration,
+   removal of failure modes (silent placeholder fallback, QA vacuity),
+   ~$5.80/render cost estimate (vs $0.05 today for unusable Haiku
+   output), 3-phase migration sequencing, and verification plan. NO
+   IMPLEMENTATION YET — pending user review.
+
+5. **scripts/gen_assets_oneshot.py** — one-off Sonnet SVG generator that
+   bypasses the broken gen_image.py. Hard validation (parses, viewBox
+   correct, ≥8 shape elements, NO placeholder fallback). Per-asset
+   prompts include compositing role, palette, plate size, style anchor.
+   Used to generate 11 of the 16 SVGs across both demos. Total cost ~$1.
+
+6. **example_c golden hash regenerated.** The byte-identical regression
+   test (TestRegressionByteIdentical::test_example_c_byte_identical) was
+   failing because my mask fix changed the output for the portal scene.
+   Old golden (a6dcddcc...) baked in the v1 plate-bbox stub behavior;
+   new golden (7189ebc...) reflects spec-correct §6.4 behavior. Note:
+   the test SVG at tests/scenes/assets/portal_tree.svg has fill="none"
+   on the hole, so the new render produces M=0 (all-forest output) — a
+   faithful test of "what happens when path_svg has no real hole."
+
+### What I had to navigate
+
+- **Stale model IDs in the codebase.** parallax_engine/director/agent.py
+  and scene/designer.py both use "claude-sonnet-4-6-20261231" which 404s
+  on the API. Correct ID per the runtime context is just
+  "claude-sonnet-4-6". Same likely true for the Opus and Haiku IDs
+  there. Worth a follow-up cleanup pass.
+
+- **Encoder finalization "hang."** Both forest and portal renders
+  produced full mp4s but appeared to hang at ~7-10 MB during FFmpeg's
+  final flush. Killing the Python process (which closed stdin to FFmpeg)
+  let FFmpeg finalize cleanly. ffprobe confirmed all 300 / 240 frames
+  were present and the duration was correct. Suggests the previously-
+  noted "1080p hangs at 5.7 MB" symptom is more general — it's a slow
+  finalization, not a true hang. Adding an explicit
+  `proc.stdin.close()` followed by a `proc.wait()` with timeout in
+  parallax_engine/encode.py would surface this distinction cleanly
+  without requiring SIGTERM.
+
+- **Sonnet output failure modes.**
+  - max_tokens=8192 truncated complex SVGs (trees_mid was the first
+    failure). Bumped to 16384.
+  - Some outputs had inline <thinking>...</thinking> blocks that
+    surrounded the SVG. Added regex stripping in _strip_fences.
+  - city_near specifically kept producing malformed XML (line 15 col 0
+    parse failure) even after retries; hand-authored as fallback.
+
+- **The big architectural fix.** Spent ~30 min validating my
+  understanding of masks.py before changing anything. Confirmed
+  `_rasterize_svg_bytes` is in render.py (lazy-imported from masks.py
+  to avoid cycle), the L2 rule in masks.py:456-488 was already
+  implemented, near-cull handoff already worked, and only the matte-
+  building piece was stubbed. Total change: 138 net new lines across
+  masks.py (+ 1 line in render.py to thread workspace through).
+
+### What the next session should do first
+
+The three handoff_prompt.md tasks are complete. The user's next move
+per handoff §7 is to review:
+1. /tmp/portal_full.mp4 (Task 1 verification)
+2. /tmp/forest_full.mp4 (Task 2 verification)
+3. svg_pipeline_design.md (Task 3 design doc)
+
+Pending follow-ups (NOT done this session, deferred):
+
+- **One pre-existing test failure remains** in
+  tests/test_render_smoke.py::TestCli::test_no_subcommand_exits_1. Root
+  cause is a pydantic AttributeError at parallax_engine/asset/generator.py:263
+  (`palette_locked.items()` — PaletteLocked is a Pydantic model, not a
+  dict). NOT caused by my masks change; failing before this session.
+  Worth a follow-up if anyone touches asset/generator.py.
+
+- **Stale model IDs in director/agent.py and scene/designer.py.** Should
+  be aligned with the actual API IDs (claude-sonnet-4-6, claude-opus-4-7,
+  claude-haiku-4-5-20251001). Add a unit test that asserts configured
+  IDs are present in client.models.list() to prevent recurrence.
+
+- **Encoder finalization timeout.** Add proc.stdin.close() + proc.wait()
+  with explicit timeout in parallax_engine/encode.py so renders finalize
+  without operator intervention.
+
+- **Implement the SVG pipeline (Task 3 design)** if user approves.
+  Phase 1+2+3 across ~1500-2500 lines per the design doc's §11.
+
+Build's "all milestones pass" status unchanged this session — no
+milestone or phase_milestones.json edits. The masks.py change updates
+behavior of _build_perspective_matte but the function signature is
+unchanged at the public API; the workspace parameter to
+build_mask_alpha and composite_with_mask is opt-in (default None for
+backward compatibility with existing callers).
