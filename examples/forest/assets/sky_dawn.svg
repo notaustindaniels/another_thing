@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b1844"/>
+      <stop offset="45%" stop-color="#3d2a6e"/>
+      <stop offset="68%" stop-color="#c4605a"/>
+      <stop offset="82%" stop-color="#f0a36a"/>
+      <stop offset="92%" stop-color="#fbe6a6"/>
+      <stop offset="100%" stop-color="#cc7a72"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="0.599" cy="0.672" r="0.18" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#fffae0"/>
+      <stop offset="18%" stop-color="#fde8a0"/>
+      <stop offset="40%" stop-color="#f5c97a"/>
+      <stop offset="70%" stop-color="#e8a55a" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#1b1844" stop-opacity="0.0"/>
+    </radialGradient>
+    <radialGradient id="sunGlowWide" cx="0.599" cy="0.672" r="0.32" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#fde8b0"/>
+      <stop offset="30%" stop-color="#f5c87040"/>
+      <stop offset="100%" stop-color="#1b1844" stop-opacity="0.0"/>
+    </radialGradient>
+    <linearGradient id="valleyShadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a4a6a"/>
+      <stop offset="60%" stop-color="#3e3050"/>
+      <stop offset="100%" stop-color="#2a1e38"/>
+    </linearGradient>
+    <linearGradient id="godray1" x1="0.5" y1="1" x2="0.28" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#f5c87a"/>
+      <stop offset="100%" stop-color="#3d2a6e"/>
+    </linearGradient>
+    <linearGradient id="godray2" x1="0.5" y1="1" x2="0.38" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#f5c060"/>
+      <stop offset="100%" stop-color="#2e2060"/>
+    </linearGradient>
+    <linearGradient id="godray3" x1="0.5" y1="1" x2="0.58" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#f0b870"/>
+      <stop offset="100%" stop-color="#2e2060"/>
+    </linearGradient>
+    <linearGradient id="godray4" x1="0.5" y1="1" x2="0.70" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#edb068"/>
+      <stop offset="100%" stop-color="#261848"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base sky gradient fill -->
+  <rect x="0" y="0" width="3840" height="2160" fill="url(#skyGrad)"/>
+
+  <!-- Wide sun glow bloom behind clouds -->
+  <rect x="0" y="0" width="3840" height="2160" fill="url(#sunGlowWide)"/>
+
+  <!-- God ray 1 — leftmost fan -->
+  <polygon points="2300,1450 1050,0 1380,0 2300,1450" fill="url(#godray1)"/>
+
+  <!-- God ray 2 -->
+  <polygon points="2300,1450 1520,0 1740,0 2300,1450" fill="url(#godray2)"/>
+
+  <!-- God ray 3 — right of center -->
+  <polygon points="2300,1450 2460,0 2680,0 2300,1450" fill="url(#godray3)"/>
+
+  <!-- God ray 4 — far right fan -->
+  <polygon points="2300,1450 2900,0 3140,0 2300,1450" fill="url(#godray4)"/>
+
+  <!-- Sun disc — small, low, warm -->
+  <circle cx="2300" cy="1448" r="52" fill="#fffae0"/>
+  <circle cx="2300" cy="1448" r="38" fill="#fff8d0"/>
+  <circle cx="2300" cy="1448" r="26" fill="#fffae0"/>
+
+  <!-- Sun glow radial overlay -->
+  <rect x="0" y="0" width="3840" height="2160" fill="url(#sunGlow)"/>
+
+  <!-- Stratus cloud band 1 — high, violet, very elongated -->
+  <path d="M 0,340 C 300,310 600,295 900,320 C 1200,345 1400,380 1700,355 C 2000,330 2300,300 2600,318 C 2900,336 3200,360 3840,330 L 3840,395 C 3200,425 2900,405 2600,385 C 2300,365 2000,390 1700,415 C 1400,440 1200,408 900,385 C 600,362 300,375 0,405 Z" fill="#8e7195"/>
+
+  <!-- Stratus cloud band 1b — overlapping lighter tint -->
+  <path d="M 0,350 C 400,325 800,340 1100,355 C 1400,370 1600,345 1950,358 C 2300,371 2600,340 2900,355 C 3200,370 3500,380 3840,360 L 3840,400 C 3500,420 3200,410 2900,395 C 2600,380 2300,410 1950,398 C 1600,386 1400,410 1100,398 C 800,386 400,368 0,390 Z" fill="#9e7fa8"/>
+
+  <!-- Stratus cloud band 2 — mid sky, dusty rose/violet -->
+  <path d="M 0,580 C 250,555 550,545 850,568 C 1150,591 1350,620 1650,600 C 1950,580 2200,558 2500,572 C 2800,586 3100,610 3840,585 L 3840,660 C 3100,685 2800,665 2500,648 C 2200,631 1950,652 1650,672 C 1350,692 1150,665 850,642 C 550,619 250,628 0,648 Z" fill="#7a638a"/>
+
+  <!-- Stratus cloud band 2b — lighter fill layered -->
+  <path d="M 0,598 C 350,575 700,582 1000,600 C 1300,618 1550,605 1800,615 C 2050,625 2350,604 2650,618 C 2950,632 3300,620 3840,608 L 3840,648 C 3300,660 2950,672 2650,658 C 2350,644 2050,665 1800,655 C 1550,645 1300,660 1000,642 C 700,624 350,618 0,638 Z" fill="#8e759a"/>
+
+  <!-- Stratus cloud band 3 — warm peach band, upper-mid horizon -->
+  <path d="M 0,900 C 300,875 650,868 980,892 C 1310,916 1560,945 1850,928 C 2140,911 2420,885 2720,900 C 3020,915 3350,938 3840,912 L 3840,975 C 3350,1001 3020,978 2720,963 C 2420,948 2140,972 1850,990 C 1560,1008 1310,980 980,955 C 650,930 300,940 0,960 Z" fill="#deb088"/>
+
+  <!-- Stratus cloud band 3b — slightly cooler tint on top -->
+  <path d="M 0,912 C 400,890 800,898 1100,918 C 1400,938 1650,920 1950,930 C 2250,940 2550,912 2850,928 C 3150,944 3500,932 3840,920 L 3840,955 C 3500,967 3150,980 2850,963 C 2550,946 2250,970 1950,960 C 1650,950 1400,970 1100,952 C 800,934 400,928 0,948 Z" fill="#c9a080"/>
+
+  <!-- Stratus cloud band 4 — lower, dusty rose, nearing horizon -->
+  <path d="M 0,1150 C 350,1125 700,1118 1050,1140 C 1400,1162 1650,1190 1950,1172 C 2250,1154 2500,1128 2800,1142 C 3100,1156 3400,1178 3840,1152 L 3840,1220 C 3400,1246 3100,1224 2800,1208 C 2500,1192 2250,1218 1950,1238 C 1650,1258 1400,1230 1050,1206 C 700,1182 350,1192 0,1212 Z" fill="#c79a8e"/>
+
+  <!-- Stratus cloud band 4b — layered dusty rose detail -->
+  <path d="M 0,1168 C 280,1148 580,1155 880,1172 C 1180,1189 1430,1178 1730,1188 C 2030,1198 2330,1170 2630,1184 C 2930,1198 3280,1188 3840,1170 L 3840,1205 C 3280,1223 2930,1233 2630,1218 C 2330,1203 2030,1228 1730,1218 C 1430,1208 1180,1222 880,1205 C 580,1188 280,1183 0,1200 Z" fill="#d4a898"/>
+
+  <!-- Stratus cloud band 5 — very near horizon, warm amber/peach merge -->
+  <path d="M 0,1330 C 400,1308 800,1300 1150,1322 C 1500,1344 1800,1368 2100,1352 C 2400,1336 2700,1310 3000,1326 C 3300,1342 3550,1360 3840,1338 L 3840,1395 C 3550,1418 3300,1400 3000,1382 C 2700,1364 2400,1388 2100,1406 C 1800,1424 1500,1400 1150,1376 C 800,1352 400,1358 0,1375 Z" fill="#c8917e"/>
+
+  <!-- Cloud band crossing over sun — occludes sun disc partially -->
+  <path d="M 1600,1410 C 1800,1388 2000,1378 2200,1390 C 2300,1396 2380,1402 2480,1398 C 2580,1394 2720,1382 2900,1392 C 3100,1402 3350,1420 3840,1408 L 3840,1455 C 3350,1467 3100,1450 2900,1438 C 2720,1426 2580,1438 2480,1442 C 2380,1446 2300,1440 2200,1434 C 2000,1422 1800,1432 1600,1452 C 1400,1472 1150,1468 0,1458 L 0,1415 C 1150,1425 1400,1432 1600,1410 Z" fill="#c4857a"/>
+
+  <!-- Cloud band crossing sun — lighter upper edge highlight -->
+  <path d="M 1650,1408 C 1850,1386 2050,1376 2230,1388 C 2350,1395 2430,1398 2540,1394 C 2650,1390 2780,1380 2960,1390 C 3140,1400 3400,1414 3840,1404 L 3840,1424 C 3400,1434 3140,1420 2960,1410 C 2780,1400 2650,1410 2540,1414 C 2430,1418 2350,1415 2230,1408 C 2050,1396 1850,1406 1650,1428 C 1450,1450 1180,1446 0,1436 L 0,1416 C 1180,1426 1450,1430 1650,1408 Z" fill="#d4948a"/>
+
+  <!-- Valley shadow band — dusky purple below horizon -->
+  <rect x="0" y="1500" width="3840" height="660" fill="url(#valleyShadow)"/>
+
+  <!-- Valley shadow soft upper fade detail -->
+  <path d="M 0,1500 C 480,1488 960,1480 1440,1492 C 1920,1504 2400,1518 2880,1508 C 3200,1500 3520,1492 3840,1500 L 3840,1560 C 3520,1548 3200,1540 2880,1548 C 2400,1560 1920,1572 1440,1558 C 960,1544 480,1548 0,1560 Z" fill="#5a4a6a"/>
+
+  <!-- Lower plate fill — deep shadow base -->
+  <rect x="0" y="1800" width="3840" height="360" fill="#2a1e38"/>
+</svg>
