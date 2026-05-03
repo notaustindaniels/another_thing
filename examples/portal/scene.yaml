@@ -4,14 +4,18 @@
 # mask block. Resolution dropped from 1920×1080 to 960×540 because
 # the encoder hangs at 1080p (handoff §3, §5.9).
 #
-# DEVIATION FROM §6.3: camera Bezier endpoint is [0,0,-5500], not [0,0,-4400].
+# DEVIATION FROM §6.3: camera Bezier endpoint is [0,0,-10000], not [0,0,-4400].
 # §6.3's worked-example endpoint stops 100 units BEFORE the portal_tree at
 # z=-4500, so the near-cull handoff (projection.py:230 — fires when the layer
-# is ≥ perspective_px-300 = 900 units BEHIND the camera) never triggers and
-# the city never fully takes over the frame. Extending the path past z=-5400
-# lets cull_opacity reach 0, the mask flips to M=1.0 everywhere (masks.py:330),
-# and the destination stack takes the full frame for the final ~0.5s — the
-# "passing through" moment from §2.4 / portal_mechanic.md insight 2.
+# is ≥ perspective_px-300 = 900 units BEHIND the camera) never triggers.
+#
+# This demo extends the path so the camera (a) passes the portal at t=4s
+# (mid-clip), letting the near-cull dissolve fire and the city stack take
+# the full frame, and (b) continues forward through the city stack for
+# the second half — flying past city_far (z=-7000) around t=6.5s and ending
+# near city_sky (z=-10500). The result is a complete "drone flies into
+# portal, emerges into the destination world, continues onward" beat,
+# rather than the spec's clipped "approach the portal" framing.
 version: 1
 meta:
   duration_s: 8.0
@@ -42,12 +46,23 @@ camera:
   drone:
     path:
       kind: bezier
-      controls: [[0,0,0],[40,10,-2000],[-30,-10,-3800],[0,0,-5500]]
+      # Camera path designed for "fly through the portal" arc:
+      #   t=0..4s — approach forest, portal hole grows in center frame
+      #   t=4s   — pass through portal_tree (z=-4500); near-cull fires;
+      #             mask flips to M=1.0 → city stack takes the frame
+      #             (engineered: B(0.5).z = -5400 so portal z_cam = +900 = cull_end)
+      #   t=4..8s — continue forward through the city stack:
+      #             flies past city_far (z=-7000) around t=6.5s,
+      #             ending near city_sky (z=-10500) at z=-10000.
+      # Lateral motion: P1 banks right (x=200) for the approach, P2 returns
+      # near-center (x=-50) so the second-half flight feels like a steady
+      # forward dolly through the city, not a swerve.
+      controls: [[0,0,0],[200,40,-4400],[-50,-10,-6667],[0,0,-10000]]
       duration_s: 8.0
     poi_lookahead_s: 0.5
     spring_halflife_s: 0.20
-    noise: { z_amp: 18, xy_amp: 5, hz: 0.6 }
-    bank_from_velocity: 0.30
+    noise: { z_amp: 22, xy_amp: 8, hz: 0.7 }
+    bank_from_velocity: 0.40
 
 masks:
   - id: portal
