@@ -1,0 +1,51 @@
+# Minimal portal scene to validate the SVG-driven mask hole rasterization
+# in isolation. Uses the hand-authored portal_tree.svg + placeholder colored
+# rectangles for the other layers. If this works, the city color (orange)
+# should only show inside the oval hole; everywhere else, the forest color
+# (green) and the tree silhouette should be visible.
+version: 1
+meta:
+  duration_s: 0.5
+  fps: 10
+  resolution: [384, 216]
+  perspective_px: 1200
+  origin: [192, 108]
+  bg_color: "#000000"
+  seed: 1
+
+stacks:
+  forest:
+    layers:
+      - { id: forest_bg,    src: assets_test/forest_bg.svg,  scene_xyz: [0,0,-9000],  plate_size: [3840,2160] }
+      - { id: portal_tree,  src: assets/portal_tree.svg,     scene_xyz: [0,0,-4500],  plate_size: [3840,2160], svg_paint_id: silhouette }
+  city:
+    layers:
+      - { id: city_bg,  src: assets_test/city_bg.svg, scene_xyz: [0,0,-7000],  plate_size: [3840,2160] }
+
+camera:
+  mode: drone
+  drone:
+    path:
+      kind: bezier
+      controls: [[0,0,0],[40,10,-2000],[-30,-10,-3500],[0,0,-4400]]
+      duration_s: 0.5
+    poi_lookahead_s: 0.5
+    spring_halflife_s: 0.20
+    noise: { z_amp: 18, xy_amp: 5, hz: 0.6 }
+    bank_from_velocity: 0.30
+
+masks:
+  - id: portal
+    path_svg: assets/portal_tree.svg
+    silhouette_id_in_svg: silhouette
+    path_id_in_svg: hole
+    attached_to_layer: forest.portal_tree
+    anchor: world
+    src_stack: forest
+    dest_stack: city
+    matte: alpha
+    growth: { kind: perspective }
+
+post:
+  global:
+    vignette: { strength: 0.0 }

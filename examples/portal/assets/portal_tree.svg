@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160">
+  <!--
+    Portal tree silhouette + hole, sharing one viewBox per SPEC §6.4.
+    The silhouette layer paints `id="silhouette"` (dark forest green) into the
+    forest stack at z=-4500. The mask layer rasterizes `id="hole"` and warps
+    it via perspective homography to define where the destination (city)
+    stack is revealed.
+
+    Layout (viewBox is 3840 wide × 2160 tall):
+      Trunk: x≈1810-2030, y≈1240-2160 (vertical column with a gentle taper).
+      Canopy: x≈1080-2760, y≈200-1280 (irregular organic dome).
+      Hole: x≈1620-2220, y≈580-1180 (oval, entirely inside the canopy).
+  -->
+
+  <!-- ===== Silhouette: visible tree (forest layer paints this) ===== -->
+  <path id="silhouette" fill="#0a1f12" d="
+    M 1810 2160
+    L 1810 1230
+    C 1750 1230 1690 1220 1620 1200
+    C 1530 1180 1440 1140 1370 1080
+    C 1280 1010 1210 920 1170 820
+    C 1130 720 1130 610 1180 530
+    C 1230 440 1320 380 1420 360
+    C 1480 280 1560 230 1650 220
+    C 1710 220 1770 240 1810 280
+    C 1860 220 1930 200 2000 200
+    C 2080 200 2160 240 2210 300
+    C 2290 280 2380 290 2450 330
+    C 2540 380 2610 460 2640 560
+    C 2670 660 2660 770 2620 860
+    C 2580 950 2510 1030 2430 1090
+    C 2330 1160 2210 1210 2090 1230
+    C 2070 1233 2050 1233 2030 1230
+    L 2030 2160
+    Z
+  "/>
+
+  <!-- canopy darker accent shapes for visual depth (still part of the
+       forest layer's render — these don't affect the mask) -->
+  <path fill="#06150a" d="
+    M 1450 760
+    C 1410 720 1390 660 1410 600
+    C 1430 540 1490 510 1550 530
+    C 1610 550 1640 610 1620 670
+    C 1600 730 1530 770 1450 760
+    Z
+  "/>
+  <path fill="#06150a" d="
+    M 2380 750
+    C 2340 720 2320 670 2340 610
+    C 2360 540 2440 510 2510 540
+    C 2580 570 2600 650 2570 720
+    C 2540 790 2450 800 2380 750
+    Z
+  "/>
+  <path fill="#06150a" d="
+    M 1880 460
+    C 1850 430 1840 380 1860 340
+    C 1880 300 1930 280 1970 290
+    C 2010 300 2030 340 2030 380
+    C 2030 420 2010 460 1980 470
+    C 1940 480 1900 480 1880 460
+    Z
+  "/>
+
+  <!-- trunk bark texture: thin darker streaks suggesting ridges -->
+  <path fill="#040c06" d="M 1850 1240 L 1858 2160 L 1864 2160 L 1858 1240 Z"/>
+  <path fill="#040c06" d="M 1900 1240 L 1908 2160 L 1916 2160 L 1908 1240 Z"/>
+  <path fill="#040c06" d="M 1960 1240 L 1968 2160 L 1976 2160 L 1968 1240 Z"/>
+  <path fill="#040c06" d="M 2000 1240 L 2008 2160 L 2014 2160 L 2008 1240 Z"/>
+
+  <!-- root flare: subtle widening at the base of the trunk -->
+  <path fill="#0a1f12" d="
+    M 1810 2160
+    L 1810 2080
+    C 1770 2090 1730 2110 1700 2140
+    L 1700 2160
+    Z
+  "/>
+  <path fill="#0a1f12" d="
+    M 2030 2160
+    L 2030 2080
+    C 2070 2090 2110 2110 2140 2140
+    L 2140 2160
+    Z
+  "/>
+
+  <!-- ===== Hole: portal opening (mask layer rasterizes this) ===== -->
+  <!--
+    Painted white so my mask raster produces alpha=255 inside the oval.
+    Sits entirely within the canopy's bounding shape so the L2 in-front-of
+    layers (leaves_mid at z=-2500, leaves_fg at z=-500) cleanly occlude
+    the visible portion.
+  -->
+  <path id="hole" fill="#ffffff" d="
+    M 1920 580
+    C 2080 580 2210 720 2210 880
+    C 2210 1040 2120 1180 1960 1180
+    C 1800 1180 1640 1060 1640 880
+    C 1640 720 1760 580 1920 580
+    Z
+  "/>
+</svg>

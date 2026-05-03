@@ -1,0 +1,310 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160">
+  <defs>
+    <linearGradient id="hazeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a06440" stop-opacity="0"/>
+      <stop offset="0.4" stop-color="#a06440" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#7a4a28" stop-opacity="0.32"/>
+    </linearGradient>
+    <linearGradient id="litFacade1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c89050"/>
+      <stop offset="1" stop-color="#8c4a30"/>
+    </linearGradient>
+    <linearGradient id="litFacade2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c89050"/>
+      <stop offset="0.6" stop-color="#a06038"/>
+      <stop offset="1" stop-color="#8c4a30"/>
+    </linearGradient>
+    <linearGradient id="domeGrad1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c89050"/>
+      <stop offset="0.5" stop-color="#9a5535"/>
+      <stop offset="1" stop-color="#6c3a24"/>
+    </linearGradient>
+    <linearGradient id="domeGrad2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b07840"/>
+      <stop offset="1" stop-color="#6c3a24"/>
+    </linearGradient>
+    <radialGradient id="radDome1" cx="0.35" cy="0.35" r="0.65">
+      <stop offset="0" stop-color="#c89050"/>
+      <stop offset="0.6" stop-color="#9a5535"/>
+      <stop offset="1" stop-color="#6c3a24"/>
+    </radialGradient>
+    <radialGradient id="radDome2" cx="0.4" cy="0.3" r="0.6">
+      <stop offset="0" stop-color="#b87840"/>
+      <stop offset="0.7" stop-color="#8c4a30"/>
+      <stop offset="1" stop-color="#6c3a24"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Atmospheric haze base -->
+  <rect x="0" y="1100" width="3840" height="1060" fill="url(#hazeGrad)"/>
+
+  <!-- === FAR BACKGROUND BLOCKY LOW BUILDINGS === -->
+  <!-- Low block cluster left -->
+  <rect x="0" y="1150" width="180" height="160" fill="#6c3a24"/>
+  <rect x="170" y="1130" width="220" height="180" fill="#7a4230"/>
+  <rect x="380" y="1140" width="160" height="170" fill="#6c3a24"/>
+  <rect x="530" y="1155" width="200" height="155" fill="#8c4a30"/>
+  <rect x="720" y="1145" width="180" height="165" fill="#7a4230"/>
+  <rect x="890" y="1160" width="140" height="150" fill="#6c3a24"/>
+
+  <!-- Low block cluster right -->
+  <rect x="2900" y="1140" width="200" height="170" fill="#7a4230"/>
+  <rect x="3090" y="1150" width="180" height="160" fill="#6c3a24"/>
+  <rect x="3260" y="1135" width="220" height="175" fill="#8c4a30"/>
+  <rect x="3470" y="1145" width="200" height="165" fill="#7a4230"/>
+  <rect x="3660" y="1155" width="180" height="155" fill="#6c3a24"/>
+
+  <!-- Mid-lower blocky buildings -->
+  <rect x="1050" y="1120" width="250" height="190" fill="#8c4a30"/>
+  <rect x="1290" y="1130" width="180" height="180" fill="#7a4230"/>
+  <rect x="1460" y="1110" width="300" height="200" fill="#6c3a24"/>
+  <rect x="1750" y="1125" width="220" height="185" fill="#8c4a30"/>
+  <rect x="1960" y="1115" width="260" height="195" fill="#7a4230"/>
+  <rect x="2210" y="1130" width="200" height="180" fill="#6c3a24"/>
+  <rect x="2400" y="1120" width="280" height="190" fill="#8c4a30"/>
+  <rect x="2670" y="1140" width="240" height="170" fill="#7a4230"/>
+
+  <!-- === MEDIUM DOMED STRUCTURES === -->
+
+  <!-- Dome 1 - left area -->
+  <path d="M 120 1150 Q 120 1040 220 1020 Q 320 1000 320 1150 Z" fill="url(#radDome1)"/>
+  <rect x="140" y="1140" width="160" height="80" fill="#8c4a30"/>
+  <!-- finial -->
+  <path d="M 218 1020 L 222 980 L 218 975 L 214 980 Z" fill="#c89050"/>
+
+  <!-- Dome 2 - onion shape left-center -->
+  <path d="M 560 1140 Q 555 1050 620 1010 Q 660 990 700 1010 Q 760 1045 755 1140 Z" fill="url(#radDome2)"/>
+  <rect x="580" y="1130" width="160" height="90" fill="#8c4a30"/>
+  <path d="M 655 1010 L 660 960 L 655 955 L 650 960 Z" fill="#b07840"/>
+  <!-- onion bulge at top -->
+  <ellipse cx="658" cy="1010" rx="38" ry="22" fill="#c89050"/>
+
+  <!-- Dome 3 - center-left -->
+  <path d="M 1080 1120 Q 1075 1020 1155 990 Q 1210 970 1265 995 Q 1335 1025 1330 1120 Z" fill="url(#radDome1)"/>
+  <rect x="1100" y="1110" width="210" height="100" fill="#8c4a30"/>
+  <ellipse cx="1205" cy="990" rx="52" ry="28" fill="#c89050"/>
+  <path d="M 1203 962 L 1207 918 L 1203 912 L 1199 918 Z" fill="#c89050"/>
+
+  <!-- Dome 4 - center -->
+  <path d="M 1780 1120 Q 1778 1015 1870 985 Q 1930 965 1985 988 Q 2060 1018 2058 1120 Z" fill="url(#radDome2)"/>
+  <rect x="1800" y="1108" width="240" height="112" fill="#8c4a30"/>
+  <ellipse cx="1920" cy="985" rx="60" ry="32" fill="#c89050"/>
+  <path d="M 1918 953 L 1922 905 L 1918 898 L 1914 905 Z" fill="#c89050"/>
+  <!-- lit facade -->
+  <path d="M 1800 1108 L 1870 1020 L 1870 1108 Z" fill="#c89050" fill-opacity="0.5"/>
+
+  <!-- Dome 5 - right-center -->
+  <path d="M 2450 1115 Q 2448 1020 2530 990 Q 2585 972 2635 994 Q 2700 1022 2698 1115 Z" fill="url(#radDome1)"/>
+  <rect x="2465" y="1105" width="215" height="115" fill="#8c4a30"/>
+  <ellipse cx="2573" cy="990" rx="55" ry="30" fill="#c89050"/>
+  <path d="M 2571 960 L 2575 916 L 2571 910 L 2567 916 Z" fill="#b07840"/>
+
+  <!-- Dome 6 - right area -->
+  <path d="M 3150 1130 Q 3148 1035 3225 1005 Q 3278 985 3325 1008 Q 3385 1035 3383 1130 Z" fill="url(#radDome2)"/>
+  <rect x="3162" y="1120" width="205" height="100" fill="#7a4230"/>
+  <ellipse cx="3266" cy="1005" rx="50" ry="27" fill="#b07840"/>
+  <path d="M 3264 978 L 3268 936 L 3264 930 L 3260 936 Z" fill="#c89050"/>
+
+  <!-- Dome 7 - far right -->
+  <path d="M 3550 1140 Q 3548 1048 3620 1018 Q 3668 998 3712 1020 Q 3768 1048 3766 1140 Z" fill="url(#radDome1)"/>
+  <rect x="3562" y="1130" width="192" height="100" fill="#8c4a30"/>
+  <ellipse cx="3658" cy="1018" rx="47" ry="26" fill="#c89050"/>
+
+  <!-- === TALL MINARETS AND SPIRES === -->
+
+  <!-- Minaret 1 - leftmost tall slender -->
+  <rect x="188" y="820" width="44" height="330" fill="#8c4a30"/>
+  <!-- bulbous dome on minaret -->
+  <path d="M 178 830 Q 178 790 210 772 Q 242 754 242 790 L 242 830 Z" fill="url(#radDome1)"/>
+  <ellipse cx="210" cy="772" rx="22" ry="12" fill="#c89050"/>
+  <path d="M 208 760 L 212 720 L 208 715 L 204 720 Z" fill="#c89050"/>
+  <!-- balcony ring -->
+  <rect x="174" y="1040" width="62" height="12" fill="#c89050"/>
+  <rect x="180" y="1052" width="50" height="8" fill="#8c4a30"/>
+  <!-- shaft lit side -->
+  <rect x="188" y="820" width="20" height="330" fill="#c89050" fill-opacity="0.4"/>
+
+  <!-- Minaret 2 - left cluster tall -->
+  <rect x="670" y="760" width="50" height="390" fill="#6c3a24"/>
+  <path d="M 658 775 Q 658 728 695 710 Q 732 692 732 728 L 732 775 Z" fill="url(#radDome2)"/>
+  <ellipse cx="695" cy="710" rx="26" ry="13" fill="#b07840"/>
+  <path d="M 693 697 L 697 650 L 693 645 L 689 650 Z" fill="#c89050"/>
+  <rect x="654" y="1000" width="72" height="14" fill="#c89050"/>
+  <rect x="660" y="1014" width="60" height="8" fill="#6c3a24"/>
+  <!-- lit facade strip -->
+  <rect x="670" y="760" width="22" height="390" fill="#c89050" fill-opacity="0.35"/>
+
+  <!-- Minaret 3 - center-left tall -->
+  <rect x="1185" y="720" width="46" height="400" fill="#8c4a30"/>
+  <!-- pointed spire top - conical -->
+  <polygon points="1208,680 1185,750 1231,750" fill="#c89050"/>
+  <polygon points="1208,650 1197,680 1219,680" fill="#c89050"/>
+  <circle cx="1208" cy="648" r="7" fill="#c89050"/>
+  <!-- balcony -->
+  <rect x="1179" y="990" width="68" height="13" fill="#c89050"/>
+  <rect x="1183" y="1003" width="58" height="8" fill="#8c4a30"/>
+  <!-- lit side -->
+  <rect x="1185" y="720" width="22" height="400" fill="#c89050" fill-opacity="0.45"/>
+
+  <!-- Minaret 4 - center grand minaret (tallest) -->
+  <rect x="1895" y="680" width="56" height="440" fill="#8c4a30"/>
+  <!-- grand bulbous dome cap -->
+  <path d="M 1878 705 Q 1875 650 1923 628 Q 1971 606 1971 650 L 1971 705 Z" fill="url(#radDome1)"/>
+  <ellipse cx="1923" cy="628" rx="32" ry="16" fill="#c89050"/>
+  <!-- pointed tip on dome -->
+  <path d="M 1921 612 L 1925 568 L 1921 562 L 1917 568 Z" fill="#c89050"/>
+  <circle cx="1923" cy="562" r="5" fill="#c89050"/>
+  <!-- upper balcony -->
+  <rect x="1881" y="890" width="82" height="15" fill="#c89050"/>
+  <rect x="1886" y="905" width="72" height="9" fill="#8c4a30"/>
+  <!-- lower balcony -->
+  <rect x="1884" y="1010" width="76" height="13" fill="#c89050"/>
+  <!-- lit face -->
+  <rect x="1895" y="680" width="26" height="440" fill="#c89050" fill-opacity="0.5"/>
+
+  <!-- Minaret 5 - right tall slender -->
+  <rect x="2820" y="740" width="48" height="410" fill="#7a4230"/>
+  <path d="M 2808 758 Q 2808 712 2844 694 Q 2880 676 2880 712 L 2880 758 Z" fill="url(#radDome2)"/>
+  <ellipse cx="2844" cy="694" rx="25" ry="13" fill="#b07840"/>
+  <path d="M 2842 681 L 2846 638 L 2842 632 L 2838 638 Z" fill="#c89050"/>
+  <rect x="2804" y="1005" width="72" height="13" fill="#c89050"/>
+  <rect x="2808" y="1018" width="64" height="8" fill="#7a4230"/>
+  <rect x="2820" y="740" width="21" height="410" fill="#c89050" fill-opacity="0.38"/>
+
+  <!-- Minaret 6 - far right spire -->
+  <rect x="3440" y="750" width="44" height="400" fill="#8c4a30"/>
+  <polygon points="3462,708 3440,762 3484,762" fill="#c89050"/>
+  <polygon points="3462,678 3451,708 3473,708" fill="#c89050"/>
+  <circle cx="3462" cy="676" r="6" fill="#c89050"/>
+  <rect x="3434" y="990" width="66" height="13" fill="#c89050"/>
+  <rect x="3440" y="750" width="20" height="400" fill="#c89050" fill-opacity="0.4"/>
+
+  <!-- === MEDIUM TOWERS AND ORNATE BUILDINGS === -->
+
+  <!-- Ornate tower left -->
+  <rect x="290" y="980" width="130" height="200" fill="#8c4a30"/>
+  <path d="M 285 995 Q 285 950 355 930 Q 425 910 425 950 L 425 995 Z" fill="url(#domeGrad1)"/>
+  <ellipse cx="355" cy="930" rx="40" ry="20" fill="#c89050"/>
+  <path d="M 353 910 L 357 875 L 353 870 L 349 875 Z" fill="#c89050"/>
+  <!-- windows -->
+  <rect x="315" y="1020" width="18" height="24" fill="#3a1810"/>
+  <rect x="355" y="1020" width="18" height="24" fill="#3a1810"/>
+  <rect x="395" y="1020" width="18" height="24" fill="#3a1810"/>
+  <rect x="315" y="1065" width="18" height="24" fill="#3a1810"/>
+  <rect x="395" y="1065" width="18" height="24" fill="#3a1810"/>
+  <!-- lit facade -->
+  <rect x="290" y="980" width="55" height="200" fill="#c89050" fill-opacity="0.45"/>
+
+  <!-- Ornate tower center-left -->
+  <rect x="880" y="970" width="160" height="220" fill="#7a4230"/>
+  <path d="M 872 985 Q 870 925 960 900 Q 1050 875 1052 925 L 1052 985 Z" fill="url(#domeGrad2)"/>
+  <ellipse cx="960" cy="900" rx="55" ry="28" fill="#b07840"/>
+  <path d="M 958 872 L 962 832 L 958 826 L 954 832 Z" fill="#c89050"/>
+  <rect x="900" y="1010" width="22" height="28" fill="#3a1810"/>
+  <rect x="950" y="1010" width="22" height="28" fill="#3a1810"/>
+  <rect x="1000" y="1010" width="22" height="28" fill="#3a1810"/>
+  <rect x="900" y="1060" width="22" height="28" fill="#3a1810"/>
+  <rect x="1000" y="1060" width="22" height="28" fill="#3a1810"/>
+  <!-- lit facade -->
+  <rect x="880" y="970" width="65" height="220" fill="#c89050" fill-opacity="0.4"/>
+
+  <!-- Compound palace center structure -->
+  <rect x="1500" y="960" width="320" height="250" fill="#8c4a30"/>
+  <!-- central larger dome -->
+  <path d="M 1488 978 Q 1484 895 1660 865 Q 1836 835 1832 895 L 1832 978 Z" fill="url(#radDome1)"/>
+  <ellipse cx="1660" cy="865" rx="88" ry="44" fill="#c89050"/>
+  <path d="M 1658 821 L 1662 778 L 1658 772 L 1654 778 Z" fill="#c89050"/>
+  <circle cx="1660" cy="772" r="8" fill="#c89050"/>
+  <!-- flanking smaller domes -->
+  <path d="M 1488 990 Q 1488 950 1530 935 Q 1572 920 1572 950 L 1572 990 Z" fill="url(#domeGrad2)"/>
+  <path d="M 1748 990 Q 1748 950 1790 935 Q 1832 920 1832 950 L 1832 990 Z" fill="url(#domeGrad2)"/>
+  <!-- windows -->
+  <rect x="1540" y="1010" width="24" height="30" fill="#3a1810"/>
+  <rect x="1585" y="1010" width="24" height="30" fill="#3a1810"/>
+  <rect x="1700" y="1010" width="24" height="30" fill="#3a1810"/>
+  <rect x="1745" y="1010" width="24" height="30" fill="#3a1810"/>
+  <rect x="1540" y="1060" width="24" height="30" fill="#3a1810"/>
+  <rect x="1660" y="1060" width="24" height="30" fill="#3a1810"/>
+  <rect x="1780" y="1060" width="24" height="30" fill="#3a1810"/>
+  <!-- arched doorway suggestion -->
+  <path d="M 1645 1180 L 1645 1120 Q 1645 1095 1660 1095 Q 1675 1095 1675 1120 L 1675 1180 Z" fill="#3a1810"/>
+  <!-- lit facade -->
+  <rect x="1500" y="960" width="130" height="250" fill="#c89050" fill-opacity="0.42"/>
+
+  <!-- Tower right of center -->
+  <rect x="2100" y="950" width="180" height="270" fill="#8c4a30"/>
+  <path d="M 2090 968 Q 2088 910 2190 885 Q 2292 860 2292 910 L 2292 968 Z" fill="url(#radDome2)"/>
+  <ellipse cx="2190" cy="885" rx="62" ry="32" fill="#c89050"/>
+  <path d="M 2188 853 L 2192 810 L 2188 804 L 2184 810 Z" fill="#c89050"/>
+  <rect x="2128" y="1000" width="24" height="30" fill="#3a1810"/>
+  <rect x="2178" y="1000" width="24" height="30" fill="#3a1810"/>
+  <rect x="2228" y="1000" width="24" height="30" fill="#3a1810"/>
+  <rect x="2128" y="1055" width="24" height="30" fill="#3a1810"/>
+  <rect x="2228" y="1055" width="24" height="30" fill="#3a1810"/>
+  <!-- lit side -->
+  <rect x="2100" y="950" width="72" height="270" fill="#c89050" fill-opacity="0.44"/>
+
+  <!-- Ornate right tower -->
+  <rect x="2950" y="960" width="200" height="240" fill="#7a4230"/>
+  <path d="M 2940 978 Q 2938 918 3050 892 Q 3162 866 3162 918 L 3162 978 Z" fill="url(#radDome1)"/>
+  <ellipse cx="3050" cy="892" rx="68" ry="35" fill="#b07840"/>
+  <path d="M 3048 857 L 3052 815 L 3048 809 L 3044 815 Z" fill="#c89050"/>
+  <rect x="2985" y="1010" width="24" height="30" fill="#3a1810"/>
+  <rect x="3035" y="1010" width="24" height="30" fill="#3a1810"/>
+  <rect x="3085" y="1010" width="24" height="30" fill="#3a1810"/>
+  <rect x="2985" y="1062" width="24" height="30" fill="#3a1810"/>
+  <rect x="3085" y="1062" width="24" height="30" fill="#3a1810"/>
+  <!-- lit facade -->
+  <rect x="2950" y="960" width="80" height="240" fill="#c89050" fill-opacity="0.42"/>
+
+  <!-- Far right ornate structure -->
+  <rect x="3360" y="980" width="200" height="230" fill="#8c4a30"/>
+  <path d="M 3350 998 Q 3348 942 3460 916 Q 3572 890 3572 942 L 3572 998 Z" fill="url(#domeGrad1)"/>
+  <ellipse cx="3460" cy="916" rx="66" ry="34" fill="#c89050"/>
+  <path d="M 3458 882 L 3462 840 L 3458 834 L 3454 840 Z" fill="#c89050"/>
+  <rect x="3388" y="1025" width="22" height="28" fill="#3a1810"/>
+  <rect x="3436" y="1025" width="22" height="28" fill="#3a1810"/>
+  <rect x="3520" y="1025" width="22" height="28" fill="#3a1810"/>
+  <rect x="3388" y="1075" width="22" height="28" fill="#3a1810"/>
+  <rect x="3520" y="1075" width="22" height="28" fill="#3a1810"/>
+  <rect x="3360" y="980" width="82" height="230" fill="#c89050" fill-opacity="0.4"/>
+
+  <!-- === CONNECTING WALLS / LOWER FILLS to create continuous skyline === -->
+  <!-- Irregular skyline connectors - left zone -->
+  <path d="M 0 1150 L 0 1200 L 300 1200 L 300 1160 L 250 1180 L 200 1165 L 170 1180 L 120 1160 L 60 1175 Z" fill="#6c3a24"/>
+  <!-- connector left-center -->
+  <path d="M 730 1160 L 730 1200 L 1080 1200 L 1080 1160 L 1040 1175 L 990 1158 L 940 1172 L 880 1158 L 820 1170 L 760 1158 Z" fill="#7a4230"/>
+  <!-- connector center-left -->
+  <path d="M 1340 1155 L 1340 1200 L 1510 1200 L 1510 1155 L 1475 1168 L 1430 1155 L 1390 1165 Z" fill="#6c3a24"/>
+  <!-- connector center -->
+  <path d="M 1840 1160 L 1840 1200 L 2095 1200 L 2095 1158 L 2050 1172 L 1990 1158 L 1940 1170 L 1900 1158 Z" fill="#7a4230"/>
+  <!-- connector center-right -->
+  <path d="M 2295 1155 L 2295 1200 L 2465 1200 L 2465 1158 L 2420 1170 L 2375 1156 L 2340 1168 Z" fill="#6c3a24"/>
+  <!-- connector right -->
+  <path d="M 2710 1158 L 2710 1200 L 2955 1200 L 2955 1158 L 2910 1170 L 2860 1156 L 2810 1168 L 2760 1156 Z" fill="#7a4230"/>
+  <!-- connector far right -->
+  <path d="M 3168 1158 L 3168 1200 L 3365 1200 L 3365 1158 L 3320 1170 L 3272 1156 L 3230 1168 Z" fill="#8c4a30"/>
+  <!-- far right edge -->
+  <path d="M 3575 1158 L 3575 1200 L 3840 1200 L 3840 1150 L 3800 1165 L 3760 1152 L 3720 1164 L 3680 1152 L 3630 1163 Z" fill="#6c3a24"/>
+
+  <!-- Bottom fill below skyline: warm atmospheric haze -->
+  <rect x="0" y="1200" width="3840" height="960" fill="url(#hazeGrad)"/>
+
+  <!-- Additional small decorative spires scattered -->
+  <!-- tiny spire near 400 -->
+  <rect x="448" y="1000" width="20" height="155" fill="#8c4a30"/>
+  <polygon points="458,978 448,1008 468,1008" fill="#c89050"/>
+  <!-- tiny spire near 1350 -->
+  <rect x="1378" y="1010" width="18" height="145" fill="#7a4230"/>
+  <polygon points="1387,988 1378,1018 1396,1018" fill="#b07840"/>
+  <!-- tiny spire near 2300 -->
+  <rect x="2335" y="1005" width="20" height="150" fill="#8c4a30"/>
+  <polygon points="2345,982 2335,1013 2355,1013" fill="#c89050"/>
+  <!-- tiny spire near 3200 -->
+  <rect x="3218" y="1015" width="18" height="142" fill="#7a4230"/>
+  <polygon points="3227,993 3218,1022 3236,1022" fill="#b07840"/>
+
+  <!-- Layered silhouette mass for density and cohesion -->
+  <path d="M 0 1310 Q 200 1280 400 1295 Q 600 1308 800 1285 Q 1000 1265 1200 1280 Q 1400 1292 1600 1270 Q 1800 1250 2000 1268 Q 2200 1282 2400 1265 Q 2600 1248 2800 1262 Q 3000 1275 3200 1258 Q 3400 1242 3600 1258 Q 3720 1268 3840 1255 L 3840 1400 Q 3000 1380 2000 1390 Q 1000 1400 0 1385 Z" fill="#7a4228" fill-opacity="0.18"/>
+
+</svg>

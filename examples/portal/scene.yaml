@@ -1,0 +1,59 @@
+# parallax-scene v1 — Forest→city portal flythrough (SPEC §6.3, full-duration)
+#
+# Faithful to SPEC.md §6.3: same Z values, plate sizes, Bezier control points,
+# noise params, mask block. Resolution dropped from 1920×1080 to 960×540 because
+# the encoder hangs at 1080p (handoff §3, §5.9).
+version: 1
+meta:
+  duration_s: 8.0
+  fps: 30
+  resolution: [960, 540]
+  perspective_px: 1200
+  origin: [480, 270]
+  bg_color: "#000000"
+  seed: 1
+
+stacks:
+  forest:
+    layers:
+      - { id: sky,         src: assets/sky.svg,         scene_xyz: [0,0,-10500], plate_size: [3840,2160] }
+      - { id: trees_far,   src: assets/trees_far.svg,   scene_xyz: [0,0,-8500],  plate_size: [3840,2160] }
+      - { id: trees_mid,   src: assets/trees_mid.svg,   scene_xyz: [0,0,-6500],  plate_size: [3840,2160] }
+      - { id: portal_tree, src: assets/portal_tree.svg, scene_xyz: [0,0,-4500],  plate_size: [3840,2160], svg_paint_id: silhouette }
+      - { id: leaves_mid,  src: assets/leaves_mid.svg,  scene_xyz: [0,0,-2500],  plate_size: [3840,2160] }
+      - { id: leaves_fg,   src: assets/leaves_fg.svg,   scene_xyz: [0,0,-500],   plate_size: [3840,2160] }
+  city:
+    layers:
+      - { id: city_sky,  src: assets/city_sky.svg,  scene_xyz: [0,0,-10500], plate_size: [3840,2160] }
+      - { id: city_far,  src: assets/city_far.svg,  scene_xyz: [0,0,-7000],  plate_size: [3840,2160] }
+      - { id: city_near, src: assets/city_near.svg, scene_xyz: [0,0,-3500],  plate_size: [3840,2160] }
+
+camera:
+  mode: drone
+  drone:
+    path:
+      kind: bezier
+      controls: [[0,0,0],[40,10,-2000],[-30,-10,-3500],[0,0,-4400]]
+      duration_s: 8.0
+    poi_lookahead_s: 0.5
+    spring_halflife_s: 0.20
+    noise: { z_amp: 18, xy_amp: 5, hz: 0.6 }
+    bank_from_velocity: 0.30
+
+masks:
+  - id: portal
+    path_svg: assets/portal_tree.svg
+    silhouette_id_in_svg: silhouette
+    path_id_in_svg: hole
+    attached_to_layer: forest.portal_tree
+    anchor: world
+    src_stack: forest
+    dest_stack: city
+    matte: alpha
+    growth: { kind: perspective }
+
+post:
+  global:
+    vignette: { strength: 0.45 }
+    grain:    { sigma: 3 }
+    fisheye:  { k1: 0.18 }
