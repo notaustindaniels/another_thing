@@ -1,8 +1,17 @@
 # parallax-scene v1 — Forest→city portal flythrough (SPEC §6.3, full-duration)
 #
-# Faithful to SPEC.md §6.3: same Z values, plate sizes, Bezier control points,
-# noise params, mask block. Resolution dropped from 1920×1080 to 960×540 because
+# Faithful to SPEC.md §6.3: same Z values, plate sizes, noise params,
+# mask block. Resolution dropped from 1920×1080 to 960×540 because
 # the encoder hangs at 1080p (handoff §3, §5.9).
+#
+# DEVIATION FROM §6.3: camera Bezier endpoint is [0,0,-5500], not [0,0,-4400].
+# §6.3's worked-example endpoint stops 100 units BEFORE the portal_tree at
+# z=-4500, so the near-cull handoff (projection.py:230 — fires when the layer
+# is ≥ perspective_px-300 = 900 units BEHIND the camera) never triggers and
+# the city never fully takes over the frame. Extending the path past z=-5400
+# lets cull_opacity reach 0, the mask flips to M=1.0 everywhere (masks.py:330),
+# and the destination stack takes the full frame for the final ~0.5s — the
+# "passing through" moment from §2.4 / portal_mechanic.md insight 2.
 version: 1
 meta:
   duration_s: 8.0
@@ -33,7 +42,7 @@ camera:
   drone:
     path:
       kind: bezier
-      controls: [[0,0,0],[40,10,-2000],[-30,-10,-3500],[0,0,-4400]]
+      controls: [[0,0,0],[40,10,-2000],[-30,-10,-3800],[0,0,-5500]]
       duration_s: 8.0
     poi_lookahead_s: 0.5
     spring_halflife_s: 0.20
