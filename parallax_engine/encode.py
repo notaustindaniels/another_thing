@@ -35,6 +35,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -157,8 +158,20 @@ def open_encoder(
         "-threads", "1",   # determinism (§7)
         str(out_path),
     ]
+    # IMPORTANT: stderr goes to a TemporaryFile, not subprocess.PIPE.
+    # FFmpeg writes progress + warnings to stderr continuously during encoding
+    # (a few hundred bytes per frame). With stderr=subprocess.PIPE and no
+    # background reader thread, the OS pipe buffer (~64 KiB on macOS / Linux)
+    # fills after a few hundred frames, FFmpeg blocks on its next stderr
+    # write, stops reading stdin, and Python deadlocks on the next
+    # stdin.write(). That's the "render appears stuck at ~7-10 MB" failure
+    # mode. Using an OS-backed temp file gives FFmpeg unbounded stderr capacity
+    # while still preserving the bytes for diagnostic readout in close_encoder.
+    stderr_file = tempfile.TemporaryFile(prefix="parallax_ffmpeg_stderr_")
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
-                            stderr=subprocess.PIPE)
+                            stderr=stderr_file)
+    # Stash the file handle on the proc object so close_encoder can read it.
+    proc._stderr_tempfile = stderr_file  # type: ignore[attr-defined]
     return proc
 
 
@@ -196,11 +209,18 @@ def close_encoder(proc: subprocess.Popen) -> None:
         proc.stdin.close()  # type: ignore[union-attr]
     proc.wait()
     stderr_bytes = b""
-    if proc.stderr:
+    stderr_file = getattr(proc, "_stderr_tempfile", None)
+    if stderr_file is not None:
         try:
-            stderr_bytes = proc.stderr.read()
+            stderr_file.seek(0)
+            stderr_bytes = stderr_file.read()
         except Exception:
             pass
+        finally:
+            try:
+                stderr_file.close()
+            except Exception:
+                pass
     if proc.returncode != 0:
         raise RuntimeError(
             f"FFmpeg exited with code {proc.returncode}:\n"
@@ -267,6 +287,13 @@ class Encoder:
                         self._proc.wait(timeout=5)
                     except Exception:
                         pass
+                    # Clean up stderr temp file even on the error path
+                    stderr_file = getattr(self._proc, "_stderr_tempfile", None)
+                    if stderr_file is not None:
+                        try:
+                            stderr_file.close()
+                        except Exception:
+                            pass
             finally:
                 self._proc = None
         return False   # do not suppress exceptions

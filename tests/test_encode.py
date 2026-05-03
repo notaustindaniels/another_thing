@@ -242,27 +242,30 @@ class TestCloseEncoder:
 
     def test_success_no_raise(self):
         """close_encoder does not raise when FFmpeg exits 0."""
+        import io
         mock_proc = MagicMock()
         mock_proc.stdin.closed = False
         mock_proc.returncode = 0
-        mock_proc.stderr.read.return_value = b""
+        mock_proc._stderr_tempfile = io.BytesIO(b"")
         close_encoder(mock_proc)  # should not raise
 
     def test_nonzero_exit_raises(self):
         """close_encoder raises RuntimeError when FFmpeg exits non-zero."""
+        import io
         mock_proc = MagicMock()
         mock_proc.stdin.closed = False
-        mock_proc.stderr.read.return_value = b"error output"
+        mock_proc._stderr_tempfile = io.BytesIO(b"error output")
         mock_proc.returncode = 1
         with pytest.raises(RuntimeError, match="FFmpeg exited"):
             close_encoder(mock_proc)
 
     def test_close_stdin_called(self):
         """close_encoder closes stdin then waits."""
+        import io
         mock_proc = MagicMock()
         mock_proc.stdin.closed = False
         mock_proc.returncode = 0
-        mock_proc.stderr.read.return_value = b""
+        mock_proc._stderr_tempfile = io.BytesIO(b"")
         close_encoder(mock_proc)
         mock_proc.stdin.close.assert_called_once()
         mock_proc.wait.assert_called_once()
