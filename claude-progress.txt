@@ -2131,6 +2131,19 @@ then implement the missing SVG hole rasterization, then do Task 1.
   parallax_engine/encode.py would surface this distinction cleanly
   without requiring SIGTERM.
 
+  **UPDATE (post-Session-25 review):** The "hang" was not finalization —
+  it was a real pipe deadlock. `open_encoder` opened ffmpeg with
+  `stderr=subprocess.PIPE` and never drained that pipe during the loop.
+  After ~64 KiB of stderr accumulates (a few hundred frames worth of
+  ffmpeg progress lines), the OS stderr pipe buffer fills, ffmpeg blocks
+  on its next stderr write, stops reading stdin, Python blocks on the
+  next stdin.write — both processes alive but pinned, file frozen. The
+  reason kill+wait worked: SIGTERM closed Python's stdin to ffmpeg,
+  ffmpeg detected EOF and finalized. Fixed in commit 6e46806 by
+  redirecting stderr to `tempfile.TemporaryFile` (unbounded capacity).
+  Verified: 960×540 × 8s × 30fps portal render now exits naturally
+  with code 0, no SIGTERM needed.
+
 - **Sonnet output failure modes.**
   - max_tokens=8192 truncated complex SVGs (trees_mid was the first
     failure). Bumped to 16384.
@@ -2169,9 +2182,9 @@ Pending follow-ups (NOT done this session, deferred):
   claude-haiku-4-5-20251001). Add a unit test that asserts configured
   IDs are present in client.models.list() to prevent recurrence.
 
-- **Encoder finalization timeout.** Add proc.stdin.close() + proc.wait()
-  with explicit timeout in parallax_engine/encode.py so renders finalize
-  without operator intervention.
+- ~~**Encoder finalization timeout.**~~ Resolved post-review: the "hang"
+  was the stderr-pipe deadlock fixed in commit 6e46806. No timeout
+  workaround needed; renders now exit naturally.
 
 - **Implement the SVG pipeline (Task 3 design)** if user approves.
   Phase 1+2+3 across ~1500-2500 lines per the design doc's §11.
@@ -2182,3 +2195,21 @@ behavior of _build_perspective_matte but the function signature is
 unchanged at the public API; the workspace parameter to
 build_mask_alpha and composite_with_mask is opt-in (default None for
 backward compatibility with existing callers).
+
+### Post-review followups (same session, after user review)
+
+User reviewed the renders and flagged two issues:
+
+1. **Portal pass-through never happened** — the camera ended at z=-4400
+   (SPEC §6.3 verbatim), 100 units short of portal_tree at z=-4500. The
+   near-cull handoff (mask flips to M=1.0 → city fills frame) only
+   fires when the layer is ≥ 900 units BEHIND the camera. Fix in commit
+   9b56010: extend the Bezier endpoint to z=-5500. Portal silhouette
+   now visibly dissolves around t=7-7.5s and the city fully takes over
+   for the final 0.5s.
+
+2. **Encoder kept hanging at high res** — diagnosed as a pipe-buffer
+   deadlock (ffmpeg's stderr pipe wasn't drained; once 64 KiB
+   accumulated, ffmpeg stalled, Python blocked on stdin write). Fix in
+   commit 6e46806: redirect stderr to tempfile.TemporaryFile. 960×540
+   × 8s render now completes naturally, no SIGTERM needed.
